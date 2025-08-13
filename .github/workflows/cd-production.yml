@@ -17,7 +17,7 @@ jobs:
       should-deploy: ${{ steps.check.outputs.should-deploy }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check deployment conditions
         id: check
@@ -66,7 +66,7 @@ jobs:
         region: [us-east-1, eu-west-1, ap-southeast-1]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup deployment environment
         uses: ./.github/actions/setup-deployment
@@ -175,7 +175,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Trigger rollback
         uses: ./.github/actions/rollback-deployment
