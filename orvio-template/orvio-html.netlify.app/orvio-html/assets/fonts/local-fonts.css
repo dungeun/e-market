@@ -1,0 +1,327 @@
+/* Creato Display font start  */
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-MediumItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-LightItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-LightItalic.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-BoldItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-BoldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-ExtraBoldItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-ExtraBoldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-ThinItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-ThinItalic.woff') format('woff');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Italic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Italic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-BlackItalic.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-BlackItalic.woff') format('woff');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-ExtraBold.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-ExtraBold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Black.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Bold.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Medium.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Thin.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Thin.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Light.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Creato Display';
+    src: url('./creato-display/CreatoDisplay-Regular.woff2') format('woff2'),
+        url('./creato-display/CreatoDisplay-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Creato Display font end  */
+
+/* Nohemi font start  */
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Bold.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-ExtraBold.woff2') format('woff2'),
+        url('./nohemi/Nohemi-ExtraBold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Black.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-ExtraLight.woff2') format('woff2'),
+        url('./nohemi/Nohemi-ExtraLight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Medium.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Light.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Regular.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-SemiBold.woff2') format('woff2'),
+        url('./nohemi/Nohemi-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('./nohemi/Nohemi-Thin.woff2') format('woff2'),
+        url('./nohemi/Nohemi-Thin.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Nohemi font end  */
+
+/* pp-valve font start  */
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilExtrabold.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilExtrabold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainMediumItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainMediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilExtraboldItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilExtraboldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilExtralightItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilExtralightItalic.woff') format('woff');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilExtralight.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilExtralight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilMedium.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilMedium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainExtrabold.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainExtrabold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-StencilMediumItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-StencilMediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainExtraboldItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainExtraboldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainExtralight.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainExtralight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainExtralightItalic.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainExtralightItalic.woff') format('woff');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Valve';
+    src: url('../fonts/pp-valve/PPValve-PlainMedium.woff2') format('woff2'),
+        url('../fonts/pp-valve/PPValve-PlainMedium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+/* pp-valve font end  */

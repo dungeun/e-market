@@ -1,0 +1,676 @@
+// Enterprise Commerce Platform - Extended Schema
+// This extends the base schema with B2B, Analytics, and Advanced Features
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== B2B/B2C MODE CONFIGURATION =====
+
+enum BusinessMode {
+  B2C
+  B2B
+  HYBRID
+}
+
+model SystemConfig {
+  id           String       @id @default(cuid())
+  businessMode BusinessMode @default(B2C)
+  features     Json         // Feature flags
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("system_config")
+}
+
+// ===== B2B FEATURES =====
+
+model BusinessAccount {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  businessNumber    String    @unique // 사업자등록번호
+  companyName       String
+  representative    String    // 대표자명
+  businessType      String    // 업태
+  businessCategory  String    // 종목
+  businessAddress   String    // 사업장 주소
+  taxInvoiceEmail   String    // 세금계산서 이메일
+  verified          Boolean   @default(false)
+  verifiedAt        DateTime?
+  creditLimit       Decimal   @default(0) // 외상 한도
+  currentCredit     Decimal   @default(0) // 현재 외상액
+  paymentTerms      Int       @default(30) // 결제 조건 (일)
+  discountRate      Decimal   @default(0) // 기본 할인율
+  tier              BusinessTier @default(BRONZE)
+  status            BusinessStatus @default(PENDING)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  user              User              @relation(fields: [userId], references: [id])
+  invoices          TaxInvoice[]
+  priceGroups       PriceGroupMember[]
+  bulkOrders        BulkOrder[]
+  creditHistories   CreditHistory[]
+  
+  @@index([businessNumber])
+  @@index([status])
+  @@map("business_accounts")
+}
+
+enum BusinessTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  VIP
+}
+
+enum BusinessStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+model TaxInvoice {
+  id                String    @id @default(cuid())
+  invoiceNumber     String    @unique
+  businessAccountId String
+  orderId           String
+  type              InvoiceType
+  status            InvoiceStatus @default(PENDING)
+  amount            Decimal
+  tax               Decimal
+  totalAmount       Decimal
+  issuedAt          DateTime?
+  dueDate           DateTime?
+  paidAt            DateTime?
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  businessAccount   BusinessAccount @relation(fields: [businessAccountId], references: [id])
+  order             Order          @relation(fields: [orderId], references: [id])
+  
+  @@index([invoiceNumber])
+  @@index([status])
+  @@map("tax_invoices")
+}
+
+enum InvoiceType {
+  TAX_INVOICE      // 세금계산서
+  RECEIPT          // 영수증
+  CASH_RECEIPT     // 현금영수증
+  SIMPLIFIED       // 간이세금계산서
+}
+
+enum InvoiceStatus {
+  PENDING
+  ISSUED
+  SENT
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
+// ===== PRICE GROUPS (B2B Pricing) =====
+
+model PriceGroup {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  priority    Int       @default(0) // Higher priority overrides lower
+  isActive    Boolean   @default(true)
+  conditions  Json?     // Dynamic conditions for auto-assignment
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  members     PriceGroupMember[]
+  rules       PriceRule[]
+  
+  @@index([priority])
+  @@map("price_groups")
+}
+
+model PriceGroupMember {
+  id               String    @id @default(cuid())
+  priceGroupId     String
+  businessAccountId String
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  priceGroup       PriceGroup      @relation(fields: [priceGroupId], references: [id])
+  businessAccount  BusinessAccount @relation(fields: [businessAccountId], references: [id])
+  
+  @@unique([priceGroupId, businessAccountId])
+  @@map("price_group_members")
+}
+
+model PriceRule {
+  id           String    @id @default(cuid())
+  priceGroupId String
+  productId    String?   // Null means applies to all products
+  categoryId   String?   // Null means applies to all categories
+  type         PriceRuleType
+  value        Decimal   // Percentage or fixed amount
+  minQuantity  Int       @default(1)
+  maxQuantity  Int?
+  startDate    DateTime?
+  endDate      DateTime?
+  priority     Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  priceGroup   PriceGroup @relation(fields: [priceGroupId], references: [id])
+  product      Product?   @relation(fields: [productId], references: [id])
+  category     Category?  @relation(fields: [categoryId], references: [id])
+  
+  @@index([priceGroupId])
+  @@index([productId])
+  @@index([categoryId])
+  @@map("price_rules")
+}
+
+enum PriceRuleType {
+  PERCENTAGE_DISCOUNT
+  FIXED_DISCOUNT
+  FIXED_PRICE
+  TIERED_PRICING
+}
+
+// ===== BULK ORDERS (B2B) =====
+
+model BulkOrder {
+  id                String    @id @default(cuid())
+  businessAccountId String
+  status            BulkOrderStatus @default(DRAFT)
+  estimatedAmount   Decimal?
+  finalAmount       Decimal?
+  requestedDate     DateTime
+  confirmedDate     DateTime?
+  notes             String?
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  businessAccount   BusinessAccount @relation(fields: [businessAccountId], references: [id])
+  items             BulkOrderItem[]
+  
+  @@index([status])
+  @@map("bulk_orders")
+}
+
+enum BulkOrderStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+model BulkOrderItem {
+  id            String    @id @default(cuid())
+  bulkOrderId   String
+  productId     String
+  quantity      Int
+  requestedPrice Decimal?
+  approvedPrice Decimal?
+  notes         String?
+
+  // Relations
+  bulkOrder     BulkOrder @relation(fields: [bulkOrderId], references: [id])
+  product       Product   @relation(fields: [productId], references: [id])
+  
+  @@map("bulk_order_items")
+}
+
+// ===== ADVANCED INVENTORY MANAGEMENT =====
+
+model InventoryLocation {
+  id          String    @id @default(cuid())
+  name        String
+  code        String    @unique
+  type        LocationType
+  address     String?
+  isActive    Boolean   @default(true)
+  priority    Int       @default(0) // For fulfillment priority
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  inventories Inventory[]
+  transfers   InventoryTransfer[] @relation("FromLocation")
+  receipts    InventoryTransfer[] @relation("ToLocation")
+  
+  @@map("inventory_locations")
+}
+
+enum LocationType {
+  WAREHOUSE
+  STORE
+  DROPSHIP
+  VIRTUAL
+}
+
+model InventoryTransfer {
+  id             String    @id @default(cuid())
+  fromLocationId String
+  toLocationId   String
+  productId      String
+  quantity       Int
+  status         TransferStatus @default(PENDING)
+  initiatedBy    String
+  approvedBy     String?
+  completedAt    DateTime?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  fromLocation   InventoryLocation @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation     InventoryLocation @relation("ToLocation", fields: [toLocationId], references: [id])
+  product        Product          @relation(fields: [productId], references: [id])
+  
+  @@map("inventory_transfers")
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+// ===== PRODUCT DISPLAY CUSTOMIZATION =====
+
+model DisplayTemplate {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  type        DisplayType
+  layout      Json      // Layout configuration
+  styles      Json      // CSS/Styling configuration
+  settings    Json      // Display settings
+  isDefault   Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  sections    DisplaySection[]
+  
+  @@map("display_templates")
+}
+
+enum DisplayType {
+  HOMEPAGE
+  CATEGORY
+  PRODUCT_LIST
+  PRODUCT_DETAIL
+  LANDING_PAGE
+  PROMOTIONAL
+}
+
+model DisplaySection {
+  id          String    @id @default(cuid())
+  templateId  String
+  name        String
+  type        SectionType
+  position    Int
+  config      Json      // Section-specific configuration
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  template    DisplayTemplate @relation(fields: [templateId], references: [id])
+  
+  @@map("display_sections")
+}
+
+enum SectionType {
+  HERO_BANNER
+  PRODUCT_CAROUSEL
+  PRODUCT_GRID
+  CATEGORY_SHOWCASE
+  PROMOTIONAL_BANNER
+  FEATURED_PRODUCTS
+  NEW_ARRIVALS
+  BEST_SELLERS
+  RECOMMENDATIONS
+  CUSTOM_HTML
+}
+
+// ===== REAL-TIME INVENTORY TRACKING =====
+
+model InventorySnapshot {
+  id          String    @id @default(cuid())
+  productId   String
+  locationId  String?
+  quantity    Int
+  reserved    Int
+  available   Int
+  timestamp   DateTime  @default(now())
+  reason      String?   // Reason for snapshot (e.g., "Daily snapshot", "After bulk update")
+
+  // Relations
+  product     Product              @relation(fields: [productId], references: [id])
+  location    InventoryLocation?   @relation(fields: [locationId], references: [id])
+  
+  @@index([productId, timestamp])
+  @@map("inventory_snapshots")
+}
+
+model InventoryReservation {
+  id          String    @id @default(cuid())
+  productId   String
+  userId      String?
+  orderId     String?
+  cartId      String?
+  quantity    Int
+  expiresAt   DateTime
+  status      ReservationStatus @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  product     Product   @relation(fields: [productId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+  order       Order?    @relation(fields: [orderId], references: [id])
+  cart        Cart?     @relation(fields: [cartId], references: [id])
+  
+  @@index([expiresAt])
+  @@index([status])
+  @@map("inventory_reservations")
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CONFIRMED
+  EXPIRED
+  CANCELLED
+}
+
+// ===== BUSINESS INTELLIGENCE =====
+
+model CustomerSegment {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  criteria    Json      // Segmentation criteria
+  type        SegmentType
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  members     CustomerSegmentMember[]
+  campaigns   MarketingCampaign[]
+  
+  @@map("customer_segments")
+}
+
+enum SegmentType {
+  RFM           // Recency, Frequency, Monetary
+  DEMOGRAPHIC
+  BEHAVIORAL
+  GEOGRAPHIC
+  CUSTOM
+}
+
+model CustomerSegmentMember {
+  id          String    @id @default(cuid())
+  segmentId   String
+  userId      String
+  score       Decimal?  // Segment score/ranking
+  assignedAt  DateTime  @default(now())
+  expiresAt   DateTime?
+
+  // Relations
+  segment     CustomerSegment @relation(fields: [segmentId], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
+  
+  @@unique([segmentId, userId])
+  @@map("customer_segment_members")
+}
+
+// ===== PRODUCT DISPLAY SYSTEM =====
+
+model DisplayTemplate {
+  id          String             @id @default(cuid())
+  name        String
+  type        DisplayTemplateType
+  position    DisplayPosition
+  config      Json              // Display configuration
+  schedule    Json?             // Display schedule
+  targeting   Json?             // Targeting rules
+  isActive    Boolean           @default(true)
+  priority    Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  sections    DisplaySection[]
+  events      DisplayEvent[]
+  abTestVariants DisplayABTestVariant[]
+  
+  @@index([position, isActive])
+  @@index([priority])
+  @@map("display_templates")
+}
+
+enum DisplayTemplateType {
+  GRID           // 그리드형
+  LIST           // 리스트형
+  CAROUSEL       // 캐러셀
+  BANNER_GRID    // 배너+그리드 조합
+  MAGAZINE       // 매거진 스타일
+  CARD           // 카드형
+  TIMELINE       // 타임라인형
+  MASONRY        // 매이슨리
+  SPOTLIGHT      // 스포트라이트
+  HERO_PRODUCTS  // 히어로 상품
+}
+
+enum DisplayPosition {
+  HOME_MAIN      // 홈 메인
+  HOME_SUB       // 홈 서브
+  CATEGORY_TOP   // 카테고리 상단
+  CATEGORY_MID   // 카테고리 중간
+  SEARCH_RESULT  // 검색 결과
+  RECOMMENDATION // 추천 영역
+  EVENT          // 이벤트 페이지
+  BRAND_SHOP     // 브랜드샵
+}
+
+model DisplaySection {
+  id          String    @id @default(cuid())
+  title       String
+  templateId  String
+  priority    Int       @default(0)
+  metadata    Json?     // Rules, auto-update settings
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  template    DisplayTemplate @relation(fields: [templateId], references: [id])
+  products    Product[]
+  
+  @@index([templateId])
+  @@index([priority])
+  @@map("display_sections")
+}
+
+model DisplayEvent {
+  id          String    @id @default(cuid())
+  templateId  String
+  type        DisplayEventType
+  productId   String?
+  userId      String?
+  orderId     String?
+  sessionId   String?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  template    DisplayTemplate @relation(fields: [templateId], references: [id])
+  product     Product?        @relation(fields: [productId], references: [id])
+  user        User?           @relation(fields: [userId], references: [id])
+  order       Order?          @relation(fields: [orderId], references: [id])
+  
+  @@index([templateId, type])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("display_events")
+}
+
+enum DisplayEventType {
+  IMPRESSION  // 노출
+  CLICK       // 클릭
+  CONVERSION  // 전환
+  WISHLIST    // 위시리스트 추가
+  CART_ADD    // 장바구니 추가
+}
+
+// A/B Testing Models
+model DisplayABTest {
+  id            String              @id @default(cuid())
+  name          String
+  position      DisplayPosition
+  status        ABTestStatus        @default(DRAFT)
+  priority      Int                 @default(0)
+  startDate     DateTime
+  endDate       DateTime?
+  winnerVariantId String?
+  metadata      Json?               // Description, hypothesis, etc.
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  // Relations
+  variants      DisplayABTestVariant[]
+  assignments   ABTestAssignment[]
+  
+  @@index([position, status])
+  @@index([startDate, endDate])
+  @@map("display_ab_tests")
+}
+
+enum ABTestStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+model DisplayABTestVariant {
+  id          String    @id @default(cuid())
+  testId      String
+  templateId  String
+  name        String
+  weight      Float     // Traffic allocation percentage
+  metrics     Json?     // Performance metrics
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  test        DisplayABTest @relation(fields: [testId], references: [id])
+  template    DisplayTemplate @relation(fields: [templateId], references: [id])
+  assignments ABTestAssignment[]
+  
+  @@unique([testId, name])
+  @@map("display_ab_test_variants")
+}
+
+model ABTestAssignment {
+  id          String    @id @default(cuid())
+  testId      String
+  variantId   String
+  userId      String?
+  sessionId   String?
+  assignedAt  DateTime  @default(now())
+
+  // Relations
+  test        DisplayABTest @relation(fields: [testId], references: [id])
+  variant     DisplayABTestVariant @relation(fields: [variantId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+  
+  @@unique([testId, userId])
+  @@unique([testId, sessionId])
+  @@map("ab_test_assignments")
+}
+
+model Analytics {
+  id          String    @id @default(cuid())
+  type        AnalyticsType
+  period      String    // e.g., "2024-01", "2024-W01", "2024-Q1"
+  metrics     Json      // Flexible metrics storage
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  @@unique([type, period])
+  @@index([type, period])
+  @@map("analytics")
+}
+
+enum AnalyticsType {
+  SALES_SUMMARY
+  PRODUCT_PERFORMANCE
+  CUSTOMER_BEHAVIOR
+  CONVERSION_FUNNEL
+  REVENUE_FORECAST
+  INVENTORY_TURNOVER
+  MARKETING_ROI
+}
+
+// ===== CREDIT MANAGEMENT (B2B) =====
+
+model CreditHistory {
+  id               String    @id @default(cuid())
+  businessAccountId String
+  type             CreditType
+  amount           Decimal
+  balance          Decimal   // Balance after this transaction
+  orderId          String?
+  description      String?
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  businessAccount  BusinessAccount @relation(fields: [businessAccountId], references: [id])
+  order            Order?         @relation(fields: [orderId], references: [id])
+  
+  @@index([businessAccountId])
+  @@map("credit_histories")
+}
+
+enum CreditType {
+  PURCHASE
+  PAYMENT
+  ADJUSTMENT
+  REFUND
+}
+
+// ===== SCHEMA RELATIONS FOR EXISTING MODELS =====
+
+// Add these to your existing models:
+// User model: Add relation to BusinessAccount
+// Order model: Add relations to TaxInvoice, BulkOrder, CreditHistory
+// Product model: Add relations to PriceRule, BulkOrderItem, InventoryTransfer
+// Category model: Add relation to PriceRule
+// Cart model: Add relation to InventoryReservation
+// Inventory model: Add relation to InventoryLocation

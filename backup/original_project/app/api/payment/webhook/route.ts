@@ -1,0 +1,293 @@
+/**
+ * 결제 웹훅 처리 API
+ * 각 PG사의 웹훅을 통합 처리
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { paymentGateway, PaymentProvider } from '@/lib/services/payment/payment-gateway'
+import { PrismaClient } from '@prisma/client'
+import crypto from 'crypto'
+
+const prisma = new PrismaClient()
+
+// 웹훅 서명 검증
+function verifyWebhookSignature(
+  provider: PaymentProvider,
+  payload: string,
+  signature: string
+): boolean {
+  switch (provider) {
+    case 'TOSS_PAYMENTS':
+      // 토스페이먼츠 서명 검증
+      const secret = process.env.TOSS_PAYMENTS_WEBHOOK_SECRET!
+      const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(payload)
+        .digest('base64')
+      return signature === expectedSignature
+
+    case 'STRIPE':
+      // Stripe 서명 검증
+      // stripe.webhooks.constructEvent() 사용
+      return true // 실제 구현 시 Stripe SDK 사용
+
+    case 'KAKAO_PAY':
+      // 카카오페이 서명 검증
+      return true // 실제 구현 시 카카오페이 검증 로직
+
+    default:
+      // 다른 PG사들의 서명 검증
+      return true
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const provider = request.headers.get('x-payment-provider') as PaymentProvider
+    const signature = request.headers.get('x-webhook-signature') || ''
+    
+    if (!provider) {
+      return NextResponse.json(
+        { error: 'Provider header missing' },
+        { status: 400 }
+      )
+    }
+
+    const payload = await request.text()
+    
+    // 서명 검증
+    if (!verifyWebhookSignature(provider, payload, signature)) {
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+
+    const data = JSON.parse(payload)
+
+    // 중복 처리 방지
+    const webhookId = data.webhookId || data.eventId || `${provider}_${Date.now()}`
+    const existingWebhook = await prisma.webhookLog.findUnique({
+      where: { webhookId }
+    })
+
+    if (existingWebhook) {
+      return NextResponse.json({
+        success: true,
+        message: 'Webhook already processed'
+      })
+    }
+
+    // 웹훅 로그 저장
+    await prisma.webhookLog.create({
+      data: {
+        webhookId,
+        provider,
+        payload: data,
+        processedAt: new Date()
+      }
+    })
+
+    // 프로바이더별 웹훅 처리
+    await handleProviderWebhook(provider, data)
+
+    return NextResponse.json({
+      success: true,
+      message: 'Webhook processed successfully'
+    })
+  } catch (error: any) {
+    console.error('Webhook processing error:', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to process webhook' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * 프로바이더별 웹훅 처리
+ */
+async function handleProviderWebhook(provider: PaymentProvider, data: any) {
+  switch (provider) {
+    case 'TOSS_PAYMENTS':
+      await handleTossPaymentsWebhook(data)
+      break
+    
+    case 'KCP':
+      await handleKCPWebhook(data)
+      break
+    
+    case 'INICIS':
+      await handleInicisWebhook(data)
+      break
+    
+    case 'NAVER_PAY':
+      await handleNaverPayWebhook(data)
+      break
+    
+    case 'KAKAO_PAY':
+      await handleKakaoPayWebhook(data)
+      break
+    
+    case 'STRIPE':
+      await handleStripeWebhook(data)
+      break
+    
+    case 'PAYPAL':
+      await handlePayPalWebhook(data)
+      break
+    
+    default:
+      throw new Error(`Unsupported provider: ${provider}`)
+  }
+}
+
+/**
+ * 토스페이먼츠 웹훅 처리
+ */
+async function handleTossPaymentsWebhook(data: any) {
+  const { eventType, data: eventData } = data
+
+  switch (eventType) {
+    case 'PAYMENT_STATUS_CHANGED':
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: eventData.paymentKey }
+      })
+
+      if (payment) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: mapTossStatus(eventData.status),
+            metadata: {
+              ...(payment.metadata as any || {}),
+              tossData: eventData
+            }
+          }
+        })
+
+        // 주문 상태 업데이트
+        if (eventData.status === 'DONE') {
+          await prisma.order.update({
+            where: { id: payment.orderId },
+            data: { status: 'PAYMENT_COMPLETED' }
+          })
+        } else if (eventData.status === 'CANCELED') {
+          await prisma.order.update({
+            where: { id: payment.orderId },
+            data: { status: 'CANCELLED' }
+          })
+        }
+      }
+      break
+  }
+}
+
+/**
+ * KCP 웹훅 처리
+ */
+async function handleKCPWebhook(data: any) {
+  // KCP 웹훅 처리 로직
+  console.log('KCP webhook:', data)
+}
+
+/**
+ * 이니시스 웹훅 처리
+ */
+async function handleInicisWebhook(data: any) {
+  // 이니시스 웹훅 처리 로직
+  console.log('Inicis webhook:', data)
+}
+
+/**
+ * 네이버페이 웹훅 처리
+ */
+async function handleNaverPayWebhook(data: any) {
+  // 네이버페이 웹훅 처리 로직
+  console.log('NaverPay webhook:', data)
+}
+
+/**
+ * 카카오페이 웹훅 처리
+ */
+async function handleKakaoPayWebhook(data: any) {
+  // 카카오페이 웹훅 처리 로직
+  console.log('KakaoPay webhook:', data)
+}
+
+/**
+ * Stripe 웹훅 처리
+ */
+async function handleStripeWebhook(data: any) {
+  const { type, data: { object } } = data
+
+  switch (type) {
+    case 'payment_intent.succeeded':
+      const payment = await prisma.payment.findFirst({
+        where: { transactionId: object.id }
+      })
+
+      if (payment) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date()
+          }
+        })
+
+        await prisma.order.update({
+          where: { id: payment.orderId },
+          data: { status: 'PAYMENT_COMPLETED' }
+        })
+      }
+      break
+
+    case 'payment_intent.payment_failed':
+      const failedPayment = await prisma.payment.findFirst({
+        where: { transactionId: object.id }
+      })
+
+      if (failedPayment) {
+        await prisma.payment.update({
+          where: { id: failedPayment.id },
+          data: {
+            status: 'FAILED',
+            errorMessage: object.last_payment_error?.message
+          }
+        })
+
+        await prisma.order.update({
+          where: { id: failedPayment.orderId },
+          data: { status: 'PAYMENT_FAILED' }
+        })
+      }
+      break
+  }
+}
+
+/**
+ * PayPal 웹훅 처리
+ */
+async function handlePayPalWebhook(data: any) {
+  // PayPal 웹훅 처리 로직
+  console.log('PayPal webhook:', data)
+}
+
+/**
+ * 토스페이먼츠 상태 매핑
+ */
+function mapTossStatus(status: string): 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'PARTIAL_REFUND' {
+  const statusMap: Record<string, 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'PARTIAL_REFUND'> = {
+    'READY': 'PENDING',
+    'IN_PROGRESS': 'PENDING',
+    'WAITING_FOR_DEPOSIT': 'PENDING',
+    'DONE': 'COMPLETED',
+    'CANCELED': 'CANCELLED',
+    'PARTIAL_CANCELED': 'PARTIAL_REFUND',
+    'ABORTED': 'FAILED',
+    'EXPIRED': 'FAILED'
+  }
+  
+  return statusMap[status] || 'PENDING'
+}
