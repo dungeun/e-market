@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Server as SocketIOServer } from 'socket.io'
 import { Server as HTTPServer } from 'http'
 import { logger } from '../utils/logger'
@@ -26,7 +27,7 @@ export class SocketServer {
 
   private setupMiddleware() {
     // Authentication middleware
-    this.io.use((socket: any, next) => authMiddleware(socket as AuthenticatedSocket, next))
+    this.io.use((socket: unknown, next) => authMiddleware(socket as AuthenticatedSocket, next))
   }
 
   private setupEventHandlers() {
@@ -218,12 +219,12 @@ export class SocketServer {
   }
 
   // Send message to specific user
-  sendToUser(userId: string, event: string, data: any) {
+  sendToUser(userId: string, event: string, data: unknown) {
     this.io.to(`user:${userId}`).emit(event, data)
   }
 
   // Send message to specific session
-  sendToSession(sessionId: string, event: string, data: any) {
+  sendToSession(sessionId: string, event: string, data: unknown) {
     this.io.to(`session:${sessionId}`).emit(event, data)
   }
 

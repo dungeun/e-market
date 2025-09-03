@@ -152,7 +152,7 @@ export class WebhookService {
   /**
    * Handle successful payment
    */
-  private async handlePaymentSuccess(data: any, gateway: string): Promise<void> {
+  private async handlePaymentSuccess(data: unknown, gateway: string): Promise<void> {
     try {
       // Find payment by transaction ID or metadata
       const payment = await this.findPaymentByGatewayData(data, gateway)
@@ -206,7 +206,7 @@ export class WebhookService {
   /**
    * Handle failed payment
    */
-  private async handlePaymentFailed(data: any, gateway: string): Promise<void> {
+  private async handlePaymentFailed(data: unknown, gateway: string): Promise<void> {
     try {
       const payment = await this.findPaymentByGatewayData(data, gateway)
       
@@ -250,7 +250,7 @@ export class WebhookService {
   /**
    * Handle payment cancellation
    */
-  private async handlePaymentCancelled(data: any, gateway: string): Promise<void> {
+  private async handlePaymentCancelled(data: unknown, gateway: string): Promise<void> {
     try {
       const payment = await this.findPaymentByGatewayData(data, gateway)
       
@@ -287,7 +287,7 @@ export class WebhookService {
   /**
    * Handle chargeback notification
    */
-  private async handleChargeback(data: any, gateway: string): Promise<void> {
+  private async handleChargeback(data: unknown, gateway: string): Promise<void> {
     try {
       const payment = await this.findPaymentByGatewayData(data, gateway)
       
@@ -317,7 +317,7 @@ export class WebhookService {
   /**
    * Handle recurring payment success
    */
-  private async handleRecurringPaymentSuccess(_data: any, _gateway: string): Promise<void> {
+  private async handleRecurringPaymentSuccess(_data: unknown, _gateway: string): Promise<void> {
     try {
       // Handle subscription payment success
       // This would be implemented based on subscription requirements
@@ -331,7 +331,7 @@ export class WebhookService {
   /**
    * Handle refund completion
    */
-  private async handleRefundCompleted(data: any, gateway: string): Promise<void> {
+  private async handleRefundCompleted(data: unknown, gateway: string): Promise<void> {
     try {
       const payment = await this.findPaymentByGatewayData(data, gateway)
       
@@ -372,8 +372,8 @@ export class WebhookService {
   /**
    * Find payment by gateway-specific data
    */
-  private async findPaymentByGatewayData(data: any, gateway: string): Promise<any> {
-    let where: any = {}
+  private async findPaymentByGatewayData(data: unknown, gateway: string): Promise<unknown> {
+    let where: unknown = {}
 
     switch (gateway.toUpperCase()) {
       case 'STRIPE':
@@ -418,14 +418,14 @@ export class WebhookService {
         break
     }
 
-    return await prisma.payment.findFirst({ where })
+    return await query({ where })
   }
 
   /**
    * Extract failure reason from gateway data (currently unused)
    */
   /*
-  private _extractFailureReason(data: any, gateway: string): string {
+  private _extractFailureReason(data: unknown, gateway: string): string {
     switch (gateway.toUpperCase()) {
       case 'STRIPE':
         return data.last_payment_error?.message || 'Payment failed'
@@ -445,7 +445,7 @@ export class WebhookService {
   /**
    * Extract refund amount from gateway data
    */
-  private extractRefundAmount(data: any, gateway: string): number {
+  private extractRefundAmount(data: unknown, gateway: string): number {
     switch (gateway.toUpperCase()) {
       case 'STRIPE':
         return data.amount / 100 // Stripe uses cents
@@ -462,7 +462,7 @@ export class WebhookService {
    * Extract refund transaction ID from gateway data (currently unused)
    */
   /*
-  private _extractRefundTransactionId(data: any, gateway: string): string {
+  private _extractRefundTransactionId(data: unknown, gateway: string): string {
     switch (gateway.toUpperCase()) {
       case 'STRIPE':
         return data.id

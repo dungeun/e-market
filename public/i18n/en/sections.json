@@ -1,0 +1,358 @@
+{
+  "version": "2025.8.29.1200",
+  "lastUpdated": "2025-09-03T13:08:43.958Z",
+  "language": "en",
+  "sectionOrder": [],
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "visible": true,
+      "data": {
+        "slides": [
+          {
+            "tag": "✅ Fixed",
+            "title": "Database Update Complete",
+            "bgColor": "bg-gradient-to-br from-indigo-600 to-purple-600",
+            "subtitle": "Trigger errors have been resolved"
+          },
+          {
+            "id": "1756329390243",
+            "tag": "NEW",
+            "order": 2,
+            "title": "Premium Collection",
+            "bgColor": "bg-gradient-to-br from-blue-600 to-cyan-600",
+            "visible": true,
+            "subtitle": "Discover exclusive products"
+          },
+          {
+            "id": "1756329396708",
+            "tag": "HOT",
+            "order": 3,
+            "title": "Special Offers",
+            "bgColor": "bg-gradient-to-br from-emerald-500 to-teal-600",
+            "visible": true,
+            "subtitle": "Limited time deals"
+          }
+        ]
+      }
+    },
+    "category": {
+      "type": "category",
+      "visible": true,
+      "data": {
+        "title": "Categories",
+        "categories": [
+          {
+            "id": "cat_fashion",
+            "name": "Fashion/Apparel",
+            "order": 1,
+            "visible": true,
+            "categoryId": "fashion"
+          },
+          {
+            "id": "cat_beauty",
+            "name": "Beauty/Cosmetics",
+            "badge": "HOT",
+            "order": 2,
+            "visible": true,
+            "categoryId": "beauty"
+          },
+          {
+            "id": "cat_electronics",
+            "name": "Electronics",
+            "order": 3,
+            "visible": true,
+            "categoryId": "electronics"
+          },
+          {
+            "id": "cat_home",
+            "name": "Home/Interior",
+            "order": 4,
+            "visible": true,
+            "categoryId": "home"
+          },
+          {
+            "id": "cat_food",
+            "name": "Food/Drinks",
+            "badge": "NEW",
+            "order": 5,
+            "visible": true,
+            "categoryId": "food"
+          },
+          {
+            "id": "cat_sports",
+            "name": "Sports/Leisure",
+            "order": 6,
+            "visible": true,
+            "categoryId": "sports"
+          },
+          {
+            "id": "cat_books",
+            "name": "Books/Stationery",
+            "order": 7,
+            "visible": true,
+            "categoryId": "books"
+          },
+          {
+            "id": "cat_baby",
+            "name": "Baby/Maternity",
+            "order": 8,
+            "visible": true,
+            "categoryId": "baby"
+          }
+        ],
+        "items": [
+          {
+            "id": "cat_fashion",
+            "name": "Fashion/Apparel",
+            "slug": "fashion",
+            "icon": "👗",
+            "image": "/images/categories/fashion.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_beauty",
+            "name": "Beauty/Cosmetics",
+            "slug": "beauty",
+            "icon": "💄",
+            "image": "/images/categories/beauty.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_electronics",
+            "name": "Electronics",
+            "slug": "electronics",
+            "icon": "📱",
+            "image": "/images/categories/electronics.jpg",
+            "productCount": 2
+          },
+          {
+            "id": "cat_home",
+            "name": "Home/Interior",
+            "slug": "home",
+            "icon": "🏠",
+            "image": "/images/categories/home.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_food",
+            "name": "Food/Drinks",
+            "slug": "food",
+            "icon": "🍕",
+            "image": "/images/categories/food.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_sports",
+            "name": "Sports/Leisure",
+            "slug": "sports",
+            "icon": "⚽",
+            "image": "/images/categories/sports.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_books",
+            "name": "Books/Stationery",
+            "slug": "books",
+            "icon": "📚",
+            "image": "/images/categories/books.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_baby",
+            "name": "Baby/Maternity",
+            "slug": "baby",
+            "icon": "🍼",
+            "image": "/images/categories/baby.jpg",
+            "productCount": 0
+          }
+        ],
+        "gridLayout": "6x11"
+      }
+    },
+    "quicklinks": {
+      "type": "quicklinks",
+      "visible": true,
+      "data": {
+        "title": "Quick Links",
+        "links": [
+          {
+            "id": "quick-1",
+            "icon": "🎉",
+            "link": "/events",
+            "title": "Events"
+          },
+          {
+            "id": "quick-2",
+            "icon": "🎫",
+            "link": "/coupons",
+            "title": "Coupons"
+          },
+          {
+            "id": "quick-3",
+            "icon": "🏆",
+            "link": "/ranking",
+            "title": "Ranking"
+          }
+        ]
+      }
+    },
+    "promo": {
+      "type": "promo",
+      "visible": true,
+      "data": {
+        "banner": {
+          "icon": "🎁",
+          "link": "",
+          "title": "🚀 Get Started Now!",
+          "subtitle": "50% off first campaign fee",
+          "textColor": "#000000",
+          "backgroundColor": "#FEF3C7",
+          "backgroundImage": ""
+        }
+      }
+    },
+    "featured-products": {
+      "type": "featured",
+      "visible": true,
+      "data": {
+        "title": "Special Deals",
+        "subtitle": "Don't miss these amazing offers",
+        "products": [],
+        "displayCount": 8
+      }
+    },
+    "products": {
+      "type": "products",
+      "visible": true,
+      "data": {
+        "title": "Featured Products",
+        "subtitle": "Discover our curated selection",
+        "displayCount": 10
+      }
+    },
+    "ranking": {
+      "type": "ranking",
+      "visible": true,
+      "data": {
+        "title": "Live Rankings",
+        "subtitle": "Most popular products",
+        "popular": [
+          {
+            "id": "rank_1",
+            "rank": 1,
+            "title": "Galaxy S24",
+            "description": "Latest AI-powered flagship smartphone",
+            "price": "$999",
+            "originalPrice": "$1,199",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "badge": "HOT",
+            "rating": 4.8
+          },
+          {
+            "id": "rank_2",
+            "rank": 2,
+            "title": "LG OLED 55\" TV",
+            "description": "Perfect picture quality OLED Smart TV",
+            "price": "$1,990",
+            "originalPrice": "$2,290",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "badge": "SALE",
+            "rating": 4.9
+          },
+          {
+            "id": "rank_3",
+            "rank": 3,
+            "title": "Sulwhasoo Essence",
+            "description": "Premium essence with herbal ingredients",
+            "price": "$89",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7
+          },
+          {
+            "id": "rank_4",
+            "rank": 4,
+            "title": "Dyson V15 Cordless Vacuum",
+            "description": "Powerful laser-guided vacuum cleaner",
+            "price": "$899",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6
+          },
+          {
+            "id": "rank_5",
+            "rank": 5,
+            "title": "Nike Air Max 270",
+            "description": "Comfortable and stylish sneakers",
+            "price": "$159",
+            "image": "/images/products/nike-airmax-270.jpg",
+            "link": "/products/nike-airmax-270",
+            "rating": 4.5
+          }
+        ]
+      }
+    },
+    "recommended": {
+      "type": "recommended",
+      "visible": true,
+      "data": {
+        "title": "Recommended Products",
+        "subtitle": "Discover our popular selections",
+        "items": [
+          {
+            "id": "rec_1",
+            "title": "Galaxy S24",
+            "description": "New smartphone experience powered by AI",
+            "price": "$999",
+            "originalPrice": "$1,199",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "rating": 4.8,
+            "reviewCount": 1247,
+            "isNew": true,
+            "isSale": true
+          },
+          {
+            "id": "rec_2",
+            "title": "LG OLED 55\" TV",
+            "description": "Perfect black display with OLED technology",
+            "price": "$1,990",
+            "originalPrice": "$2,290",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "rating": 4.9,
+            "reviewCount": 892,
+            "isSale": true,
+            "badge": "Best"
+          },
+          {
+            "id": "rec_3",
+            "title": "Sulwhasoo Essence",
+            "description": "Premium skincare made with herbal ingredients",
+            "price": "$89",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7,
+            "reviewCount": 2456,
+            "badge": "Popular"
+          },
+          {
+            "id": "rec_4",
+            "title": "Dyson V15 Cordless Vacuum",
+            "description": "Innovative vacuum with laser dust detection",
+            "price": "$899",
+            "originalPrice": "$1,099",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6,
+            "reviewCount": 674,
+            "isSale": true
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { io, Socket } from 'socket.io-client'
+import { env } from '@/lib/config/env';
 
 class SocketService {
   private socket: Socket | null = null
@@ -8,19 +9,19 @@ class SocketService {
 
   connect() {
     if (!this.socket || !this.isConnected) {
-      this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+      this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || env.appUrl, {
         transports: ['websocket'],
         autoConnect: true,
       })
 
       this.socket.on('connect', () => {
         this.isConnected = true
-        console.log('Socket connected:', this.socket?.id)
+
       })
 
       this.socket.on('disconnect', () => {
         this.isConnected = false
-        console.log('Socket disconnected')
+
       })
     }
 
@@ -35,19 +36,19 @@ class SocketService {
     }
   }
 
-  emit(event: string, data: any) {
+  emit(event: string, data: unknown) {
     if (this.socket && this.isConnected) {
       this.socket.emit(event, data)
     }
   }
 
-  on(event: string, callback: (data: any) => void) {
+  on(event: string, callback: (data: unknown) => void) {
     if (this.socket) {
       this.socket.on(event, callback)
     }
   }
 
-  off(event: string, callback?: (data: any) => void) {
+  off(event: string, callback?: (data: unknown) => void) {
     if (this.socket) {
       this.socket.off(event, callback)
     }
@@ -62,11 +63,11 @@ class SocketService {
   }
 
   // Cart sync events
-  syncCart(cartData: any) {
+  syncCart(cartData: unknown) {
     this.emit('cart-update', cartData)
   }
 
-  onCartUpdate(callback: (data: any) => void) {
+  onCartUpdate(callback: (data: unknown) => void) {
     this.on('cart-updated', callback)
   }
 
@@ -75,17 +76,17 @@ class SocketService {
     this.emit('track-order', { orderId })
   }
 
-  onOrderUpdate(callback: (data: any) => void) {
+  onOrderUpdate(callback: (data: unknown) => void) {
     this.on('order-updated', callback)
   }
 
   // Admin notifications
-  onAdminNotification(callback: (data: any) => void) {
+  onAdminNotification(callback: (data: unknown) => void) {
     this.on('admin-notification', callback)
   }
 
   // Stock updates
-  onStockUpdate(callback: (data: any) => void) {
+  onStockUpdate(callback: (data: unknown) => void) {
     this.on('stock-updated', callback)
   }
 }

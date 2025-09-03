@@ -15,7 +15,7 @@ describe('Auto-Save Functionality Integration', () => {
 
   beforeAll(async () => {
     // Create test product
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test Auto-Save Product',
         slug: 'test-autosave-product',
@@ -36,9 +36,9 @@ describe('Auto-Save Functionality Integration', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await prisma.cartItem.deleteMany()
-    await prisma.cart.deleteMany()
-    await prisma.product.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
     
     // Clean up auto-save resources
     cleanupAutoSave(sessionId)
@@ -85,7 +85,7 @@ describe('Auto-Save Functionality Integration', () => {
 
       // Verify cart was updated
       const updatedCart = response.body.data
-      const targetItem = updatedCart.items.find((item: any) => item.productId === productId)
+      const targetItem = updatedCart.items.find((item: unknown) => item.productId === productId)
       expect(targetItem.quantity).toBe(3) // Should be combined: 2 + 1
 
       // Wait for auto-save to process

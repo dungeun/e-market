@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,11 +19,11 @@ interface BannerGridProps {
   }
 }
 
-export default function BannerGrid({ config }: BannerGridProps) {
-  if (!config.banners || config.banners.length === 0) return null
+const BannerGrid = React.memo(function BannerGrid({ config }: BannerGridProps) {
+  if (!config?.banners || config?.banners.length === 0) return null
 
   const getGridClass = () => {
-    switch (config.layout) {
+    switch (config?.layout) {
       case '2x2':
         return 'grid-cols-2 grid-rows-2'
       case '1x3':
@@ -37,16 +39,16 @@ export default function BannerGrid({ config }: BannerGridProps) {
     <section className="py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div 
-          className={`grid ${getGridClass()} gap-${config.spacing || 4}`}
+          className={`grid ${getGridClass()} gap-${config?.spacing || 4}`}
         >
-          {config.banners.map((banner) => (
+          {config?.banners.map((banner) => (
             <Link
               key={banner.id}
               href={banner.link}
               className="relative group overflow-hidden"
             >
               <div className={`relative aspect-video bg-gray-100 ${
-                config.rounded ? 'rounded-lg' : ''
+                config?.rounded ? 'rounded-lg' : ''
               } overflow-hidden`}>
                 <Image
                   src={banner.image || '/placeholder.svg'}
@@ -61,5 +63,7 @@ export default function BannerGrid({ config }: BannerGridProps) {
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default BannerGrid;

@@ -13,7 +13,7 @@ interface BrandSpotlightProps {
     layout?: 'showcase' | 'grid' | 'carousel'
     backgroundColor?: string
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function BrandSpotlight({ config, products }: BrandSpotlightProps) {

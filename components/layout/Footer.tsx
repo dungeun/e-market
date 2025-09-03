@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
@@ -37,7 +39,7 @@ const socialLinks = [
   { name: 'YouTube', icon: Youtube, href: '#' },
 ];
 
-export default function Footer() {
+const Footer = React.memo(function Footer() {
   return (
     <footer className="bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,4 +216,5 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+});
+export default Footer;

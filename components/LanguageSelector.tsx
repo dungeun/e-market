@@ -4,17 +4,35 @@ import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
 
-const languages = [
-  { code: 'ko', name: '한국어', flag: '🇰🇷', shortName: 'KO' },
-  { code: 'en', name: 'English', flag: '🇺🇸', shortName: 'EN' },
-  { code: 'jp', name: '日本語', flag: '🇯🇵', shortName: 'JP' },
-]
+interface Language {
+  code: string;
+  name: string;
+  nativeName?: string;
+  flag: string;
+  shortName: string;
+  isDefault?: boolean;
+}
 
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [languages, setLanguages] = useState<Language[]>([])
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { currentLanguage, setLanguage, t } = useLanguage()
+
+  // 사용 가능한 언어 목록 로드
+  useEffect(() => {
+    fetch('/api/languages/available')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLanguages(data);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load languages:', err);
+      });
+  }, [])
 
   // 하이드레이션 문제 방지를 위해 마운트 상태 추적
   useEffect(() => {
@@ -35,15 +53,21 @@ export default function LanguageSelector() {
   }, [])
 
   const handleLanguageChange = (langCode: string) => {
-    setLanguage(langCode as 'ko' | 'en' | 'jp')
+    // 동적 언어 지원 - 타입 캐스팅 제거
+    setLanguage(langCode as any)
     setIsOpen(false)
     
     // 페이지 새로고침 (선택사항 - 전체 앱 리렌더링)
     // window.location.reload()
   }
 
-  // 마운트되기 전에는 기본 언어(한국어) 표시하여 하이드레이션 오류 방지
-  const displayLang = mounted ? currentLang : languages[0]
+  // 언어 목록이 없으면 렌더링하지 않음
+  if (languages.length === 0) {
+    return null;
+  }
+
+  // 마운트되기 전이나 현재 언어가 없으면 첫 번째 언어 사용
+  const displayLang = mounted ? (currentLang || languages[0]) : languages[0]
 
   return (
     <div className="relative" ref={dropdownRef}>

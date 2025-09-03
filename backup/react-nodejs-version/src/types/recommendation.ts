@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 export interface RecommendationRequest {
   userId: string;
   algorithm: RecommendationAlgorithm;
@@ -45,7 +46,7 @@ export interface UserBehaviorData {
   timestamp: Date;
   weight: number;
   sessionId?: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export enum UserActionType {

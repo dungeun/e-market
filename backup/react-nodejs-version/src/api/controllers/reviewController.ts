@@ -30,8 +30,8 @@ class ReviewController {
         data: review,
         message: '리뷰가 성공적으로 작성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create review error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 작성 중 오류가 발생했습니다.' 
       });
@@ -45,9 +45,9 @@ class ReviewController {
       const query: ReviewQueryDto = {
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 10,
-        sortBy: req.query.sortBy as any || 'latest',
+        sortBy: req.query.sortBy as unknown || 'latest',
         rating: req.query.rating ? parseInt(req.query.rating as string) : undefined,
-        reviewType: req.query.reviewType as any,
+        reviewType: req.query.reviewType as unknown,
         verified: req.query.verified === 'true' ? true : 
                  req.query.verified === 'false' ? false : null,
         bestOnly: req.query.bestOnly === 'true'
@@ -59,8 +59,8 @@ class ReviewController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Get reviews error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 조회 중 오류가 발생했습니다.' 
       });
@@ -77,8 +77,8 @@ class ReviewController {
         success: true,
         data: statistics
       });
-    } catch (error: any) {
-      console.error('Get review statistics error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 통계 조회 중 오류가 발생했습니다.' 
       });
@@ -103,8 +103,8 @@ class ReviewController {
         data: bestReviews,
         message: '베스트 리뷰가 선정되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Select best reviews error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '베스트 리뷰 선정 중 오류가 발생했습니다.' 
       });
@@ -133,8 +133,8 @@ class ReviewController {
         data: result,
         message: '투표가 완료되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Vote review error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 투표 중 오류가 발생했습니다.' 
       });
@@ -169,8 +169,8 @@ class ReviewController {
         data: updatedReview,
         message: '리뷰가 수정되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Update review error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 수정 중 오류가 발생했습니다.' 
       });
@@ -194,8 +194,8 @@ class ReviewController {
         success: true,
         message: '리뷰가 삭제되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Delete review error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 삭제 중 오류가 발생했습니다.' 
       });
@@ -229,8 +229,8 @@ class ReviewController {
         data: reply,
         message: '답글이 작성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create reply error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '답글 작성 중 오류가 발생했습니다.' 
       });
@@ -254,8 +254,8 @@ class ReviewController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Get my reviews error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 조회 중 오류가 발생했습니다.' 
       });
@@ -283,8 +283,8 @@ class ReviewController {
         success: true,
         message: '리뷰 신고가 접수되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Report review error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '리뷰 신고 중 오류가 발생했습니다.' 
       });

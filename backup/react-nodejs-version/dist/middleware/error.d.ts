@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { Prisma } from '@prisma/client';
 import { circuitBreakers } from './circuitBreaker';
 export interface ErrorResponse {
     success: false;

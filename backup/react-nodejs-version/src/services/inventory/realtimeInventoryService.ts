@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { PrismaClient, ReservationType, ReservationStatus, AlertType, AlertLevel } from '@prisma/client';
 import { Server as SocketServer } from 'socket.io';
 import { cacheService } from '../cacheService';
@@ -105,7 +106,7 @@ export class RealtimeInventoryService extends EventEmitter {
     expiresAt.setMinutes(expiresAt.getMinutes() + duration);
 
     // 예약 생성
-    const reservation = await this.prisma.inventoryReservation.create({
+    const reservation = await this.query({
       data: {
         productId,
         variantId,
@@ -140,7 +141,7 @@ export class RealtimeInventoryService extends EventEmitter {
    * 예약 확정 (구매 완료)
    */
   async confirmReservation(reservationId: string): Promise<void> {
-    const reservation = await this.prisma.inventoryReservation.findUnique({
+    const reservation = await this.query({
       where: { id: reservationId }
     });
 
@@ -153,13 +154,13 @@ export class RealtimeInventoryService extends EventEmitter {
     }
 
     // 예약 상태 업데이트
-    await this.prisma.inventoryReservation.update({
+    await this.query({
       where: { id: reservationId },
       data: { status: ReservationStatus.CONFIRMED }
     });
 
     // 재고 로그 기록
-    await this.prisma.inventoryLog.create({
+    await this.query({
       data: {
         productId: reservation.productId,
         type: 'SALE',
@@ -173,7 +174,7 @@ export class RealtimeInventoryService extends EventEmitter {
    * 예약 취소
    */
   async cancelReservation(reservationId: string): Promise<void> {
-    const reservation = await this.prisma.inventoryReservation.findUnique({
+    const reservation = await this.query({
       where: { id: reservationId }
     });
 
@@ -182,7 +183,7 @@ export class RealtimeInventoryService extends EventEmitter {
     }
 
     // 예약 취소
-    await this.prisma.inventoryReservation.update({
+    await this.query({
       where: { id: reservationId },
       data: { status: ReservationStatus.CANCELLED }
     });
@@ -211,7 +212,7 @@ export class RealtimeInventoryService extends EventEmitter {
     if (cached && !requestedQuantity) return cached;
 
     // 상품 정보 조회
-    const product = await this.prisma.product.findUnique({
+    const product = await this.query({
       where: { id: productId },
       select: {
         quantity: true,
@@ -275,7 +276,7 @@ export class RealtimeInventoryService extends EventEmitter {
    * 만료된 예약 정리
    */
   private async cleanupExpiredReservations(): Promise<void> {
-    const expired = await this.prisma.inventoryReservation.findMany({
+    const expired = await this.query({
       where: {
         status: ReservationStatus.ACTIVE,
         expiresAt: { lt: new Date() }
@@ -285,7 +286,7 @@ export class RealtimeInventoryService extends EventEmitter {
     for (const reservation of expired) {
       try {
         // 예약 만료 처리
-        await this.prisma.inventoryReservation.update({
+        await this.query({
           where: { id: reservation.id },
           data: { status: ReservationStatus.EXPIRED }
         });
@@ -310,18 +311,17 @@ export class RealtimeInventoryService extends EventEmitter {
           });
         }
       } catch (error) {
-        console.error(`Failed to cleanup reservation ${reservation.id}:`, error);
+
       }
     }
 
-    console.log(`Cleaned up ${expired.length} expired reservations`);
   }
 
   /**
    * 재고 스냅샷 생성
    */
   private async createInventorySnapshots(): Promise<void> {
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where: { trackQuantity: true },
       include: {
         variants: true,
@@ -340,7 +340,7 @@ export class RealtimeInventoryService extends EventEmitter {
         .filter(r => !r.variantId)
         .reduce((sum, r) => sum + r.quantity, 0);
 
-      await this.prisma.inventorySnapshot.create({
+      await this.query({
         data: {
           productId: product.id,
           availableQuantity: product.quantity - mainReserved,
@@ -357,7 +357,7 @@ export class RealtimeInventoryService extends EventEmitter {
           .filter(r => r.variantId === variant.id)
           .reduce((sum, r) => sum + r.quantity, 0);
 
-        await this.prisma.inventorySnapshot.create({
+        await this.query({
           data: {
             productId: product.id,
             variantId: variant.id,
@@ -376,7 +376,7 @@ export class RealtimeInventoryService extends EventEmitter {
    * 재고 경고 확인
    */
   private async checkInventoryAlerts(): Promise<void> {
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where: { trackQuantity: true },
       include: {
         inventoryReservations: {
@@ -456,7 +456,7 @@ export class RealtimeInventoryService extends EventEmitter {
     thresholdQuantity?: number
   ): Promise<void> {
     // 기존 미해결 경고 확인
-    const existing = await this.prisma.inventoryAlert.findFirst({
+    const existing = await this.query({
       where: {
         productId,
         type,
@@ -466,7 +466,7 @@ export class RealtimeInventoryService extends EventEmitter {
 
     if (existing) return;
 
-    const alert = await this.prisma.inventoryAlert.create({
+    const alert = await this.query({
       data: {
         productId,
         type,
@@ -498,14 +498,14 @@ export class RealtimeInventoryService extends EventEmitter {
     quantityChange: number
   ): Promise<void> {
     if (variantId) {
-      await this.prisma.productVariant.update({
+      await this.query({
         where: { id: variantId },
         data: {
           quantity: { increment: quantityChange }
         }
       });
     } else {
-      await this.prisma.product.update({
+      await this.query({
         where: { id: productId },
         data: {
           quantity: { increment: quantityChange }
@@ -553,7 +553,7 @@ export class RealtimeInventoryService extends EventEmitter {
     await this.updateProductQuantity(productId, variantId, adjustment);
 
     // 로그 기록
-    await this.prisma.inventoryLog.create({
+    await this.query({
       data: {
         productId,
         type: 'ADJUSTMENT',
@@ -597,7 +597,7 @@ export class RealtimeInventoryService extends EventEmitter {
 
     // 로그 기록
     await Promise.all([
-      this.prisma.inventoryLog.create({
+      this.query({
         data: {
           productId: fromProductId,
           type: 'TRANSFER',
@@ -606,7 +606,7 @@ export class RealtimeInventoryService extends EventEmitter {
           reference: userId
         }
       }),
-      this.prisma.inventoryLog.create({
+      this.query({
         data: {
           productId: toProductId,
           type: 'TRANSFER',
@@ -644,7 +644,7 @@ export class RealtimeInventoryService extends EventEmitter {
           userId
         );
       } catch (error) {
-        console.error(`Failed to update inventory for ${update.productId}:`, error);
+
       }
     }
   }
@@ -659,7 +659,7 @@ export class RealtimeInventoryService extends EventEmitter {
   }) {
     const { startDate, endDate, productIds } = options;
 
-    const where: any = {};
+    const where: unknown = {};
     if (startDate && endDate) {
       where.createdAt = { gte: startDate, lte: endDate };
     }
@@ -668,9 +668,9 @@ export class RealtimeInventoryService extends EventEmitter {
     }
 
     const [logs, snapshots, alerts] = await Promise.all([
-      this.prisma.inventoryLog.findMany({ where }),
-      this.prisma.inventorySnapshot.findMany({ where }),
-      this.prisma.inventoryAlert.findMany({ 
+      this.query({ where }),
+      this.query({ where }),
+      this.query({ 
         where: { ...where, isResolved: false } 
       })
     ]);

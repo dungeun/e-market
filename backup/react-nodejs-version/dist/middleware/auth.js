@@ -20,7 +20,7 @@ const authenticate = async (req, _res, next) => {
         // Verify JWT token
         const decoded = jsonwebtoken_1.default.verify(token, config_1.config.jwt.secret);
         // Get user from database
-        const user = await database_1.prisma.user.findUnique({
+        const user = await database_1.query({
             where: { id: decoded.userId },
             select: {
                 id: true,
@@ -68,7 +68,7 @@ const optionalAuth = async (req, _res, next) => {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (token) {
             const decoded = jsonwebtoken_1.default.verify(token, config_1.config.jwt.secret);
-            const user = await database_1.prisma.user.findUnique({
+            const user = await database_1.query({
                 where: { id: decoded.userId },
                 select: {
                     id: true,
@@ -116,7 +116,7 @@ const sessionAuth = async (req, res, next) => {
             return next(); // Allow anonymous sessions
         }
         // Find session in database
-        const session = await database_1.prisma.session.findUnique({
+        const session = await database_1.query({
             where: { token: sessionToken },
             include: {
                 user: {
@@ -136,7 +136,7 @@ const sessionAuth = async (req, res, next) => {
             return next();
         }
         // Update session last activity
-        await database_1.prisma.session.update({
+        await database_1.query({
             where: { id: session.id },
             data: { lastActivityAt: new Date() },
         });
@@ -173,7 +173,7 @@ const apiKeyAuth = async (req, _res, next) => {
         }
         // Verify API key in database
         const hashedKey = security_1.SecurityUtils.hashData(apiKey);
-        const apiClient = await database_1.prisma.apiClient.findFirst({
+        const apiClient = await database_1.query({
             where: {
                 hashedKey,
                 isActive: true,
@@ -191,7 +191,7 @@ const apiKeyAuth = async (req, _res, next) => {
             throw new error_1.AppError('Invalid API key', 401);
         }
         // Rate limit check
-        await database_1.prisma.apiClient.update({
+        await database_1.query({
             where: { id: apiClient.id },
             data: {
                 lastUsedAt: new Date(),

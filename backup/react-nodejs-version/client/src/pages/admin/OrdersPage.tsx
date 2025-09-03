@@ -33,7 +33,7 @@ export const OrdersPage: React.FC = () => {
   const { data: orders, isLoading, error } = useQuery<Order[]>(
     ['adminOrders', statusFilter, dateFilter],
     async () => {
-      const params: any = {}
+      const params: unknown = {}
       if (statusFilter !== 'all') params.status = statusFilter
       if (dateFilter !== 'all') params.dateRange = dateFilter
       

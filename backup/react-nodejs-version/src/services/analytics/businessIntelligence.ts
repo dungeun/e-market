@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { cacheService } from '../cacheService';
 import { logger } from '../../utils/logger';
 
@@ -273,7 +272,7 @@ export class BusinessIntelligenceService {
    * 현재 기간 데이터 조회
    */
   private async getCurrentPeriodData(startDate: Date, endDate: Date) {
-    const orders = await this.prisma.order.findMany({
+    const orders = await this.query({
       where: {
         createdAt: { gte: startDate, lte: endDate },
         status: 'COMPLETED'
@@ -306,7 +305,7 @@ export class BusinessIntelligenceService {
       prevStart = new Date(prevEnd.getTime() - periodLength);
     }
 
-    const orders = await this.prisma.order.findMany({
+    const orders = await this.query({
       where: {
         createdAt: { gte: prevStart, lte: prevEnd },
         status: 'COMPLETED'
@@ -467,13 +466,13 @@ export class BusinessIntelligenceService {
     // 실제로는 웹사이트 방문자 수 대비 주문 수로 계산
     // 여기서는 간단히 세션 대비 주문으로 계산
     const [orders, sessions] = await Promise.all([
-      this.prisma.order.count({
+      this.query({
         where: {
           createdAt: { gte: startDate, lte: endDate },
           status: 'COMPLETED'
         }
       }),
-      this.prisma.session.count({
+      this.query({
         where: {
           createdAt: { gte: startDate, lte: endDate }
         }
@@ -567,7 +566,7 @@ export class BusinessIntelligenceService {
     // 회전율 기반 분석
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where: {
         status: 'PUBLISHED',
         trackQuantity: true
@@ -623,13 +622,13 @@ export class BusinessIntelligenceService {
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
     const [newCustomers, activeCustomers, atRiskCustomers, lostCustomers] = await Promise.all([
-      this.prisma.user.count({
+      this.query({
         where: {
           role: 'CUSTOMER',
           createdAt: { gte: startDate, lte: endDate }
         }
       }),
-      this.prisma.user.count({
+      this.query({
         where: {
           role: 'CUSTOMER',
           orders: {
@@ -639,7 +638,7 @@ export class BusinessIntelligenceService {
           }
         }
       }),
-      this.prisma.user.count({
+      this.query({
         where: {
           role: 'CUSTOMER',
           orders: {
@@ -656,7 +655,7 @@ export class BusinessIntelligenceService {
           }
         }
       }),
-      this.prisma.user.count({
+      this.query({
         where: {
           role: 'CUSTOMER',
           orders: {

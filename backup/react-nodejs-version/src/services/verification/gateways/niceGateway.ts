@@ -104,7 +104,7 @@ export class NICEGateway {
   /**
    * 데이터 암호화
    */
-  private encryptData(data: any): string {
+  private encryptData(data: unknown): string {
     try {
       const key = Buffer.from(this.config.apiKey, 'hex');
       const iv = crypto.randomBytes(16);
@@ -175,7 +175,7 @@ export class NICEGateway {
   /**
    * 결과 파싱
    */
-  private parseResult(data: any): VerificationResult {
+  private parseResult(data: unknown): VerificationResult {
     const success = data.resultCode === '0000';
     const verified = success && data.authResult === 'Y';
 

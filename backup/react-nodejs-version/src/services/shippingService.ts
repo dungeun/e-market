@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Prisma, ShippingMethod, ShippingStatus } from '@prisma/client'
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
@@ -134,7 +135,7 @@ export class ShippingService {
       logger.info('Creating shipment', { orderId: data.orderId, carrier: data.carrier })
 
       // Get order details
-      const order = await prisma.order.findUnique({
+      const order = await query({
         where: { id: data.orderId },
         include: {
           items: {
@@ -247,7 +248,7 @@ export class ShippingService {
     try {
       logger.info('Updating shipment', { id, updates: Object.keys(data) })
 
-      const existingShipment = await prisma.shipment.findUnique({
+      const existingShipment = await query({
         where: { id },
         include: { order: true },
       })
@@ -268,7 +269,7 @@ export class ShippingService {
             ...(data.notes && { notes: data.notes }),
             ...(data.metadata && {
               metadata: {
-                ...((existingShipment.metadata as any) || {}),
+                ...((existingShipment.metadata as unknown) || {}),
                 ...data.metadata,
               } as Prisma.JsonObject,
             }),
@@ -317,7 +318,7 @@ export class ShippingService {
   // Get shipment by ID
   async getShipmentById(id: string): Promise<ShipmentWithDetails> {
     try {
-      const shipment = await prisma.shipment.findUnique({
+      const shipment = await query({
         where: { id },
         include: {
           order: {
@@ -334,7 +335,7 @@ export class ShippingService {
         throw new AppError('Shipment not found', 404)
       }
 
-      return this.transformShipmentToDetails(shipment as any)
+      return this.transformShipmentToDetails(shipment as unknown)
 
     } catch (error) {
       logger.error('Error getting shipment by ID', { error: error instanceof Error ? error.message : String(error), id })
@@ -349,7 +350,7 @@ export class ShippingService {
       logger.info('Tracking shipment', { trackingNumber: data.trackingNumber })
 
       // Find shipment in database
-      const shipment = await prisma.shipment.findFirst({
+      const shipment = await query({
         where: { trackingNumber: data.trackingNumber },
         include: {
           trackingEvents: {
@@ -363,14 +364,14 @@ export class ShippingService {
       }
 
       // Get tracking events
-      const events: TrackingEvent[] = shipment.trackingEvents.map((event: any) => ({
+      const events: TrackingEvent[] = shipment.trackingEvents.map((event: unknown) => ({
         id: event.id,
         shipmentId: event.shipmentId,
         status: event.status,
         location: event.location || undefined,
         description: event.description || undefined,
         timestamp: event.timestamp,
-        metadata: event.metadata as Record<string, any>,
+        metadata: event.metadata as Record<string, unknown>,
         createdAt: event.createdAt,
       }))
 
@@ -417,7 +418,7 @@ export class ShippingService {
       }
 
       const [shipments, total] = await Promise.all([
-        prisma.shipment.findMany({
+        query({
           where,
           include: {
             order: {
@@ -430,7 +431,7 @@ export class ShippingService {
           skip: (page - 1) * limit,
           take: limit,
         }),
-        prisma.shipment.count({ where }),
+        query({ where }),
       ])
 
       const summaries: ShippingSummary[] = shipments.map(shipment => ({
@@ -468,7 +469,7 @@ export class ShippingService {
     try {
       logger.info('Handling carrier webhook', { carrier, trackingNumber: data.trackingNumber })
 
-      const shipment = await prisma.shipment.findFirst({
+      const shipment = await query({
         where: {
           trackingNumber: data.trackingNumber,
           carrier: carrier.toUpperCase(),
@@ -523,7 +524,7 @@ export class ShippingService {
         recentShipments,
       ] = await Promise.all([
         // Total shipments count
-        prisma.shipment.count(),
+        query(),
 
         // Total and average cost
         prisma.shipment.aggregate({
@@ -547,7 +548,7 @@ export class ShippingService {
         }),
 
         // Recent shipments
-        prisma.shipment.findMany({
+        query({
           include: {
             order: {
               select: {
@@ -597,7 +598,7 @@ export class ShippingService {
   }
 
   // Private helper methods
-  private validatePackages(packages: any[]): void {
+  private validatePackages(packages: unknown[]): void {
     for (const pkg of packages) {
       if (pkg.weight < this.MIN_PACKAGE_WEIGHT || pkg.weight > this.MAX_PACKAGE_WEIGHT) {
         throw new AppError(`Package weight must be between ${this.MIN_PACKAGE_WEIGHT} and ${this.MAX_PACKAGE_WEIGHT} ${pkg.weightUnit}`, 400)
@@ -611,11 +612,11 @@ export class ShippingService {
     }
   }
 
-  private validatePackageInfo(packageInfo: any): void {
+  private validatePackageInfo(packageInfo: unknown): void {
     this.validatePackages([packageInfo])
   }
 
-  private async getBaseRates(origin: any, destination: any, weight: number): Promise<ShippingRate[]> {
+  private async getBaseRates(origin: unknown, destination: unknown, weight: number): Promise<ShippingRate[]> {
     // Mock implementation - in real scenario, this would call external APIs
     const distance = this.calculateDistance(origin, destination)
     const baseRate = Math.max(5, distance * 0.1 + weight * 0.5)
@@ -629,7 +630,7 @@ export class ShippingService {
 
         rates.push({
           carrier: carrierCode,
-          service: serviceCode as any,
+          service: serviceCode as unknown,
           serviceName: service.name,
           cost,
           currency: this.DEFAULT_CURRENCY,
@@ -646,7 +647,7 @@ export class ShippingService {
     return rates
   }
 
-  private async applyShippingRules(rates: ShippingRate[], context: any): Promise<ShippingRate[]> {
+  private async applyShippingRules(rates: ShippingRate[], context: unknown): Promise<ShippingRate[]> {
     // Mock implementation - apply shipping rules like free shipping, discounts, etc.
     const rules = await this.getActiveShippingRules()
 
@@ -676,12 +677,12 @@ export class ShippingService {
     return []
   }
 
-  private doesRuleApply(_rule: any, _context: any): boolean {
+  private doesRuleApply(_rule: unknown, _context: unknown): boolean {
     // Mock implementation - check if rule conditions match context
     return true
   }
 
-  private calculateDistance(_origin: any, _destination: any): number {
+  private calculateDistance(_origin: unknown, _destination: unknown): number {
     // Mock implementation - calculate distance between addresses
     return Math.random() * 1000 + 100 // Random distance between 100-1100 km
   }
@@ -710,7 +711,7 @@ export class ShippingService {
     }
   }
 
-  private convertAddressToShippingAddress(address: any): ShippingAddress {
+  private convertAddressToShippingAddress(address: unknown): ShippingAddress {
     return {
       street1: address.street1,
       street2: address.street2,
@@ -727,8 +728,8 @@ export class ShippingService {
     }
   }
 
-  private transformShipmentToDetails(shipment: any): ShipmentWithDetails {
-    const metadata = shipment.metadata as any || {}
+  private transformShipmentToDetails(shipment: unknown): ShipmentWithDetails {
+    const metadata = shipment.metadata as unknown || {}
 
     return {
       id: shipment.id,

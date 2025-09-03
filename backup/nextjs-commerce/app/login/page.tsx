@@ -59,7 +59,7 @@ export default function LoginPage() {
       router.push('/')
       
     } catch (error) {
-      console.error('Login error:', error)
+
       toast.error(error instanceof Error ? error.message : '로그인에 실패했습니다')
     } finally {
       setIsLoading(false)

@@ -19,8 +19,8 @@ class PromotionController {
         data: promotion,
         message: '프로모션이 생성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create promotion error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 생성 중 오류가 발생했습니다.' 
       });
@@ -44,8 +44,8 @@ class PromotionController {
         data: promotion,
         message: '프로모션이 수정되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Update promotion error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 수정 중 오류가 발생했습니다.' 
       });
@@ -66,8 +66,8 @@ class PromotionController {
         success: true,
         data: statistics
       });
-    } catch (error: any) {
-      console.error('Get promotion statistics error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '통계 조회 중 오류가 발생했습니다.' 
       });
@@ -101,8 +101,8 @@ class PromotionController {
         data: flashSale,
         message: '플래시 세일이 생성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create flash sale error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '플래시 세일 생성 중 오류가 발생했습니다.' 
       });
@@ -136,8 +136,8 @@ class PromotionController {
         data: bogo,
         message: 'BOGO 프로모션이 생성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create BOGO promotion error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || 'BOGO 프로모션 생성 중 오류가 발생했습니다.' 
       });
@@ -158,8 +158,8 @@ class PromotionController {
         success: true,
         message: '프로모션이 삭제되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Delete promotion error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 삭제 중 오류가 발생했습니다.' 
       });
@@ -172,7 +172,7 @@ class PromotionController {
       const query = {
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 20,
-        type: req.query.type as any,
+        type: req.query.type as unknown,
         targetCategory: req.query.categoryId as string,
         targetProduct: req.query.productId as string,
         isActive: true
@@ -184,8 +184,8 @@ class PromotionController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Get active promotions error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 조회 중 오류가 발생했습니다.' 
       });
@@ -205,8 +205,8 @@ class PromotionController {
         data: result,
         message: '프로모션 시뮬레이션 결과입니다.'
       });
-    } catch (error: any) {
-      console.error('Simulate promotion error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 시뮬레이션 중 오류가 발생했습니다.' 
       });

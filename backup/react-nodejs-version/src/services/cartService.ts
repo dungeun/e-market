@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Prisma, ProductVariant } from '@prisma/client'
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
@@ -88,7 +89,7 @@ export class CartService {
       where.OR!.push({ sessionId })
     }
 
-    const cart = await prisma.cart.findFirst({
+    const cart = await query({
       where,
       orderBy: { updatedAt: 'desc' },
     })
@@ -131,13 +132,13 @@ export class CartService {
     const skip = (page - 1) * limit
 
     const [carts, total] = await Promise.all([
-      prisma.cart.findMany({
+      query({
         where,
         skip,
         take: limit,
         orderBy: { updatedAt: 'desc' },
       }),
-      prisma.cart.count({ where }),
+      query({ where }),
     ])
 
     // Get detailed cart information
@@ -158,7 +159,7 @@ export class CartService {
 
   // Update cart
   async updateCart(id: string, data: UpdateCartInput): Promise<CartWithDetails> {
-    const existingCart = await prisma.cart.findUnique({
+    const existingCart = await query({
       where: { id },
     })
 
@@ -170,7 +171,7 @@ export class CartService {
       throw new AppError('Cart has expired', 410)
     }
 
-    await prisma.cart.update({
+    await query({
       where: { id },
       data: {
         ...data,
@@ -184,7 +185,7 @@ export class CartService {
 
   // Delete cart
   async deleteCart(id: string): Promise<void> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id },
     })
 
@@ -192,7 +193,7 @@ export class CartService {
       throw new AppError('Cart not found', 404)
     }
 
-    await prisma.cart.delete({
+    await query({
       where: { id },
     })
 
@@ -210,7 +211,7 @@ export class CartService {
   }
 
   private async performAddItemToCart(
-    tx: any,
+    tx: unknown,
     cartId: string,
     data: AddCartItemInput,
   ): Promise<void> {
@@ -356,9 +357,9 @@ export class CartService {
   async updateCartItem(
     cartId: string,
     itemId: string,
-    data: UpdateCartItemInput & { options?: Record<string, any> },
+    data: UpdateCartItemInput & { options?: Record<string, unknown> },
   ): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
     })
 
@@ -370,7 +371,7 @@ export class CartService {
       throw new AppError('Cart has expired', 410)
     }
 
-    const cartItem = await prisma.cartItem.findFirst({
+    const cartItem = await query({
       where: {
         id: itemId,
         cartId,
@@ -432,7 +433,7 @@ export class CartService {
     }
 
     await prisma.$transaction(async (tx) => {
-      const updateData: any = {
+      const updateData: unknown = {
         quantity: data.quantity,
         updatedAt: new Date(),
       }
@@ -460,7 +461,7 @@ export class CartService {
 
   // Remove item from cart
   async removeCartItem(cartId: string, itemId: string): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
     })
 
@@ -472,7 +473,7 @@ export class CartService {
       throw new AppError('Cart has expired', 410)
     }
 
-    const cartItem = await prisma.cartItem.findFirst({
+    const cartItem = await query({
       where: {
         id: itemId,
         cartId,
@@ -500,7 +501,7 @@ export class CartService {
 
   // Clear all items from cart
   async clearCart(cartId: string): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
     })
 
@@ -540,7 +541,7 @@ export class CartService {
 
   // Apply coupon to cart
   async applyCoupon(cartId: string, data: ApplyCouponInput): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
       include: {
         items: true,
@@ -559,7 +560,7 @@ export class CartService {
     }
 
     // Find the coupon
-    const coupon = await prisma.coupon.findUnique({
+    const coupon = await query({
       where: { code: data.couponCode },
     })
 
@@ -600,7 +601,7 @@ export class CartService {
       )
     }
 
-    await prisma.cartCoupon.create({
+    await query({
       data: {
         cartId,
         couponId: coupon.id,
@@ -613,7 +614,7 @@ export class CartService {
 
   // Remove coupon from cart
   async removeCoupon(cartId: string, couponId: string): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
     })
 
@@ -625,7 +626,7 @@ export class CartService {
       throw new AppError('Cart has expired', 410)
     }
 
-    const cartCoupon = await prisma.cartCoupon.findFirst({
+    const cartCoupon = await query({
       where: {
         cartId,
         couponId,
@@ -636,7 +637,7 @@ export class CartService {
       throw new AppError('Coupon not found in cart', 404)
     }
 
-    await prisma.cartCoupon.delete({
+    await query({
       where: {
         cartId_couponId: {
           cartId,
@@ -654,11 +655,11 @@ export class CartService {
     const { sourceCartId, targetCartId } = data
 
     const [sourceCart, targetCart] = await Promise.all([
-      prisma.cart.findUnique({
+      query({
         where: { id: sourceCartId },
         include: { items: true },
       }),
-      prisma.cart.findUnique({
+      query({
         where: { id: targetCartId },
         include: { items: true },
       }),
@@ -731,7 +732,7 @@ export class CartService {
   async transferCart(data: TransferCartInput): Promise<CartWithDetails> {
     const { sessionId, userId } = data
 
-    const sessionCart = await prisma.cart.findFirst({
+    const sessionCart = await query({
       where: {
         sessionId,
         userId: null,
@@ -745,7 +746,7 @@ export class CartService {
     }
 
     // Check if user already has a cart
-    const userCart = await prisma.cart.findFirst({
+    const userCart = await query({
       where: {
         userId,
         expiresAt: { gt: new Date() },
@@ -762,7 +763,7 @@ export class CartService {
       return this.getCartWithDetails(userCart.id)
     } else {
       // Transfer session cart to user
-      await prisma.cart.update({
+      await query({
         where: { id: sessionCart.id },
         data: {
           userId,
@@ -778,7 +779,7 @@ export class CartService {
 
   // Validate cart stock
   async validateCartStock(cartId: string): Promise<StockValidationResult> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
       include: {
         items: {
@@ -820,7 +821,7 @@ export class CartService {
 
   // Clean up expired carts
   async cleanupExpiredCarts(): Promise<number> {
-    const result = await prisma.cart.deleteMany({
+    const result = await queryMany({
       where: {
         expiresAt: {
           lt: new Date(),
@@ -834,7 +835,7 @@ export class CartService {
 
   // Private helper methods
   private async getCartWithDetails(cartId: string): Promise<CartWithDetails> {
-    const cart = await prisma.cart.findUnique({
+    const cart = await query({
       where: { id: cartId },
       include: {
         items: {
@@ -862,10 +863,10 @@ export class CartService {
     }
 
     // Calculate totals
-    const totals = this.calculateCartTotals(cart as any)
+    const totals = this.calculateCartTotals(cart as unknown)
 
     // Transform items with additional details
-    const itemsWithDetails: CartItemWithDetails[] = cart.items.map((item: any) => ({
+    const itemsWithDetails: CartItemWithDetails[] = cart.items.map((item: unknown) => ({
       id: item.id,
       cartId: item.cartId,
       productId: item.productId,
@@ -879,7 +880,7 @@ export class CartService {
         slug: item.product.slug,
         sku: item.product.sku,
         price: Number(item.product.price),
-        images: item.product.images.map((img: any) => ({
+        images: item.product.images.map((img: unknown) => ({
           id: img.id,
           url: img.url,
           alt: img.alt || undefined,
@@ -894,10 +895,10 @@ export class CartService {
         name: item.variant.name,
         sku: item.variant.sku,
         price: Number(item.variant.price),
-        attributes: item.variant.attributes as Record<string, any>,
+        attributes: item.variant.attributes as Record<string, unknown>,
         quantity: item.variant.quantity,
       } : undefined,
-      options: (item as any).options as Record<string, any> | undefined,
+      options: (item as unknown).options as Record<string, unknown> | undefined,
       isAvailable: item.product.status === 'PUBLISHED',
       stockStatus: this.getStockStatus(item),
       createdAt: item.createdAt,
@@ -931,7 +932,7 @@ export class CartService {
   }
 
   private calculateCartTotals(cart: CartWithRelations): CartTotals {
-    const subtotal = cart.items.reduce((sum: number, item: any) => {
+    const subtotal = cart.items.reduce((sum: number, item: unknown) => {
       return sum + (Number(item.price) * item.quantity)
     }, 0)
 
@@ -957,12 +958,12 @@ export class CartService {
       shippingCost: Math.round(shippingCost * 100) / 100,
       discountAmount: Math.round(discountAmount * 100) / 100,
       total: Math.round(total * 100) / 100,
-      itemCount: cart.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
+      itemCount: cart.items.reduce((sum: number, item: unknown) => sum + item.quantity, 0),
       currency: cart.currency,
     }
   }
 
-  private calculateCouponDiscount(coupon: any, subtotal: number): number {
+  private calculateCouponDiscount(coupon: unknown, subtotal: number): number {
     switch (coupon.type) {
     case 'PERCENTAGE':
       return subtotal * (Number(coupon.value) / 100)
@@ -975,7 +976,7 @@ export class CartService {
     }
   }
 
-  private getStockStatus(item: any): 'in_stock' | 'low_stock' | 'out_of_stock' {
+  private getStockStatus(item: unknown): 'in_stock' | 'low_stock' | 'out_of_stock' {
     if (!item.product.trackQuantity) {
       return 'in_stock'
     }

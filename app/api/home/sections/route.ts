@@ -1,49 +1,18 @@
+// Redirect to unified UI sections API for consistency
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 
+// GET: 홈페이지 섹션 데이터 가져오기 (리다이렉트)
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const lang = searchParams.get('lang') || 'ko';
-
-    console.log('Loading sections for language:', lang);
-
-    // 데이터베이스에서 UI 섹션 가져오기
-    const dbSections = await prisma.uISection.findMany({
-      where: { 
-        isActive: true,
-        type: { in: ['hero', 'category', 'quicklinks', 'promo'] }
-      },
-      orderBy: { order: 'asc' }
-    });
-
-    console.log('Found sections:', dbSections.length);
-
-    // 섹션 데이터를 클라이언트 형식으로 변환
-    const sections = dbSections.map(section => ({
-      id: section.id,
-      type: section.type,
-      key: section.key,
-      title: section.title,
-      data: section.data,
-      order: section.order
-    }));
-
-    return NextResponse.json({
-      success: true,
-      sections,
-      language: lang
-    });
-
-  } catch (error) {
-    console.error('Failed to load sections:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to load sections',
-        sections: []
-      },
-      { status: 500 }
-    );
-  }
+  // URL의 query parameters 유지하며 리다이렉트
+  const { searchParams } = new URL(request.url);
+  const queryString = searchParams.toString();
+  const redirectUrl = queryString ? 
+    `/api/ui-sections?${queryString}` : 
+    '/api/ui-sections';
+  
+  // 308 Permanent Redirect로 하위 호환성 유지
+  return NextResponse.redirect(
+    new URL(redirectUrl, request.url),
+    308
+  );
 }

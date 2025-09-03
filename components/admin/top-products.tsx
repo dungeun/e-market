@@ -26,7 +26,7 @@ export function TopProducts() {
         setProducts(data.products || [])
       }
     } catch (error) {
-      console.error('Error fetching top products:', error)
+
     } finally {
       setLoading(false)
     }

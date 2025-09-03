@@ -13,7 +13,7 @@ interface SpecialOffersProps {
     showDiscountPercentage?: boolean
     highlightColor?: string
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function SpecialOffers({ config, products }: SpecialOffersProps) {

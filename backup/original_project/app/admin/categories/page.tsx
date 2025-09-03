@@ -120,7 +120,7 @@ export default function CategoriesPage() {
     )
   }
 
-  const handleAction = (action: string, category: any) => {
+  const handleAction = (action: string, category: unknown) => {
     switch(action) {
       case 'edit':
         toast.info(`${category.name} 카테고리 수정`)

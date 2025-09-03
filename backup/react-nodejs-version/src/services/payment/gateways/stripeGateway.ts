@@ -82,13 +82,13 @@ export class StripeGateway extends PaymentGateway {
         },
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe initiate payment error:', error)
       throw new AppError(error.message || 'Failed to initiate payment', 500)
     }
   }
 
-  async confirmPayment(paymentId: string, _data: any): Promise<GatewayResponse> {
+  async confirmPayment(paymentId: string, _data: unknown): Promise<GatewayResponse> {
     try {
       const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentId)
 
@@ -96,7 +96,7 @@ export class StripeGateway extends PaymentGateway {
         return {
           success: true,
           transactionId: paymentIntent.id,
-          approvalNumber: (paymentIntent as any).charges?.data[0]?.id,
+          approvalNumber: (paymentIntent as unknown).charges?.data[0]?.id,
           rawResponse: paymentIntent,
         }
       } else {
@@ -107,7 +107,7 @@ export class StripeGateway extends PaymentGateway {
           rawResponse: paymentIntent,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe confirm payment error:', error)
       
       return {
@@ -129,7 +129,7 @@ export class StripeGateway extends PaymentGateway {
         transactionId: canceledIntent.id,
         rawResponse: canceledIntent,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe cancel payment error:', error)
       
       return {
@@ -155,7 +155,7 @@ export class StripeGateway extends PaymentGateway {
         approvalNumber: refund.charge as string,
         rawResponse: refund,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe refund payment error:', error)
       
       return {
@@ -173,10 +173,10 @@ export class StripeGateway extends PaymentGateway {
       return {
         success: true,
         transactionId: paymentIntent.id,
-        approvalNumber: (paymentIntent as any).charges?.data[0]?.id,
+        approvalNumber: (paymentIntent as unknown).charges?.data[0]?.id,
         rawResponse: paymentIntent,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe get payment status error:', error)
       
       return {
@@ -187,7 +187,7 @@ export class StripeGateway extends PaymentGateway {
     }
   }
 
-  verifyWebhookSignature(payload: any, signature: string): boolean {
+  verifyWebhookSignature(payload: unknown, signature: string): boolean {
     try {
       this.stripe.webhooks.constructEvent(
         JSON.stringify(payload),
@@ -207,7 +207,7 @@ export class StripeGateway extends PaymentGateway {
         expand: ['charges', 'customer'],
       })
 
-      const charge = (paymentIntent as any).charges?.data[0]
+      const charge = (paymentIntent as unknown).charges?.data[0]
       if (!charge) {
         throw new AppError('No charge found for payment', 400)
       }
@@ -236,7 +236,7 @@ export class StripeGateway extends PaymentGateway {
           approvalNumber: charge.id,
         },
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Stripe generate receipt error:', error)
       throw new AppError('Failed to generate receipt', 500)
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 
 const ProductUpdateSchema = z.object({
@@ -20,7 +20,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id: params.id },
       include: {
         images: true,
@@ -48,7 +48,7 @@ export async function GET(
     
     return NextResponse.json(product)
   } catch (error) {
-    console.error('Error fetching product:', error)
+
     return NextResponse.json(
       { error: 'Failed to fetch product' },
       { status: 500 }
@@ -64,7 +64,7 @@ export async function PUT(
     const body = await request.json()
     const validatedData = ProductUpdateSchema.parse(body)
     
-    const product = await prisma.product.update({
+    const product = await query({
       where: { id: params.id },
       data: validatedData,
       include: {
@@ -81,8 +81,7 @@ export async function PUT(
         { status: 400 }
       )
     }
-    
-    console.error('Error updating product:', error)
+
     return NextResponse.json(
       { error: 'Failed to update product' },
       { status: 500 }
@@ -95,13 +94,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.product.delete({
+    await query({
       where: { id: params.id },
     })
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting product:', error)
+
     return NextResponse.json(
       { error: 'Failed to delete product' },
       { status: 500 }

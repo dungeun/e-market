@@ -162,7 +162,7 @@ export class EcountApiService {
         data: result.data || result
       }
     } catch (error) {
-      console.error('Ecount API Error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -322,7 +322,7 @@ export class EcountApiService {
     quantity: number
     unitPrice?: number
     memo?: string
-  }): Promise<EcountApiResponse<any>> {
+  }): Promise<EcountApiResponse<unknown>> {
     return this.makeRequest('/api/inventory/in', 'POST', {
       item_code: data.itemCode,
       warehouse_code: data.warehouseCode,
@@ -340,7 +340,7 @@ export class EcountApiService {
     warehouseCode?: string
     quantity: number
     memo?: string
-  }): Promise<EcountApiResponse<any>> {
+  }): Promise<EcountApiResponse<unknown>> {
     return this.makeRequest('/api/inventory/out', 'POST', {
       item_code: data.itemCode,
       warehouse_code: data.warehouseCode,
@@ -399,7 +399,7 @@ export class EcountApiService {
     }>
     totalAmount: number
     orderDate: Date
-  }): Promise<EcountApiResponse<any>> {
+  }): Promise<EcountApiResponse<unknown>> {
     try {
       // 1. 고객 등록/확인
       let customerCode = `CUST_${orderData.orderNumber}`
@@ -452,7 +452,7 @@ export class EcountApiService {
 
       return salesOrderResult
     } catch (error) {
-      console.error('Ecount sync error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -470,7 +470,7 @@ export class EcountApiService {
   /**
    * API 연결 테스트
    */
-  async testConnection(): Promise<EcountApiResponse<any>> {
+  async testConnection(): Promise<EcountApiResponse<unknown>> {
     try {
       const result = await this.getAccounts()
       return {

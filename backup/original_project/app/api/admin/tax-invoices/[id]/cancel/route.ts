@@ -1,7 +1,5 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // POST - 세금계산서 취소
 export async function POST(
@@ -14,7 +12,7 @@ export async function POST(
     const { reason } = body
 
     // 세금계산서 조회
-    const invoice = await prisma.taxInvoice.findUnique({
+    const invoice = await query({
       where: { id: invoiceId },
       include: { items: true }
     })
@@ -38,7 +36,7 @@ export async function POST(
     
     if (popbillResult.success) {
       // 취소 성공 시 DB 업데이트
-      const updatedInvoice = await prisma.taxInvoice.update({
+      const updatedInvoice = await query({
         where: { id: invoiceId },
         data: {
           status: 'CANCELLED',
@@ -59,7 +57,7 @@ export async function POST(
       )
     }
   } catch (error) {
-    console.error('Tax invoice cancel error:', error)
+
     return NextResponse.json(
       { error: '세금계산서 취소 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -68,7 +66,7 @@ export async function POST(
 }
 
 // Popbill API 취소 호출 함수
-async function cancelFromPopbill(invoice: any, reason: string) {
+async function cancelFromPopbill(invoice: unknown, reason: string) {
   try {
     // TODO: 실제 Popbill API 취소 호출
     // const result = await popbillAPI.delete(
@@ -84,7 +82,7 @@ async function cancelFromPopbill(invoice: any, reason: string) {
       message: '취소 성공'
     }
   } catch (error) {
-    console.error('Popbill Cancel API Error:', error)
+
     return {
       success: false,
       message: '국세청 취소 실패'

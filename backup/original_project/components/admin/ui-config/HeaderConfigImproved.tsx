@@ -20,14 +20,14 @@ export function HeaderConfigImproved() {
     })
   );
 
-  const handleHeaderDragEnd = (event: any) => {
+  const handleHeaderDragEnd = (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = config.header.menus.findIndex((item: any) => item.id === active.id);
-      const newIndex = config.header.menus.findIndex((item: any) => item.id === over.id);
+      const oldIndex = config.header.menus.findIndex((item: unknown) => item.id === active.id);
+      const newIndex = config.header.menus.findIndex((item: unknown) => item.id === over.id);
       
-      const newMenus = arrayMove(config.header.menus, oldIndex, newIndex).map((item: any, index: number) => ({
+      const newMenus = arrayMove(config.header.menus, oldIndex, newIndex).map((item: unknown, index: number) => ({
         ...item,
         order: index + 1,
       }));
@@ -37,7 +37,7 @@ export function HeaderConfigImproved() {
   };
 
   const handleMenuUpdate = (id: string, updates: Partial<MenuItem>) => {
-    const newMenus = config.header.menus.map((item: any) =>
+    const newMenus = config.header.menus.map((item: unknown) =>
       item.id === id ? { ...item, ...updates } : item
     );
     updateHeaderMenus(newMenus);
@@ -46,8 +46,8 @@ export function HeaderConfigImproved() {
   const generateMenuKey = () => {
     // 기존 메뉴 키 중 header.menu.custom_XX 형식의 최대 번호 찾기
     const customMenus = config.header.menus
-      .filter((menu: any) => menu.label.startsWith('header.menu.custom_'))
-      .map((menu: any) => {
+      .filter((menu: unknown) => menu.label.startsWith('header.menu.custom_'))
+      .map((menu: unknown) => {
         const match = menu.label.match(/header\.menu\.custom_(\d+)/);
         return match ? parseInt(match[1]) : 0;
       });
@@ -113,7 +113,7 @@ export function HeaderConfigImproved() {
       alert(`메뉴가 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('메뉴 추가 실패:', error);
+
       alert('메뉴 추가 중 오류가 발생했습니다.');
     }
   };
@@ -142,7 +142,7 @@ export function HeaderConfigImproved() {
 
       updateHeaderMenus(config.header.menus.filter((item) => item.id !== id));
     } catch (error) {
-      console.error('메뉴 삭제 실패:', error);
+
       alert('메뉴 삭제 중 오류가 발생했습니다.');
     }
   };

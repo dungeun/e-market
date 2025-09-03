@@ -1,11 +1,10 @@
+import type { User, RequestContext } from '@/lib/types/common';
 /**
  * 상품 진열 템플릿 관리 서비스
  * 한국형 커머스 스타일의 다양한 진열 방식 지원
  */
 
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
 export type DisplayTemplateType = 
   | 'GRID'           // 그리드형
@@ -135,14 +134,14 @@ export class DisplayTemplateService {
     schedule?: DisplaySchedule
     targeting?: DisplayTargeting
   }): Promise<DisplayTemplate> {
-    const template = await prisma.displayTemplate.create({
+    const template = await query({
       data: {
         name: data.name,
         type: data.type,
         position: data.position,
-        config: data.config as any,
-        schedule: (data.schedule || {}) as any,
-        targeting: (data.targeting || {}) as any,
+        config: data.config as unknown,
+        schedule: (data.schedule || {}) as unknown,
+        targeting: (data.targeting || {}) as unknown,
         isActive: true,
         priority: 0
       }
@@ -164,7 +163,7 @@ export class DisplayTemplateService {
   ): Promise<DisplayTemplate[]> {
     const now = new Date()
     
-    const templates = await prisma.displayTemplate.findMany({
+    const templates = await query({
       where: {
         position,
         isActive: true,
@@ -183,7 +182,7 @@ export class DisplayTemplateService {
                   { 
                     schedule: {
                       path: ['endDate'],
-                      equals: 'null' as any
+                      equals: 'null' as unknown
                     }
                   },
                   {
@@ -212,7 +211,7 @@ export class DisplayTemplateService {
    */
   async arrangeProducts(
     templateId: string,
-    products: any[],
+    products: unknown[],
     options?: {
       sortBy?: 'popularity' | 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'discount'
       limit?: number
@@ -220,7 +219,7 @@ export class DisplayTemplateService {
       userId?: string
     }
   ): Promise<any[]> {
-    const template = await prisma.displayTemplate.findUnique({
+    const template = await query({
       where: { id: templateId }
     })
 
@@ -265,7 +264,7 @@ export class DisplayTemplateService {
     rules: ProductSelectionRule[]
     templateType: DisplayTemplateType
     config?: DisplayConfig
-  }): Promise<any> {
+  }): Promise<unknown> {
     // 상품 선택 규칙에 따라 상품 조회
     const products = await this.selectProductsByRules(data.rules)
     
@@ -281,7 +280,7 @@ export class DisplayTemplateService {
     const arrangedProducts = await this.arrangeProducts(template.id, products)
     
     // 섹션 생성
-    const section = await prisma.displaySection.create({
+    const section = await query({
       data: {
         title: data.title,
         templateId: template.id,
@@ -291,7 +290,7 @@ export class DisplayTemplateService {
         metadata: {
           rules: data.rules,
           autoUpdate: true
-        } as any
+        } as unknown
       }
     })
     
@@ -315,8 +314,8 @@ export class DisplayTemplateService {
       weight: number  // 트래픽 비중
     }>
     duration: number  // 테스트 기간 (일)
-  }): Promise<any> {
-    const test = await prisma.displayABTest.create({
+  }): Promise<unknown> {
+    const test = await query({
       data: {
         name: data.name,
         position: data.position,
@@ -331,7 +330,7 @@ export class DisplayTemplateService {
                 name: `${data.name}_${v.name}`,
                 type: v.templateType,
                 position: data.position,
-                config: v.config as any,
+                config: v.config as unknown,
                 isActive: true,
                 priority: 100  // A/B 테스트 우선순위
               }
@@ -341,7 +340,7 @@ export class DisplayTemplateService {
               impressions: 0,
               clicks: 0,
               conversions: 0
-            } as any
+            } as unknown
           }))
         }
       },
@@ -365,7 +364,7 @@ export class DisplayTemplateService {
     period: { start: Date; end: Date }
   ): Promise<DisplayPerformance> {
     // 노출 수
-    const impressions = await prisma.displayEvent.count({
+    const impressions = await query({
       where: {
         templateId,
         type: 'IMPRESSION',
@@ -377,7 +376,7 @@ export class DisplayTemplateService {
     })
     
     // 클릭 수
-    const clicks = await prisma.displayEvent.count({
+    const clicks = await query({
       where: {
         templateId,
         type: 'CLICK',
@@ -389,7 +388,7 @@ export class DisplayTemplateService {
     })
     
     // 전환 수
-    const conversions = await prisma.displayEvent.count({
+    const conversions = await query({
       where: {
         templateId,
         type: 'CONVERSION',
@@ -427,7 +426,7 @@ export class DisplayTemplateService {
 
   // === Private Helper Methods ===
 
-  private mapToDisplayTemplate(data: any): DisplayTemplate {
+  private mapToDisplayTemplate(data: unknown): DisplayTemplate {
     return {
       id: data.id,
       name: data.name,
@@ -443,7 +442,7 @@ export class DisplayTemplateService {
   }
 
   private async filterByTargeting(
-    templates: any[],
+    templates: unknown[],
     context?: any
   ): Promise<any[]> {
     if (!context) return templates
@@ -468,7 +467,7 @@ export class DisplayTemplateService {
     })
   }
 
-  private sortProducts(products: any[], sortBy: string): any[] {
+  private sortProducts(products: unknown[], sortBy: string): unknown[] {
     switch (sortBy) {
       case 'newest':
         return products.sort((a, b) => b.createdAt - a.createdAt)
@@ -486,7 +485,7 @@ export class DisplayTemplateService {
     }
   }
 
-  private async personalizeProducts(products: any[], userId: string): Promise<any[]> {
+  private async personalizeProducts(products: unknown[], userId: string): Promise<any[]> {
     // 사용자 선호도 기반 개인화
     const userPreferences = await this.getUserPreferences(userId)
     
@@ -498,10 +497,10 @@ export class DisplayTemplateService {
   }
 
   private applyTemplateArrangement(
-    products: any[],
+    products: unknown[],
     type: DisplayTemplateType,
     config: DisplayConfig
-  ): any[] {
+  ): unknown[] {
     switch (type) {
       case 'SPOTLIGHT':
         // 첫 번째 상품을 강조
@@ -527,18 +526,18 @@ export class DisplayTemplateService {
   }
 
   private async trackImpression(templateId: string, productCount: number): Promise<void> {
-    await prisma.displayEvent.create({
+    await query({
       data: {
         templateId,
         type: 'IMPRESSION',
-        metadata: { productCount } as any
+        metadata: { productCount } as unknown
       }
     })
   }
 
   private async selectProductsByRules(rules: ProductSelectionRule[]): Promise<any[]> {
     // 규칙에 따른 상품 선택 로직
-    const query: any = { where: { AND: [] } }
+    const query: unknown = { where: { AND: [] } }
     
     for (const rule of rules) {
       switch (rule.type) {
@@ -569,7 +568,7 @@ export class DisplayTemplateService {
       }
     }
     
-    return await prisma.product.findMany(query)
+    return await query(query)
   }
 
   private getDefaultConfig(type: DisplayTemplateType): DisplayConfig {
@@ -713,9 +712,9 @@ export class DisplayTemplateService {
     return configs[type]
   }
 
-  private async getUserPreferences(userId: string): Promise<any> {
+  private async getUserPreferences(userId: string): Promise<unknown> {
     // 사용자 선호도 조회
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       where: { userId },
       include: {
         items: {
@@ -768,7 +767,7 @@ export class DisplayTemplateService {
     return preferences
   }
 
-  private calculatePersonalizationScore(product: any, preferences: any): number {
+  private calculatePersonalizationScore(product: unknown, preferences: unknown): number {
     let score = 0
     
     // 카테고리 매칭

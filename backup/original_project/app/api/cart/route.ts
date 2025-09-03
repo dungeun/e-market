@@ -1,23 +1,25 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const sessionId = request.cookies.get('sessionId')?.value
 
-    let cart: any = null
+    let cart: unknown = null
 
     if (session?.user?.email) {
       // 로그인 유저의 장바구니 - 먼저 이메일로 유저 찾기
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { email: session.user.email }
       })
       
       if (user) {
-        cart = await prisma.cart.findUnique({
+        cart = await query({
           where: { userId: user.id },
         include: {
           items: {
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
       }
     } else if (sessionId) {
       // 비로그인 유저의 장바구니
-      cart = await prisma.cart.findUnique({
+      cart = await query({
         where: { sessionId },
         include: {
           items: {
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(cart)
   } catch (error) {
-    console.error('Error fetching cart:', error)
+
     return NextResponse.json(
       { error: '장바구니를 불러오는 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -76,21 +78,21 @@ export async function POST(request: NextRequest) {
     }
 
     // 장바구니 찾기 또는 생성
-    let cart: any = null
+    let cart: unknown = null
     if (session?.user?.email) {
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { email: session.user.email }
       })
       
       if (user) {
-        cart = await prisma.cart.upsert({
+        cart = await query({
           where: { userId: user.id },
           update: {},
           create: { userId: user.id },
         })
       }
     } else if (sessionId) {
-      cart = await prisma.cart.upsert({
+      cart = await query({
         where: { sessionId },
         update: {},
         create: { sessionId },
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 상품 확인
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id: productId },
     })
 
@@ -125,7 +127,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 장바구니 아이템 추가 또는 업데이트
-    const existingItem = await prisma.cartItem.findUnique({
+    const existingItem = await query({
       where: {
         cartId_productId: {
           cartId: cart.id,
@@ -136,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     let cartItem
     if (existingItem) {
-      cartItem = await prisma.cartItem.update({
+      cartItem = await query({
         where: { id: existingItem.id },
         data: {
           quantity: existingItem.quantity + quantity,
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
         },
       })
     } else {
-      cartItem = await prisma.cartItem.create({
+      cartItem = await query({
         data: {
           cartId: cart.id,
           productId,
@@ -167,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error('Error adding to cart:', error)
+
     return NextResponse.json(
       { error: '장바구니에 추가하는 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -181,20 +183,20 @@ export async function DELETE(request: NextRequest) {
     const sessionId = request.cookies.get('sessionId')?.value
     const { productId } = await request.json()
 
-    let cart: any = null
+    let cart: unknown = null
     if (session?.user?.email) {
       // 로그인 유저의 장바구니 - 먼저 이메일로 유저 찾기
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { email: session.user.email }
       })
       
       if (user) {
-        cart = await prisma.cart.findUnique({
+        cart = await query({
           where: { userId: user.id },
         })
       }
     } else if (sessionId) {
-      cart = await prisma.cart.findUnique({
+      cart = await query({
         where: { sessionId },
       })
     }
@@ -206,7 +208,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await prisma.cartItem.delete({
+    await query({
       where: {
         cartId_productId: {
           cartId: cart.id,
@@ -217,7 +219,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error removing from cart:', error)
+
     return NextResponse.json(
       { error: '장바구니에서 제거하는 중 오류가 발생했습니다.' },
       { status: 500 }

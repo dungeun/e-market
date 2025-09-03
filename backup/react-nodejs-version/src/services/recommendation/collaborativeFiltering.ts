@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { 
   RecommendationResult, 
   UserBehaviorData, 
@@ -56,7 +56,7 @@ export class CollaborativeFilteringService {
       
       return topRecommendations;
     } catch (error) {
-      console.error('User-based CF error:', error);
+
       return [];
     }
   }
@@ -74,7 +74,7 @@ export class CollaborativeFilteringService {
 
     try {
       // 1. 유사한 상품 찾기
-      const similarProducts = await this.prisma.productSimilarity.findMany({
+      const similarProducts = await this.query({
         where: {
           productId,
           algorithm: 'collaborative',
@@ -98,7 +98,7 @@ export class CollaborativeFilteringService {
         .map(sp => ({
           productId: sp.similarProductId,
           score: sp.similarity,
-          algorithm: 'COLLABORATIVE' as any,
+          algorithm: 'COLLABORATIVE' as unknown,
           reason: `Similar to ${productId}`
         }));
 
@@ -107,7 +107,7 @@ export class CollaborativeFilteringService {
       
       return recommendations;
     } catch (error) {
-      console.error('Item-based CF error:', error);
+
       return [];
     }
   }
@@ -116,7 +116,7 @@ export class CollaborativeFilteringService {
    * 사용자 행동 데이터 가져오기
    */
   private async getUserBehaviors(userId: string): Promise<UserBehaviorData[]> {
-    const behaviors = await this.prisma.userBehavior.findMany({
+    const behaviors = await this.query({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 1000 // 최근 1000개 행동만
@@ -162,7 +162,7 @@ export class CollaborativeFilteringService {
     targetScores: Map<string, number>
   ): Promise<Array<{ userId: string; similarity: number }>> {
     // 캐시된 유사도 확인
-    const cachedSimilarities = await this.prisma.userSimilarity.findMany({
+    const cachedSimilarities = await this.query({
       where: {
         userId: targetUserId,
         algorithm: 'collaborative'
@@ -183,7 +183,7 @@ export class CollaborativeFilteringService {
     
     // 타겟 사용자와 같은 상품을 본 다른 사용자들 찾기
     const targetProductIds = Array.from(targetScores.keys());
-    const potentialNeighbors = await this.prisma.userBehavior.findMany({
+    const potentialNeighbors = await this.query({
       where: {
         productId: { in: targetProductIds },
         userId: { not: targetUserId }
@@ -206,7 +206,7 @@ export class CollaborativeFilteringService {
         });
 
         // 유사도 캐시 저장
-        await this.prisma.userSimilarity.upsert({
+        await this.query({
           where: {
             userId_similarUserId_algorithm: {
               userId: targetUserId,
@@ -300,7 +300,7 @@ export class CollaborativeFilteringService {
       recommendations.push({
         productId,
         score,
-        algorithm: 'COLLABORATIVE' as any,
+        algorithm: 'COLLABORATIVE' as unknown,
         reason: productReasons.get(productId)?.join(', ')
       });
     });
@@ -312,10 +312,9 @@ export class CollaborativeFilteringService {
    * 상품 간 유사도 계산 및 저장
    */
   async calculateItemSimilarities(minSupport: number = 5): Promise<void> {
-    console.log('Calculating item similarities...');
-    
+
     // 모든 상품 쌍에 대해 유사도 계산
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where: { status: 'PUBLISHED' },
       select: { id: true }
     });
@@ -326,13 +325,13 @@ export class CollaborativeFilteringService {
         const productB = products[j].id;
 
         // 두 상품을 모두 본 사용자 찾기
-        const usersA = await this.prisma.userBehavior.findMany({
+        const usersA = await this.query({
           where: { productId: productA },
           select: { userId: true, action: true },
           distinct: ['userId']
         });
 
-        const usersB = await this.prisma.userBehavior.findMany({
+        const usersB = await this.query({
           where: { productId: productB },
           select: { userId: true, action: true },
           distinct: ['userId']
@@ -356,7 +355,6 @@ export class CollaborativeFilteringService {
       }
     }
 
-    console.log('Item similarities calculation completed');
   }
 
   /**
@@ -367,7 +365,7 @@ export class CollaborativeFilteringService {
     similarProductId: string,
     similarity: number
   ): Promise<void> {
-    await this.prisma.productSimilarity.upsert({
+    await this.query({
       where: {
         productId_similarProductId_algorithm: {
           productId,

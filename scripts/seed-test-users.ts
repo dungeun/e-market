@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Creating test users...');
@@ -10,7 +8,7 @@ async function main() {
   const hashedPassword = await bcrypt.hash('test123!', 12);
 
   // 관리자 계정
-  const adminUser = await prisma.user.upsert({
+  const adminUser = await query({
     where: {
       email: 'admin@shopmall.com',
     },
@@ -39,7 +37,7 @@ async function main() {
   });
 
   // 슈퍼 관리자 계정
-  const superAdminUser = await prisma.user.upsert({
+  const superAdminUser = await query({
     where: {
       email: 'superadmin@shopmall.com',
     },
@@ -68,7 +66,7 @@ async function main() {
   });
 
   // 일반 사용자 계정 1
-  const user1 = await prisma.user.upsert({
+  const user1 = await query({
     where: {
       email: 'user1@test.com',
     },
@@ -97,7 +95,7 @@ async function main() {
   });
 
   // 일반 사용자 계정 2
-  const user2 = await prisma.user.upsert({
+  const user2 = await query({
     where: {
       email: 'user2@test.com',
     },
@@ -126,7 +124,7 @@ async function main() {
   });
 
   // 장바구니 생성 (사용자들을 위해)
-  await prisma.cart.upsert({
+  await query({
     where: {
       userId: user1.id,
     },
@@ -136,7 +134,7 @@ async function main() {
     },
   });
 
-  await prisma.cart.upsert({
+  await query({
     where: {
       userId: user2.id,
     },

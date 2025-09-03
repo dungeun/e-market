@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { tossPayments } from '@/lib/payments/toss'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 
 const ConfirmTossPaymentSchema = z.object({
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Update order status in database
-    await prisma.order.update({
+    await query({
       where: { orderNumber: validatedData.orderId },
       data: {
         status: 'PAID',
@@ -42,11 +42,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('Error confirming Toss payment:', error)
-    
     // If payment confirmation fails, update order status
     try {
-      await prisma.order.update({
+      await query({
         where: { orderNumber: body.orderId },
         data: {
           status: 'PAYMENT_FAILED',
@@ -54,7 +52,7 @@ export async function POST(request: NextRequest) {
         },
       })
     } catch (dbError) {
-      console.error('Error updating order status after payment failure:', dbError)
+
     }
 
     return NextResponse.json(

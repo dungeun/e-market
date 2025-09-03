@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { orderService } from '../../services/orderService'
 import { logger } from '../../utils/logger'
 import { OrderEvent } from '../../types/order'
@@ -106,7 +107,7 @@ export class OrderEventHandler {
   }
 
   // Handle order shipped
-  async handleOrderShipped(orderId: string, trackingInfo: any) {
+  async handleOrderShipped(orderId: string, trackingInfo: unknown) {
     try {
       const order = await orderService.getOrderById(orderId)
       
@@ -210,11 +211,11 @@ export class OrderEventHandler {
   }
 
   // Broadcast to admin users
-  private async broadcastToAdmins(event: string, data: any) {
+  private async broadcastToAdmins(event: string, data: unknown) {
     try {
       // Get all admin users
       const { prisma } = await import('../../utils/database')
-      const adminUsers = await prisma.user.findMany({
+      const adminUsers = await query({
         where: {
           role: {
             in: ['ADMIN', 'SUPER_ADMIN'],

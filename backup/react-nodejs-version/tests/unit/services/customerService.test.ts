@@ -89,8 +89,8 @@ describe('CustomerService', () => {
         },
       }
 
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
-      ;(prisma.setting.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(mockUser)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       const profile = await CustomerService.getProfile(mockUserId)
 
@@ -114,7 +114,7 @@ describe('CustomerService', () => {
     })
 
     test('should throw error if user not found', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       await expect(CustomerService.getProfile(mockUserId))
         .rejects.toThrow(new AppError('User not found', 404))
@@ -135,11 +135,11 @@ describe('CustomerService', () => {
         ...updateData,
       }
 
-      ;(prisma.user.update as jest.Mock).mockResolvedValue(updatedUser)
+      ;(query as jest.Mock).mockResolvedValue(updatedUser)
 
       const result = await CustomerService.updateProfile(mockUserId, updateData)
 
-      expect(prisma.user.update).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: { id: mockUserId },
         data: updateData,
         select: expect.any(Object),
@@ -163,11 +163,11 @@ describe('CustomerService', () => {
           { id: 'addr2', isDefault: false, createdAt: new Date() },
         ]
 
-        ;(prisma.address.findMany as jest.Mock).mockResolvedValue(mockAddresses)
+        ;(query as jest.Mock).mockResolvedValue(mockAddresses)
 
         const addresses = await CustomerService.getAddresses(mockUserId)
 
-        expect(prisma.address.findMany).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalledWith({
           where: { userId: mockUserId },
           orderBy: [
             { isDefault: 'desc' },
@@ -194,16 +194,16 @@ describe('CustomerService', () => {
 
         const createdAddress = { id: mockAddressId, ...addressData }
 
-        ;(prisma.address.updateMany as jest.Mock).mockResolvedValue({ count: 1 })
-        ;(prisma.address.create as jest.Mock).mockResolvedValue(createdAddress)
+        ;(queryMany as jest.Mock).mockResolvedValue({ count: 1 })
+        ;(query as jest.Mock).mockResolvedValue(createdAddress)
 
         const result = await CustomerService.addAddress(mockUserId, addressData)
 
-        expect(prisma.address.updateMany).toHaveBeenCalledWith({
+        expect(queryMany).toHaveBeenCalledWith({
           where: { userId: mockUserId, isDefault: true },
           data: { isDefault: false },
         })
-        expect(prisma.address.create).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalledWith({
           data: { ...addressData, userId: mockUserId },
         })
         expect(result).toEqual(createdAddress)
@@ -212,21 +212,21 @@ describe('CustomerService', () => {
 
     describe('deleteAddress', () => {
       test('should delete address if not used in pending orders', async () => {
-        ;(prisma.address.findFirst as jest.Mock).mockResolvedValue({ id: mockAddressId })
-        ;(prisma.order.count as jest.Mock).mockResolvedValue(0)
-        ;(prisma.address.delete as jest.Mock).mockResolvedValue({ id: mockAddressId })
+        ;(query as jest.Mock).mockResolvedValue({ id: mockAddressId })
+        ;(query as jest.Mock).mockResolvedValue(0)
+        ;(query as jest.Mock).mockResolvedValue({ id: mockAddressId })
 
         await CustomerService.deleteAddress(mockUserId, mockAddressId)
 
-        expect(prisma.order.count).toHaveBeenCalled()
-        expect(prisma.address.delete).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalled()
+        expect(query).toHaveBeenCalledWith({
           where: { id: mockAddressId },
         })
       })
 
       test('should throw error if address used in pending orders', async () => {
-        ;(prisma.address.findFirst as jest.Mock).mockResolvedValue({ id: mockAddressId })
-        ;(prisma.order.count as jest.Mock).mockResolvedValue(1)
+        ;(query as jest.Mock).mockResolvedValue({ id: mockAddressId })
+        ;(query as jest.Mock).mockResolvedValue(1)
 
         await expect(CustomerService.deleteAddress(mockUserId, mockAddressId))
           .rejects.toThrow(new AppError('Cannot delete address used in pending orders', 400))
@@ -251,13 +251,13 @@ describe('CustomerService', () => {
           product: mockProduct,
         }
 
-        ;(prisma.product.findUnique as jest.Mock).mockResolvedValue(mockProduct)
-        ;(prisma.wishlistItem.findUnique as jest.Mock).mockResolvedValue(null)
-        ;(prisma.wishlistItem.create as jest.Mock).mockResolvedValue(mockWishlistItem)
+        ;(query as jest.Mock).mockResolvedValue(mockProduct)
+        ;(query as jest.Mock).mockResolvedValue(null)
+        ;(query as jest.Mock).mockResolvedValue(mockWishlistItem)
 
         const result = await CustomerService.addToWishlist(mockUserId, mockProductId)
 
-        expect(prisma.wishlistItem.create).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalledWith({
           data: { userId: mockUserId, productId: mockProductId },
           include: expect.any(Object),
         })
@@ -266,8 +266,8 @@ describe('CustomerService', () => {
       })
 
       test('should throw error if product already in wishlist', async () => {
-        ;(prisma.product.findUnique as jest.Mock).mockResolvedValue({ id: mockProductId })
-        ;(prisma.wishlistItem.findUnique as jest.Mock).mockResolvedValue({ id: 'existing' })
+        ;(query as jest.Mock).mockResolvedValue({ id: mockProductId })
+        ;(query as jest.Mock).mockResolvedValue({ id: 'existing' })
 
         await expect(CustomerService.addToWishlist(mockUserId, mockProductId))
           .rejects.toThrow(new AppError('Product already in wishlist', 400))
@@ -281,8 +281,8 @@ describe('CustomerService', () => {
           { id: 'item2', productId: 'prod2', product: { name: 'Product 2' } },
         ]
 
-        ;(prisma.wishlistItem.findMany as jest.Mock).mockResolvedValue(mockItems)
-        ;(prisma.wishlistItem.count as jest.Mock).mockResolvedValue(2)
+        ;(query as jest.Mock).mockResolvedValue(mockItems)
+        ;(query as jest.Mock).mockResolvedValue(2)
 
         const result = await CustomerService.getWishlist(mockUserId, {
           page: 1,
@@ -305,7 +305,7 @@ describe('CustomerService', () => {
 
   describe('Preferences Management', () => {
     test('should return default preferences if none exist', async () => {
-      ;(prisma.setting.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       const preferences = await CustomerService.getPreferences(mockUserId)
 
@@ -326,12 +326,12 @@ describe('CustomerService', () => {
       const updates = { language: 'es', theme: 'dark' }
       const merged = { ...currentPrefs, ...updates }
 
-      ;(prisma.setting.findUnique as jest.Mock).mockResolvedValue({ value: currentPrefs })
-      ;(prisma.setting.upsert as jest.Mock).mockResolvedValue({ value: merged })
+      ;(query as jest.Mock).mockResolvedValue({ value: currentPrefs })
+      ;(query as jest.Mock).mockResolvedValue({ value: merged })
 
       const result = await CustomerService.updatePreferences(mockUserId, updates)
 
-      expect(prisma.setting.upsert).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: { key: `user_preferences_${mockUserId}` },
         update: { value: merged },
         create: {
@@ -395,7 +395,7 @@ describe('CustomerService', () => {
         _count: { sessions: 10 },
       }
 
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
+      ;(query as jest.Mock).mockResolvedValue(mockUser)
 
       const analytics = await CustomerService.getAnalytics(mockUserId)
 
@@ -435,7 +435,7 @@ describe('CustomerService', () => {
           carts: [{ id: 'cart1' }],
         }
 
-        ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUserData)
+        ;(query as jest.Mock).mockResolvedValue(mockUserData)
 
         const exportedData = await CustomerService.exportCustomerData(mockUserId)
 
@@ -448,15 +448,15 @@ describe('CustomerService', () => {
 
     describe('deleteAccount', () => {
       test('should soft delete account and remove sensitive data', async () => {
-        ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({ password: 'hashed' })
-        ;(prisma.user.update as jest.Mock).mockResolvedValue({})
-        ;(prisma.address.deleteMany as jest.Mock).mockResolvedValue({})
-        ;(prisma.paymentMethod.deleteMany as jest.Mock).mockResolvedValue({})
-        ;(prisma.wishlistItem.deleteMany as jest.Mock).mockResolvedValue({})
+        ;(query as jest.Mock).mockResolvedValue({ password: 'hashed' })
+        ;(query as jest.Mock).mockResolvedValue({})
+        ;(queryMany as jest.Mock).mockResolvedValue({})
+        ;(queryMany as jest.Mock).mockResolvedValue({})
+        ;(queryMany as jest.Mock).mockResolvedValue({})
 
         await CustomerService.deleteAccount(mockUserId, 'password123')
 
-        expect(prisma.user.update).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalledWith({
           where: { id: mockUserId },
           data: {
             deletedAt: expect.any(Date),
@@ -467,8 +467,8 @@ describe('CustomerService', () => {
             isActive: false,
           },
         })
-        expect(prisma.address.deleteMany).toHaveBeenCalledWith({ where: { userId: mockUserId } })
-        expect(prisma.paymentMethod.deleteMany).toHaveBeenCalledWith({ where: { userId: mockUserId } })
+        expect(queryMany).toHaveBeenCalledWith({ where: { userId: mockUserId } })
+        expect(queryMany).toHaveBeenCalledWith({ where: { userId: mockUserId } })
       })
     })
   })

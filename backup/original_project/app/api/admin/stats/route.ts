@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 export async function GET() {
   try {
@@ -44,9 +44,9 @@ export async function GET() {
         }
       }),
       // 총 주문
-      prisma.order.count(),
+      query(),
       // 지난달 주문
-      prisma.order.count({
+      query({
         where: {
           createdAt: {
             gte: lastMonth,
@@ -55,9 +55,9 @@ export async function GET() {
         }
       }),
       // 총 상품
-      prisma.product.count(),
+      query(),
       // 지난달 등록 상품
-      prisma.product.count({
+      query({
         where: {
           createdAt: {
             gte: lastMonth,
@@ -66,9 +66,9 @@ export async function GET() {
         }
       }),
       // 총 고객
-      prisma.user.count(),
+      query(),
       // 지난달 가입 고객
-      prisma.user.count({
+      query({
         where: {
           createdAt: {
             gte: lastMonth,
@@ -98,7 +98,7 @@ export async function GET() {
       customersChange: Math.round(customersChange * 10) / 10
     })
   } catch (error) {
-    console.error('Error fetching stats:', error)
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

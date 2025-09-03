@@ -88,7 +88,7 @@ export class CJLogisticsAPI {
    * 실제 API 구현 예시 (참고용)
    */
   /*
-  private async realAPICall(trackingNumber: string): Promise<any> {
+  private async realAPICall(trackingNumber: string): Promise<unknown> {
     const response = await axios.post(
       this.apiUrl,
       {

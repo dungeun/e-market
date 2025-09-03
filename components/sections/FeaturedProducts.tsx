@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -18,8 +20,30 @@ interface FeaturedProductsProps {
   data?: Product[]
 }
 
-export default function FeaturedProducts({ config, products, data }: FeaturedProductsProps) {
-  const items = products || data || []
+const FeaturedProducts = React.memo(function FeaturedProducts({ config, products, data }: FeaturedProductsProps) {
+  // Ensure items is always an array - check for various data structures
+  let items = products || data || []
+  
+  // Handle config structure
+  if (config) {
+    if (Array.isArray(config)) {
+      items = config
+    } else if (config.items && Array.isArray(config.items)) {
+      items = config.items
+    } else if (config.products && Array.isArray(config.products)) {
+      items = config.products
+    } else if (typeof config === 'object' && !Array.isArray(config)) {
+      // If config is an object but not the expected structure, use empty array
+      items = []
+    }
+  }
+  
+  // Final safety check
+  if (!Array.isArray(items)) {
+    console.warn('FeaturedProducts: items is not an array, got:', typeof items, items)
+    items = []
+  }
+  
   const title = config?.title || '추천 상품'
   const subtitle = config?.subtitle || '엄선된 상품을 만나보세요'
   const columns = config?.columns || 4
@@ -80,5 +104,7 @@ export default function FeaturedProducts({ config, products, data }: FeaturedPro
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default FeaturedProducts;

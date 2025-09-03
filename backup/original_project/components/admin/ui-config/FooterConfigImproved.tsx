@@ -79,7 +79,7 @@ export function FooterConfigImproved() {
       alert(`컬럼이 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('컬럼 추가 실패:', error);
+
       alert('컬럼 추가 중 오류가 발생했습니다.');
     }
   };
@@ -136,7 +136,7 @@ export function FooterConfigImproved() {
       alert(`메뉴가 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('메뉴 추가 실패:', error);
+
       alert('메뉴 추가 중 오류가 발생했습니다.');
     }
   };
@@ -172,11 +172,11 @@ export function FooterConfigImproved() {
         }
       }
 
-      const updatedColumns = config.footer.columns.filter((column: any, index: number) => index !== columnIndex);
+      const updatedColumns = config.footer.columns.filter((column: unknown, index: number) => index !== columnIndex);
       updateFooter({ ...config.footer, columns: updatedColumns });
 
     } catch (error) {
-      console.error('컬럼 삭제 실패:', error);
+
       alert('컬럼 삭제 중 오류가 발생했습니다.');
     }
   };
@@ -201,16 +201,16 @@ export function FooterConfigImproved() {
       }
 
       const updatedColumns = [...config.footer.columns];
-      updatedColumns[columnIndex].items = updatedColumns[columnIndex].items.filter((item: any, index: number) => index !== itemIndex);
+      updatedColumns[columnIndex].items = updatedColumns[columnIndex].items.filter((item: unknown, index: number) => index !== itemIndex);
       updateFooter({ ...config.footer, columns: updatedColumns });
 
     } catch (error) {
-      console.error('메뉴 삭제 실패:', error);
+
       alert('메뉴 삭제 중 오류가 발생했습니다.');
     }
   };
 
-  const handleUpdateItem = (columnIndex: number, itemIndex: number, updates: any) => {
+  const handleUpdateItem = (columnIndex: number, itemIndex: number, updates: unknown) => {
     const updatedColumns = [...config.footer.columns];
     updatedColumns[columnIndex].items[itemIndex] = {
       ...updatedColumns[columnIndex].items[itemIndex],
@@ -271,7 +271,7 @@ export function FooterConfigImproved() {
 
         {/* 컬럼 목록 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {config.footer.columns?.map((column: any, columnIndex: number) => (
+          {config.footer.columns?.map((column: unknown, columnIndex: number) => (
             <div key={columnIndex} className="bg-gray-50 rounded-lg p-4">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-semibold">
@@ -345,7 +345,7 @@ export function FooterConfigImproved() {
 
               {/* 아이템 목록 */}
               <div className="space-y-2">
-                {column.items?.map((item: any, itemIndex: number) => (
+                {column.items?.map((item: unknown, itemIndex: number) => (
                   <div key={itemIndex} className="flex items-center space-x-2 bg-white p-2 rounded">
                     <input
                       type="text"

@@ -1,125 +1,52 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
+import { NextRequest, NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-// GET /api/settings - 일반 설정 조회
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // 기본 사이트 설정 조회
-    const settings = await prisma.siteConfig.findMany({
-      where: {
-        OR: [
-          { key: 'general' },
-          { key: 'website' },
-          { key: 'social' },
-          { key: 'features' }
-        ]
-      }
-    });
-
-    // 설정이 없는 경우 기본값 반환
-    if (settings.length === 0) {
-      const defaultSettings = {
-        general: {
-          siteName: 'LinkPick',
-          siteDescription: '인플루언서와 브랜드를 연결하는 플랫폼',
-          adminEmail: 'admin@linkpick.co.kr',
-          language: 'ko',
-          timezone: 'Asia/Seoul'
+    // 공개적으로 접근 가능한 설정만 반환
+    const publicSettings = {
+      website: {
+        logo: '/logo.png',
+        favicon: '/favicon.ico',
+        primaryColor: '#3B82F6',
+        secondaryColor: '#10B981',
+        footerEnabled: true,
+        footerText: '© 2024 E-Market Korea. All rights reserved.',
+        footerLinks: [
+          { title: '이용약관', url: '/terms', newWindow: false },
+          { title: '개인정보처리방침', url: '/privacy', newWindow: false },
+          { title: '고객지원', url: '/support', newWindow: false },
+          { title: '회사소개', url: '/about', newWindow: false }
+        ],
+        socialLinks: {
+          facebook: 'https://facebook.com/emarketkorea',
+          twitter: 'https://twitter.com/emarketkorea',
+          instagram: 'https://instagram.com/emarketkorea',
+          youtube: 'https://youtube.com/emarketkorea',
+          linkedin: 'https://linkedin.com/company/emarketkorea'
         },
-        website: {
-          primaryColor: '#3B82F6',
-          secondaryColor: '#10B981',
-          logo: '/logo.svg',
-          favicon: '/favicon.ico',
-          themeMode: 'light'
-        },
-        social: {
-          facebook: 'https://facebook.com/linkpick',
-          twitter: 'https://twitter.com/linkpick',
-          instagram: 'https://instagram.com/linkpick',
-          youtube: ''
-        },
-        features: {
-          userRegistration: true,
-          emailVerification: true,
-          socialLogin: true,
-          newsletter: true,
-          comments: true,
-          reviews: true
+        seo: {
+          metaTitle: 'E-Market Korea - 해외 노동자를 위한 중고 거래 플랫폼',
+          metaDescription: '한국에서 생활하는 외국인 노동자들을 위한 필수품 중고 거래 플랫폼입니다.',
+          metaKeywords: '중고거래, 외국인노동자, 전자제품, 가전제품, 생활용품, 한국, 거래',
+          ogImage: '/og-image.jpg'
         }
-      };
-
-      return NextResponse.json({
-        success: true,
-        settings: defaultSettings
-      });
-    }
-
-    // 설정 데이터를 파싱하여 반환
-    const parsedSettings = settings.reduce((acc, setting) => {
-      try {
-        acc[setting.key] = JSON.parse(setting.value);
-      } catch (e) {
-        console.warn(`Failed to parse setting ${setting.key}:`, e);
-        acc[setting.key] = setting.value;
-      }
-      return acc;
-    }, {} as Record<string, any>);
-
-    return NextResponse.json({
-      success: true,
-      settings: parsedSettings
-    });
-
-  } catch (error) {
-    console.error('Settings fetch error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch settings',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  }
-}
-
-// POST /api/settings - 설정 업데이트 (관리자만)
-export async function POST(request: Request) {
-  try {
-    const { key, value } = await request.json();
-
-    if (!key || value === undefined) {
-      return NextResponse.json({
-        success: false,
-        error: 'Key and value are required'
-      }, { status: 400 });
-    }
-
-    // 설정 업데이트 또는 생성
-    const updatedSetting = await prisma.siteConfig.upsert({
-      where: { key },
-      update: { 
-        value: typeof value === 'string' ? value : JSON.stringify(value),
-        updatedAt: new Date()
       },
-      create: {
-        key,
-        value: typeof value === 'string' ? value : JSON.stringify(value)
+      general: {
+        siteName: 'E-Market Korea',
+        siteDescription: '해외 노동자를 위한 중고 거래 플랫폼'
       }
-    });
+    }
 
     return NextResponse.json({
-      success: true,
-      setting: updatedSetting
-    });
+      settings: publicSettings
+    })
 
   } catch (error) {
-    console.error('Settings update error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to update settings',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

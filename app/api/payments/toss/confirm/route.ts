@@ -1,8 +1,11 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { tossPayment } from '@/lib/toss-payment'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { kakaoAlimtalk } from '@/lib/kakao-alimtalk'
 
 export async function POST(request: NextRequest) {
@@ -11,7 +14,7 @@ export async function POST(request: NextRequest) {
     const { paymentKey, orderId, amount } = await request.json()
 
     // 주문 정보 확인
-    const order = await prisma.order.findUnique({
+    const order = await query({
       where: { orderNumber: orderId },
       include: { 
         user: true,
@@ -46,11 +49,11 @@ export async function POST(request: NextRequest) {
     })
 
     // 결제 정보 저장
-    await prisma.payment.create({
+    await query({
       data: {
         orderId: order.id,
         provider: 'TOSS_PAYMENTS',
-        method: paymentResult.method as any,
+        method: paymentResult.method as unknown,
         status: 'COMPLETED',
         amount: paymentResult.totalAmount,
         paymentKey: paymentResult.paymentKey,
@@ -61,14 +64,14 @@ export async function POST(request: NextRequest) {
     })
 
     // 주문 상태 업데이트
-    await prisma.order.update({
+    await query({
       where: { id: order.id },
       data: { status: 'PAYMENT_COMPLETED' },
     })
 
     // 재고 차감
     for (const item of order.items) {
-      await prisma.product.update({
+      await query({
         where: { id: item.productId },
         data: {
           stock: {
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
       )
 
       // 알림 저장
-      await prisma.notification.create({
+      await query({
         data: {
           userId: order.userId!,
           type: 'PAYMENT_SUCCESS',
@@ -111,12 +114,12 @@ export async function POST(request: NextRequest) {
 
     // 장바구니 비우기
     if (session?.user?.id) {
-      const cart = await prisma.cart.findUnique({
+      const cart = await query({
         where: { userId: session.user.id },
       })
       
       if (cart) {
-        await prisma.cartItem.deleteMany({
+        await queryMany({
           where: { cartId: cart.id },
         })
       }
@@ -127,8 +130,8 @@ export async function POST(request: NextRequest) {
       orderId: order.orderNumber,
       paymentKey,
     })
-  } catch (error: any) {
-    console.error('Payment confirmation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || '결제 처리 중 오류가 발생했습니다.' },
       { status: 500 }

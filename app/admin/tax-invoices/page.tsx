@@ -82,7 +82,7 @@ export default function TaxInvoicesPage() {
       const data = await response.json()
       setInvoices(data)
     } catch (error) {
-      console.error('Error fetching invoices:', error)
+
     }
   }
 
@@ -122,7 +122,7 @@ export default function TaxInvoicesPage() {
         resetNewInvoice()
       }
     } catch (error) {
-      console.error('Error creating invoice:', error)
+
     } finally {
       setLoading(false)
     }
@@ -139,7 +139,7 @@ export default function TaxInvoicesPage() {
         fetchInvoices()
       }
     } catch (error) {
-      console.error('Error issuing invoice:', error)
+
     } finally {
       setLoading(false)
     }
@@ -156,7 +156,7 @@ export default function TaxInvoicesPage() {
         fetchInvoices()
       }
     } catch (error) {
-      console.error('Error cancelling invoice:', error)
+
     } finally {
       setLoading(false)
     }
@@ -202,7 +202,7 @@ export default function TaxInvoicesPage() {
     })
   }
 
-  const updateInvoiceItem = (index: number, field: string, value: any) => {
+  const updateInvoiceItem = (index: number, field: string, value: unknown) => {
     const updatedItems = [...newInvoice.items]
     updatedItems[index] = { ...updatedItems[index], [field]: value }
     setNewInvoice({

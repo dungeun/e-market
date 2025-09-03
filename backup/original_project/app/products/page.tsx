@@ -63,7 +63,7 @@ export default function ProductsPage() {
       setProducts(data.products)
       setTotalPages(data.pagination.totalPages)
     } catch (error) {
-      console.error('Error fetching products:', error)
+
     } finally {
       setLoading(false)
     }

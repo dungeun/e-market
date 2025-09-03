@@ -12,7 +12,7 @@ export const metricsMiddleware = (req: MetricsRequest, res: Response, next: Next
 
   // Override the end method to capture metrics
   const originalEnd = res.end
-  res.end = function(this: Response, ..._args: any[]) {
+  res.end = function(this: Response, ..._args: unknown[]) {
     // Calculate duration
     const duration = (Date.now() - (req.startTime || Date.now())) / 1000
 
@@ -37,8 +37,8 @@ export const metricsMiddleware = (req: MetricsRequest, res: Response, next: Next
     }
 
     // Call the original end method
-    return originalEnd.apply(res, _args as any)
-  } as any
+    return originalEnd.apply(res, _args as unknown)
+  } as unknown
 
   next()
 }
@@ -47,7 +47,7 @@ export const businessMetricsMiddleware = (req: Request, res: Response, next: Nex
   // Track specific business events based on the endpoint
   const originalJson = res.json
 
-  res.json = function(data?: any) {
+  res.json = function(data?: unknown) {
     try {
       // Track business metrics based on the endpoint and response
       if (req.method === 'POST' && req.path.includes('/orders') && res.statusCode === 201) {

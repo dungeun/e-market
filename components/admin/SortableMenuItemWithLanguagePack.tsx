@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState, useEffect } from 'react';
@@ -64,7 +66,7 @@ export function SortableMenuItemWithLanguagePack({ menu, onUpdate, onDelete }: S
           }
         }
       } catch (error) {
-        console.error('언어팩 키 로드 실패:', error);
+
       }
     };
 

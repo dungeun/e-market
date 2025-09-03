@@ -1,22 +1,84 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { query } from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-utils';
 import { translateText } from '@/lib/services/translation.service';
 
+// 활성화된 언어 목록 조회 헬퍼 함수
+async function getEnabledLanguages(): Promise<string[]> {
+  try {
+    const result = await query(`
+      SELECT code FROM language_settings 
+      WHERE enabled = true 
+      ORDER BY is_default DESC, code ASC
+    `);
+    return result.rows.map(row => row.code);
+  } catch (error) {
+    console.warn('언어 설정 조회 실패, 기본값 사용:', error);
+    return ['ko', 'en']; // 기본값
+  }
+}
 
-// GET: 메뉴 목록 조회
+// GET: 메뉴 목록 조회 - 언어팩 데이터 포함
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type') || 'header'; // header or footer
+    
+    // 활성화된 언어 목록 조회
+    const enabledLanguages = await getEnabledLanguages();
 
-    // UI 메뉴 테이블이 없으므로 UISection 테이블을 활용
-    const menus = await prisma.uISection.findMany({
-      where: {
-        type: type,
-        visible: true
-      },
-      orderBy: { order: 'asc' }
+    // ui_menus 테이블에서 메뉴 조회하고 언어팩 데이터 조인
+    const result = await query(`
+      SELECT 
+        um.*,
+        COALESCE(
+          json_object_agg(
+            lpt.language_code, 
+            lpt.translation
+          ) FILTER (WHERE lpt.language_code IS NOT NULL),
+          '{}'
+        ) as language_pack_translations
+      FROM ui_menus um
+      LEFT JOIN language_pack_keys lpk ON lpk.key_name = (um.content->>'languagePackKey')
+      LEFT JOIN language_pack_translations lpt ON lpk.id = lpt.key_id
+      WHERE um.type = $1 AND um.visible = true
+      GROUP BY um.id, um.type, um."sectionId", um.content, um.visible, um."order", um."createdAt", um."updatedAt"
+      ORDER BY um."order" ASC
+    `, [type]);
+    
+    // 메뉴 데이터에 언어팩 정보 병합 (동적 언어 지원)
+    const menus = result.rows.map(menu => {
+      const content = menu.content || {};
+      const translations = menu.language_pack_translations || {};
+      
+      // 동적으로 content에 언어별 필드 추가
+      const updatedContent = { ...content };
+      
+      enabledLanguages.forEach(langCode => {
+        if (translations[langCode]) {
+          if (langCode === 'ko') {
+            // 기본 언어인 경우 label, name 필드 업데이트
+            updatedContent.label = translations[langCode];
+            updatedContent.name = translations[langCode];
+          } else {
+            // 다른 언어인 경우 label_{code} 형식으로 추가
+            updatedContent[`label_${langCode}`] = translations[langCode];
+          }
+        }
+      });
+      
+      return {
+        ...menu,
+        content: updatedContent,
+        // 추가 정보로 번역 데이터 제공 (활성화된 언어만)
+        translations: Object.fromEntries(
+          Object.entries(translations).filter(([langCode]) => 
+            enabledLanguages.includes(langCode)
+          )
+        )
+      };
     });
 
     return NextResponse.json({ menus }, { status: 200 });
@@ -29,7 +91,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: 새 메뉴 추가
+// POST: 새 메뉴 추가 - 언어팩과 연동
 export async function POST(req: NextRequest) {
   try {
     const authResult = await verifyAuth(req);
@@ -41,65 +103,95 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { type, name, href, icon, autoTranslate = true } = body;
+    const { type, name, href, icon } = body;
 
+    // 메뉴 ID 생성 (sectionId로 사용)
+    const menuId = `${type}_menu_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+    
     // 언어팩 키 생성
-    const menuKey = `${type}.menu.${name.toLowerCase().replace(/\s+/g, '_')}`;
+    const languagePackKey = `header.menu.${menuId}`;
+    
+    try {
+      // 1. 언어팩 키 먼저 생성
+      const createKeyResult = await query(`
+        INSERT INTO language_pack_keys (key_name, component_type, component_id, description)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+      `, [languagePackKey, 'menu', type, `${type} 메뉴: ${name}`]);
 
-    // 번역 처리
-    let translations: any = {};
-    if (autoTranslate) {
-      const [enTranslation, jpTranslation] = await Promise.all([
-        translateText(name, 'ko', 'en'),
-        translateText(name, 'ko', 'ja')
-      ]);
+      const keyId = createKeyResult.rows[0].id;
 
-      translations = {
-        en: { name: enTranslation },
-        jp: { name: jpTranslation }
-      };
+      // 2. 한국어 번역 추가
+      await query(`
+        INSERT INTO language_pack_translations (key_id, language_code, translation, is_auto_translated)
+        VALUES ($1, $2, $3, $4)
+      `, [keyId, 'ko', name, false]);
+
+      // 3. 자동 번역 처리 (활성화된 언어만)
+      const enabledLanguages = await getEnabledLanguages();
+      const targetLanguages = enabledLanguages.filter(lang => lang !== 'ko'); // 한국어 제외
+      
+      if (targetLanguages.length > 0) {
+        try {
+          // 활성화된 언어로 번역
+          const translations = await Promise.all(
+            targetLanguages.map(targetLang =>
+              translateText(name, 'ko', targetLang)
+            )
+          );
+
+          // 번역 결과를 데이터베이스에 저장
+          await Promise.all(
+            targetLanguages.map((langCode, index) =>
+              query(`
+                INSERT INTO language_pack_translations (key_id, language_code, translation, is_auto_translated)
+                VALUES ($1, $2, $3, $4)
+              `, [keyId, langCode, translations[index], true])
+            )
+          );
+        } catch (translationError) {
+          console.warn('자동 번역 실패, 기본값 사용:', translationError);
+          // 번역 실패시 원본 텍스트 사용
+          await Promise.all(
+            targetLanguages.map(langCode =>
+              query(`
+                INSERT INTO language_pack_translations (key_id, language_code, translation, is_auto_translated)
+                VALUES ($1, $2, $3, $4)
+              `, [keyId, langCode, name, false])
+            )
+          );
+        }
+      }
+    } catch (langPackError) {
+      console.error('언어팩 생성 오류:', langPackError);
+      // 언어팩 생성 실패해도 메뉴는 생성하되 기본 데이터 사용
     }
 
-    // 메뉴 데이터 생성
+    // 4. 메뉴 데이터 생성 (언어팩 키 참조)
     const menuContent = {
-      id: `menu-${Date.now()}`,
-      label: menuKey,
-      name: name,
+      languagePackKey: languagePackKey, // 언어팩 키 참조
       href: href || '/',
       icon: icon || null,
-      visible: true
+      // 백업용 직접 데이터
+      label: name,
+      name: name
     };
 
     // 최대 order 값 조회
-    const maxOrder = await prisma.uISection.findFirst({
-      where: { type: type },
-      orderBy: { order: 'desc' },
-      select: { order: true }
-    });
+    const maxOrderResult = await query(`
+      SELECT MAX("order") as max_order FROM ui_menus WHERE type = $1
+    `, [type]);
+    
+    const maxOrder = maxOrderResult.rows[0]?.max_order || 0;
 
-    // DB에 저장
-    const menu = await prisma.uISection.create({
-      data: {
-        sectionId: menuKey,
-        type: type,
-        content: menuContent,
-        translations: translations,
-        order: (maxOrder?.order || 0) + 1,
-        visible: true
-      }
-    });
-
-    // 언어팩에도 추가
-    await prisma.languagePack.create({
-      data: {
-        key: menuKey,
-        ko: name,
-        en: translations.en?.name || name,
-        jp: translations.jp?.name || name,
-        category: type,
-        description: `${type === 'header' ? '헤더' : '푸터'} 메뉴`
-      }
-    });
+    // 5. UI 메뉴 DB에 저장
+    const menuResult = await query(`
+      INSERT INTO ui_menus (type, "sectionId", content, "order", visible)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `, [type, menuId, JSON.stringify(menuContent), maxOrder + 1, true]);
+    
+    const menu = menuResult.rows[0];
 
     return NextResponse.json({ menu }, { status: 201 });
   } catch (error) {
@@ -111,7 +203,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: 메뉴 수정
+// PUT: 메뉴 수정 - 언어팩과 연동
 export async function PUT(req: NextRequest) {
   try {
     const authResult = await verifyAuth(req);
@@ -123,11 +215,13 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { id, name, href, icon, visible, order, autoTranslate = false } = body;
+    const { id, name, href, icon, visible, order, autoTranslate = false, targetLanguages = [] } = body;
 
-    const menu = await prisma.uISection.findUnique({
-      where: { id }
-    });
+    const menuResult = await query(`
+      SELECT * FROM ui_menus WHERE id = $1
+    `, [id]);
+    
+    const menu = menuResult.rows[0];
 
     if (!menu) {
       return NextResponse.json(
@@ -136,49 +230,81 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // 컨텐츠 업데이트
-    const updatedContent: any = menu.content || {};
-    if (name !== undefined) updatedContent.name = name;
+    const currentContent = (menu.content as any) || {};
+    const updatedContent = { ...currentContent };
+
+    // 기본 필드 업데이트
     if (href !== undefined) updatedContent.href = href;
     if (icon !== undefined) updatedContent.icon = icon;
-    if (visible !== undefined) updatedContent.visible = visible;
 
-    // 번역 업데이트
-    let updatedTranslations = menu.translations as any || {};
-    if (autoTranslate && name) {
-      const [enTranslation, jpTranslation] = await Promise.all([
-        translateText(name, 'ko', 'en'),
-        translateText(name, 'ko', 'ja')
-      ]);
+    // 이름 변경시 언어팩 업데이트
+    if (name !== undefined && name !== currentContent.name) {
+      updatedContent.name = name;
+      updatedContent.label = name;
 
-      updatedTranslations = {
-        ...updatedTranslations,
-        en: { ...updatedTranslations.en, name: enTranslation },
-        jp: { ...updatedTranslations.jp, name: jpTranslation }
-      };
+      // 언어팩 키가 있으면 언어팩 업데이트
+      if (currentContent.languagePackKey) {
+        try {
+          // 한국어 번역 업데이트
+          await query(`
+            UPDATE language_pack_translations 
+            SET translation = $1, is_auto_translated = false, updated_at = CURRENT_TIMESTAMP
+            WHERE key_id = (
+              SELECT id FROM language_pack_keys WHERE key_name = $2
+            ) AND language_code = 'ko'
+          `, [name, currentContent.languagePackKey]);
 
-      // 언어팩도 업데이트
-      const menuKey = (menu.content as any)?.label || menu.sectionId;
-      await prisma.languagePack.updateMany({
-        where: { key: menuKey },
-        data: {
-          ko: name,
-          en: enTranslation,
-          jp: jpTranslation
+          // 자동 번역 업데이트 (동적 언어 지원)
+          if (autoTranslate) {
+            try {
+              // 사용자 지정 언어 또는 활성화된 언어 중 한국어 제외
+              const enabledLanguages = await getEnabledLanguages();
+              const languagesToTranslate = targetLanguages.length > 0 
+                ? targetLanguages.filter(lang => lang !== 'ko')
+                : enabledLanguages.filter(lang => lang !== 'ko');
+
+              if (languagesToTranslate.length > 0) {
+                // 번역 실행
+                const translations = await Promise.all(
+                  languagesToTranslate.map(targetLang =>
+                    translateText(name, 'ko', targetLang)
+                  )
+                );
+
+                // 번역 결과를 데이터베이스에 업데이트
+                await Promise.all(
+                  languagesToTranslate.map((langCode, index) =>
+                    query(`
+                      UPDATE language_pack_translations 
+                      SET translation = $1, is_auto_translated = true, updated_at = CURRENT_TIMESTAMP
+                      WHERE key_id = (
+                        SELECT id FROM language_pack_keys WHERE key_name = $2
+                      ) AND language_code = $3
+                    `, [translations[index], currentContent.languagePackKey, langCode])
+                  )
+                );
+              }
+            } catch (translationError) {
+              console.warn('자동 번역 실패:', translationError);
+            }
+          }
+        } catch (langPackError) {
+          console.warn('언어팩 업데이트 실패:', langPackError);
         }
-      });
+      }
     }
 
     // DB 업데이트
-    const updatedMenu = await prisma.uISection.update({
-      where: { id },
-      data: {
-        content: updatedContent,
-        translations: updatedTranslations,
-        order: order !== undefined ? order : menu.order,
-        visible: visible !== undefined ? visible : menu.visible
-      }
-    });
+    const updatedMenuResult = await query(`
+      UPDATE ui_menus 
+      SET content = $2, "order" = $3, visible = $4, "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *
+    `, [id, JSON.stringify(updatedContent), 
+        order !== undefined ? order : menu.order, 
+        visible !== undefined ? visible : menu.visible]);
+    
+    const updatedMenu = updatedMenuResult.rows[0];
 
     return NextResponse.json({ menu: updatedMenu }, { status: 200 });
   } catch (error) {
@@ -211,9 +337,11 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const menu = await prisma.uISection.findUnique({
-      where: { id }
-    });
+    const menuResult = await query(`
+      SELECT * FROM ui_menus WHERE id = $1
+    `, [id]);
+    
+    const menu = menuResult.rows[0];
 
     if (!menu) {
       return NextResponse.json(
@@ -223,17 +351,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     // 메뉴 삭제
-    await prisma.uISection.delete({
-      where: { id }
-    });
-
-    // 언어팩에서도 삭제 (커스텀 메뉴인 경우)
-    const menuKey = (menu.content as any)?.label || menu.sectionId;
-    if (menuKey.includes('custom_')) {
-      await prisma.languagePack.deleteMany({
-        where: { key: menuKey }
-      });
-    }
+    await query(`
+      DELETE FROM ui_menus WHERE id = $1
+    `, [id]);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

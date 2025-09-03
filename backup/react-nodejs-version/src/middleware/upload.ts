@@ -15,7 +15,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // Configure storage
 const storage = multer.diskStorage({
-  destination: (_req: Request, file: any, cb) => {
+  destination: (_req: Request, file: unknown, cb) => {
     // Create subdirectories based on file type
     const subDir = file.mimetype.startsWith('image/') ? 'images' : 'files'
     const fullPath = path.join(uploadDir, subDir)
@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 
     cb(null, fullPath)
   },
-  filename: (_req: Request, file: any, cb) => {
+  filename: (_req: Request, file: unknown, cb) => {
     // Generate unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
     const ext = path.extname(file.originalname)
@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 })
 
 // File filter
-const fileFilter = (_req: Request, file: any, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: Request, file: unknown, cb: multer.FileFilterCallback) => {
   if (config.upload.allowedTypes.includes(file.mimetype)) {
     cb(null, true)
   } else {
@@ -90,7 +90,7 @@ const memoryStorage = multer.memoryStorage()
 // Create multer instance for image processing (memory storage)
 export const imageUpload = multer({
   storage: memoryStorage,
-  fileFilter: (_req: Request, file: any, cb: multer.FileFilterCallback) => {
+  fileFilter: (_req: Request, file: unknown, cb: multer.FileFilterCallback) => {
     try {
       imageService.validateImageFile(file)
       cb(null, true)

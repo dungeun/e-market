@@ -140,7 +140,7 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       'optimal': { label: '최적', color: 'bg-green-100 text-green-800' },
       'low': { label: '부족', color: 'bg-yellow-100 text-yellow-800' },
       'critical': { label: '긴급', color: 'bg-red-100 text-red-800' },
@@ -164,7 +164,7 @@ export default function InventoryPage() {
     }
   }
 
-  const handleAction = (action: string, item: any) => {
+  const handleAction = (action: string, item: unknown) => {
     switch(action) {
       case 'edit':
         toast.info(`${item.product.name} 재고 수정`)

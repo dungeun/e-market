@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import bcrypt from 'bcryptjs'
 
 // 카카오 Provider 커스텀 구현
@@ -24,7 +24,7 @@ const KakaoProvider = {
     id: process.env.KAKAO_CLIENT_ID!,
     secret: process.env.KAKAO_CLIENT_SECRET!,
   },
-  profile(profile: any) {
+  profile(profile: unknown) {
     return {
       id: String(profile.id),
       name: profile.properties?.nickname || profile.kakao_account?.profile?.nickname,
@@ -54,7 +54,7 @@ const NaverProvider = {
     id: process.env.NAVER_CLIENT_ID!,
     secret: process.env.NAVER_CLIENT_SECRET!,
   },
-  profile(profile: any) {
+  profile(profile: unknown) {
     return {
       id: profile.response.id,
       name: profile.response.name || profile.response.nickname,
@@ -72,8 +72,8 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       allowDangerousEmailAccountLinking: true,
     }),
-    KakaoProvider as any,
-    NaverProvider as any,
+    KakaoProvider as unknown,
+    NaverProvider as unknown,
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('이메일과 비밀번호를 입력해주세요.')
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await query({
           where: { email: credentials.email },
         })
 
@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role || 'USER'
+        token.role = (user as unknown).role || 'USER'
       }
       if (account) {
         token.provider = account.provider
@@ -139,18 +139,18 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider && account.provider !== 'credentials') {
         const email = user.email || profile?.email
         if (email) {
-          await prisma.user.upsert({
+          await query({
             where: { email },
             update: {
               name: user.name || profile?.name,
-              image: user.image || (profile as any)?.picture,
+              image: user.image || (profile as unknown)?.picture,
               provider: account.provider,
               providerId: account.providerAccountId,
             },
             create: {
               email,
               name: user.name || profile?.name,
-              image: user.image || (profile as any)?.picture,
+              image: user.image || (profile as unknown)?.picture,
               provider: account.provider,
               providerId: account.providerAccountId,
               role: 'USER',

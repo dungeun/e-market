@@ -241,17 +241,17 @@ export const cdnService = new CDNService()
  * Express middleware for CDN URL rewriting
  */
 export function cdnMiddleware() {
-  return (_req: any, res: any, next: Function) => {
+  return (_req: unknown, res: unknown, next: Function) => {
     // Add CDN helper to response locals
     res.locals.cdn = {
-      url: (path: string, options?: any) => cdnService.getCDNUrl(path, options),
-      srcset: (path: string, options?: any) => cdnService.generateSrcSet(path, options),
+      url: (path: string, options?: unknown) => cdnService.getCDNUrl(path, options),
+      srcset: (path: string, options?: unknown) => cdnService.generateSrcSet(path, options),
       preload: (assets: string[]) => cdnService.generatePreloadLinks(assets),
     }
 
     // Override res.json to rewrite URLs in responses
     const originalJson = res.json.bind(res)
-    res.json = function(data: any) {
+    res.json = function(data: unknown) {
       if (cdnService.isEnabled() && data) {
         data = rewriteUrlsInObject(data)
       }
@@ -265,7 +265,7 @@ export function cdnMiddleware() {
 /**
  * Recursively rewrite URLs in an object
  */
-function rewriteUrlsInObject(obj: any): any {
+function rewriteUrlsInObject(obj: unknown): any {
   if (!obj || typeof obj !== 'object') {
     return obj
   }
@@ -274,7 +274,7 @@ function rewriteUrlsInObject(obj: any): any {
     return obj.map(item => rewriteUrlsInObject(item))
   }
 
-  const rewritten: any = {}
+  const rewritten: unknown = {}
 
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {

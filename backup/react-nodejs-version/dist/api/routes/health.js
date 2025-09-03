@@ -346,13 +346,13 @@ router.post('/alerts', (0, error_1.asyncHandler)(async (req, res) => {
     switch (severity) {
         case 'critical':
         case 'error':
-            console.error('HEALTH ALERT:', alertData);
+
             break;
         case 'warning':
-            console.warn('HEALTH ALERT:', alertData);
+
             break;
         default:
-            console.info('HEALTH ALERT:', alertData);
+
     }
     // In a real implementation, you would send this to your alerting system
     // await sendToAlertingSystem(alertData)

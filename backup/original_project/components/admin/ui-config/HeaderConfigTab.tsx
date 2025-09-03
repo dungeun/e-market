@@ -19,14 +19,14 @@ export function HeaderConfigTab() {
     })
   );
 
-  const handleHeaderDragEnd = (event: any) => {
+  const handleHeaderDragEnd = (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id && headerMenus.length > 0) {
-      const oldIndex = headerMenus.findIndex((item: any) => item.id === active.id);
-      const newIndex = headerMenus.findIndex((item: any) => item.id === over.id);
+      const oldIndex = headerMenus.findIndex((item: unknown) => item.id === active.id);
+      const newIndex = headerMenus.findIndex((item: unknown) => item.id === over.id);
       
-      const newMenus = arrayMove(headerMenus, oldIndex, newIndex).map((item: any, index: number) => ({
+      const newMenus = arrayMove(headerMenus, oldIndex, newIndex).map((item: unknown, index: number) => ({
         ...item,
         order: index + 1,
       }));

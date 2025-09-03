@@ -56,7 +56,7 @@ export default function ImageUpload({
       onChange(optimizedImage)
     } catch (err) {
       setError('이미지 업로드에 실패했습니다.')
-      console.error('Image upload error:', err)
+
     } finally {
       setUploading(false)
     }

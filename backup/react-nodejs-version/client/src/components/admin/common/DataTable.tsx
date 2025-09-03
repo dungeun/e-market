@@ -22,7 +22,7 @@ import clsx from 'clsx'
 
 interface DataTableProps<T> {
   data: T[]
-  columns: any[]
+  columns: unknown[]
   loading?: boolean
   error?: string
   onRowClick?: (row: T) => void
@@ -34,7 +34,7 @@ interface DataTableProps<T> {
   emptyMessage?: string
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   loading = false,

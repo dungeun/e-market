@@ -1,5 +1,6 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -211,23 +212,22 @@ const defaultProductSections = {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Loading UI config from database...');
-    
+
     // DB에서 UI 설정 조회
-    const uiConfig = await prisma.siteConfig.findUnique({
+    const uiConfig = await query({
       where: { key: 'product-sections-config' }
     });
 
     if (!uiConfig) {
-      console.log('📝 No config found, returning default product sections');
+
       return NextResponse.json({ config: defaultProductSections });
     }
 
     const config = JSON.parse(uiConfig.value);
-    console.log('✅ UI config loaded successfully');
+
     return NextResponse.json({ config });
   } catch (error) {
-    console.error('❌ Failed to load UI config:', error);
+
     return NextResponse.json({ 
       config: defaultProductSections,
       error: 'Failed to load from database, using defaults'
@@ -237,8 +237,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('💾 Saving UI config to database...');
-    
+
     const { config } = await request.json();
 
     if (!config) {
@@ -248,9 +247,9 @@ export async function POST(request: NextRequest) {
     // 중복 섹션 ID 정리
     if (config.sections) {
       const seenIds = new Set<string>();
-      const cleanedSections = config.sections.filter((section: any) => {
+      const cleanedSections = config.sections.filter((section: unknown) => {
         if (seenIds.has(section.id)) {
-          console.log(`🧹 Removing duplicate section ID: ${section.id}`);
+
           return false;
         }
         seenIds.add(section.id);
@@ -260,7 +259,7 @@ export async function POST(request: NextRequest) {
     }
 
     // DB에 UI 설정 저장
-    await prisma.siteConfig.upsert({
+    await query({
       where: { key: 'product-sections-config' },
       update: { 
         value: JSON.stringify(config),
@@ -272,10 +271,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('✅ UI config saved successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('❌ UI config save error:', error);
+
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'

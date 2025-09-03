@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import ProductCard from './ProductCard'
 import { Clock, Eye } from 'lucide-react'
@@ -11,10 +13,10 @@ interface RecentlyViewedProps {
     layout?: string
     cookieBased?: boolean
   }
-  products: any[]
+  products: unknown[]
 }
 
-export default function RecentlyViewed({ config, products }: RecentlyViewedProps) {
+const RecentlyViewed = React.memo(function RecentlyViewed({ config = {}, products = [] }: RecentlyViewedProps) {
   if (!products || products.length === 0) {
     return null
   }
@@ -26,9 +28,9 @@ export default function RecentlyViewed({ config, products }: RecentlyViewedProps
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Eye className="w-6 h-6 text-gray-600" />
-            {config.title && (
+            {config?.title && (
               <h2 className="text-2xl font-bold text-gray-900">
-                {config.title}
+                {config?.title}
               </h2>
             )}
           </div>
@@ -43,11 +45,11 @@ export default function RecentlyViewed({ config, products }: RecentlyViewedProps
         {/* 상품 스크롤 */}
         <div className="overflow-x-auto">
           <div className="flex gap-4 pb-4">
-            {Array.isArray(products) && products.slice(0, config.limit || 6).map((product) => (
+            {Array.isArray(products) && products.slice(0, config?.limit || 6).map((product) => (
               <div key={product.id} className="flex-shrink-0 w-48">
                 <ProductCard
                   product={product}
-                  showViewCount={config.showViewedTime}
+                  showViewCount={config?.showViewedTime}
                 />
               </div>
             ))}
@@ -55,5 +57,7 @@ export default function RecentlyViewed({ config, products }: RecentlyViewedProps
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default RecentlyViewed;

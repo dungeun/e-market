@@ -510,7 +510,7 @@ export class ProductOptionsController {
       
       await productOptionsService.bulkOptionOperation({
         operation: 'reorder',
-        options: reorderOptions as any
+        options: reorderOptions as unknown
       })
       
       return res.json({

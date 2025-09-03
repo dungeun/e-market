@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, TrendingUp, Users, Package } from 'lucide-react';
 import { recommendationService } from '../../services/recommendationService';
@@ -7,7 +8,7 @@ import { useAuthStore } from '../../stores/authStore';
 interface RecommendationSectionProps {
   title: string;
   algorithm: string;
-  context?: any;
+  context?: unknown;
   limit?: number;
   className?: string;
 }
@@ -40,7 +41,7 @@ const RecommendationSection: React.FC<RecommendationSectionProps> = ({
       });
       setRecommendations(response.recommendations);
     } catch (error) {
-      console.error('추천 로딩 실패:', error);
+
     } finally {
       setLoading(false);
     }

@@ -127,7 +127,7 @@ class MonitoringService {
             // Calculate today's metrics
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayOrders = await this.prisma.order.count({
+            const todayOrders = await this.query({
                 where: {
                     createdAt: {
                         gte: today,
@@ -159,7 +159,7 @@ class MonitoringService {
      */
     async updateInventoryMetrics() {
         try {
-            const products = await this.prisma.product.findMany({
+            const products = await this.query({
                 select: {
                     id: true,
                     name: true,

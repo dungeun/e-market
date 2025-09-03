@@ -11,7 +11,7 @@ export const SearchPage: React.FC = () => {
   const navigate = useNavigate();
   
   const [products, setProducts] = useState<any[]>([]);
-  const [facets, setFacets] = useState<any>({});
+  const [facets, setFacets] = useState<unknown>({});
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -35,7 +35,7 @@ export const SearchPage: React.FC = () => {
   });
 
   // URL 파라미터 업데이트
-  const updateUrlParams = (newFilters: any, newSortBy?: string, newPage?: number) => {
+  const updateUrlParams = (newFilters: unknown, newSortBy?: string, newPage?: number) => {
     const params = new URLSearchParams();
     
     if (query) params.set('q', query);
@@ -91,7 +91,7 @@ export const SearchPage: React.FC = () => {
         setFacets(result.facets);
         setTotal(result.total);
       } catch (error) {
-        console.error('Search error:', error);
+
       } finally {
         setLoading(false);
       }
@@ -101,7 +101,7 @@ export const SearchPage: React.FC = () => {
   }, [query, filters, sortBy, page]);
 
   // 필터 변경 핸들러
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters: unknown) => {
     setFilters(newFilters);
     updateUrlParams(newFilters, sortBy, 1); // 필터 변경 시 첫 페이지로
   };
@@ -133,12 +133,12 @@ export const SearchPage: React.FC = () => {
 
   // Facet 데이터 처리
   const processedFacets = {
-    categories: (facets.categories?.buckets || []).map((bucket: any) => ({
+    categories: (facets.categories?.buckets || []).map((bucket: unknown) => ({
       value: bucket.key,
       label: bucket.key, // 실제로는 카테고리 이름을 가져와야 함
       count: bucket.doc_count
     })),
-    tags: (facets.tags?.buckets || []).map((bucket: any) => ({
+    tags: (facets.tags?.buckets || []).map((bucket: unknown) => ({
       value: bucket.key,
       label: bucket.key,
       count: bucket.doc_count

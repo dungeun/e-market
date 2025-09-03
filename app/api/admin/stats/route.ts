@@ -1,13 +1,29 @@
-import { NextResponse } from 'next/server'
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { verifyAdminAuth } from '@/lib/auth-utils'
+import { prisma } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    // JWT 토큰 인증 시도
+    const jwtAuth = await verifyAdminAuth(request)
     
-    if (!session || session.user.role !== 'ADMIN') {
+    // NextAuth 세션 인증 시도 (JWT 실패 시)
+    let isAuthenticated = jwtAuth.isAuthenticated
+    let userRole = null
+    
+    if (!isAuthenticated) {
+      const session = await getServerSession(authOptions)
+      isAuthenticated = session && session.user.role === 'ADMIN'
+      userRole = session?.user.role
+    } else {
+      userRole = 'ADMIN' // JWT에서 이미 관리자 확인됨
+    }
+    
+    if (!isAuthenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -29,48 +45,48 @@ export async function GET() {
     ] = await Promise.all([
       // 총 매출
       prisma.order.aggregate({
-        _sum: { total: true },
+        _sum: { total_amount: true },
         where: { status: 'PAYMENT_COMPLETED' }
       }),
       // 지난달 매출
       prisma.order.aggregate({
-        _sum: { total: true },
+        _sum: { total_amount: true },
         where: {
           status: 'PAYMENT_COMPLETED',
-          createdAt: {
+          created_at: {
             gte: lastMonth,
             lt: currentMonth
           }
         }
       }),
       // 총 주문
-      prisma.order.count(),
+      query(),
       // 지난달 주문
-      prisma.order.count({
+      query({
         where: {
-          createdAt: {
+          created_at: {
             gte: lastMonth,
             lt: currentMonth
           }
         }
       }),
       // 총 상품
-      prisma.product.count(),
+      query(),
       // 지난달 등록 상품
-      prisma.product.count({
+      query({
         where: {
-          createdAt: {
+          created_at: {
             gte: lastMonth,
             lt: currentMonth
           }
         }
       }),
       // 총 고객
-      prisma.user.count(),
+      query(),
       // 지난달 가입 고객
-      prisma.user.count({
+      query({
         where: {
-          createdAt: {
+          created_at: {
             gte: lastMonth,
             lt: currentMonth
           }
@@ -78,8 +94,8 @@ export async function GET() {
       })
     ])
 
-    const revenue = totalRevenue._sum.total || 0
-    const lastRevenue = lastMonthRevenue._sum.total || 0
+    const revenue = totalRevenue._sum_total_amount || 0
+    const lastRevenue = lastMonthRevenue._sum_total_amount || 0
 
     // 변화율 계산
     const revenueChange = lastRevenue > 0 ? ((revenue - lastRevenue) / lastRevenue) * 100 : 0
@@ -97,8 +113,11 @@ export async function GET() {
       totalCustomers,
       customersChange: Math.round(customersChange * 10) / 10
     })
-  } catch (error) {
-    console.error('Error fetching stats:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (error: Error | unknown) {
+
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 })
   }
 }

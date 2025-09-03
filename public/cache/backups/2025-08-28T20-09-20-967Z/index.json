@@ -1,0 +1,16 @@
+{
+  "generated": "2025-08-28T19:43:42.231Z",
+  "version": "v1.0.0",
+  "languages": [
+    "ko",
+    "en",
+    "jp"
+  ],
+  "pageSize": 30,
+  "ttl": 3600,
+  "files": [
+    "products-en-page-1.json",
+    "products-jp-page-1.json",
+    "products-ko-page-1.json"
+  ]
+}

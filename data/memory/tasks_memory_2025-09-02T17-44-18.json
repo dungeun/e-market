@@ -1,0 +1,276 @@
+{
+  "tasks": [
+    {
+      "id": "21c0167e-aaf3-4e24-ac7a-98f492826957",
+      "name": "Phase 1-1: 시스템 전체 백업",
+      "description": "PRD TASK-001 구현. 언어 및 섹션 관련 모든 파일의 완전한 백업 생성",
+      "notes": "기존 백업 디렉토리 활용, 추가 백업만 수행",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T15:22:58.092Z",
+      "relatedFiles": [
+        {
+          "path": "backup/2025-09-02-prd",
+          "type": "CREATE",
+          "description": "백업 디렉토리"
+        },
+        {
+          "path": "lib/services",
+          "type": "REFERENCE",
+          "description": "언어 서비스 파일들"
+        },
+        {
+          "path": "components/DynamicSectionRenderer.tsx",
+          "type": "REFERENCE",
+          "description": "섹션 렌더러"
+        }
+      ],
+      "implementationGuide": "1. backup/2025-09-02-prd 디렉토리 확인\n2. lib/services 전체 백업\n3. components/DynamicSectionRenderer.tsx 백업\n4. app/admin/ui-config/sections/new/page.tsx 백업\n5. 데이터베이스 스키마 백업 (pg_dump)",
+      "verificationCriteria": "모든 언어/섹션 관련 파일이 backup/2025-09-02-prd에 존재",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 1-1 백업 완료. lib/services, DynamicSectionRenderer.tsx, sections/new/page.tsx 백업 완료. 데이터베이스 스키마 SQL 문서화 완료. 모든 언어/섹션 관련 파일이 backup/2025-09-02-prd에 안전하게 보관됨.",
+      "completedAt": "2025-09-02T15:22:58.089Z"
+    },
+    {
+      "id": "53d14beb-9548-42ac-8ca3-c6219c54ec7e",
+      "name": "Phase 1-2: 중복 파일 정리",
+      "description": "PRD TASK-002 구현. 중복된 컴포넌트와 서비스 파일을 백업 디렉토리로 이동",
+      "notes": "SectionsConfigTab.tsx는 메인 컴포넌트로 유지",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "21c0167e-aaf3-4e24-ac7a-98f492826957"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T15:30:29.133Z",
+      "relatedFiles": [
+        {
+          "path": "components/admin/ui-config/SectionManagerTab.tsx",
+          "type": "TO_MODIFY",
+          "description": "중복 컴포넌트"
+        },
+        {
+          "path": "components/admin/ui-config/SectionOrderTab.tsx",
+          "type": "TO_MODIFY",
+          "description": "중복 컴포넌트"
+        },
+        {
+          "path": "lib/translation.service.ts",
+          "type": "TO_MODIFY",
+          "description": "중복 서비스"
+        },
+        {
+          "path": "lib/google-translate.service.ts",
+          "type": "TO_MODIFY",
+          "description": "중복 서비스"
+        },
+        {
+          "path": "lib/language.ts",
+          "type": "TO_MODIFY",
+          "description": "레거시 파일"
+        }
+      ],
+      "implementationGuide": "1. SectionManagerTab.tsx를 backup으로 이동\n2. SectionOrderTab.tsx를 backup으로 이동\n3. lib/translation.service.ts를 backup으로 이동\n4. lib/google-translate.service.ts를 backup으로 이동\n5. lib/language.ts를 backup으로 이동",
+      "verificationCriteria": "5개 중복 파일이 backup 디렉토리로 이동되고 원본 위치에서 제거됨",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 1-2 중복 파일 정리 완료. 5개 중복 파일(SectionManagerTab.tsx, SectionOrderTab.tsx, translation.service.ts, google-translate.service.ts, language.ts)을 backup/2025-09-02-prd/duplicates-removed로 이동. SectionsConfigTab.tsx는 메인 컴포넌트로 유지.",
+      "completedAt": "2025-09-02T15:30:29.131Z"
+    },
+    {
+      "id": "180f2264-5caa-46a3-8941-e361556e50c1",
+      "name": "Phase 1-3: 새 i18n 폴더 구조 생성",
+      "description": "PRD TASK-003 구현. 통합된 i18n 시스템을 위한 새로운 폴더 구조 생성",
+      "notes": "빈 디렉토리 생성만 수행, 파일 이동은 Phase 3에서",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "53d14beb-9548-42ac-8ca3-c6219c54ec7e"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T15:33:28.543Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/admin/i18n",
+          "type": "CREATE",
+          "description": "API 통합 디렉토리"
+        },
+        {
+          "path": "lib/i18n",
+          "type": "CREATE",
+          "description": "서비스 통합 디렉토리"
+        },
+        {
+          "path": "contexts/i18n",
+          "type": "CREATE",
+          "description": "React 컨텍스트 디렉토리"
+        }
+      ],
+      "implementationGuide": "1. app/api/admin/i18n 디렉토리 생성\n2. settings, content, translate 하위 폴더 생성\n3. lib/i18n 디렉토리 생성\n4. core, providers, cache, generators 하위 폴더 생성\n5. contexts/i18n/hooks 디렉토리 생성",
+      "verificationCriteria": "3개 메인 디렉토리와 모든 하위 폴더가 생성됨",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 1-3 i18n 폴더 구조 생성 완료. 3개 메인 디렉토리(app/api/admin/i18n, lib/i18n, contexts/i18n)와 모든 하위 폴더(settings/content/translate, core/providers/cache/generators, hooks) 생성. 각 디렉토리에 README.md 문서화 추가.",
+      "completedAt": "2025-09-02T15:33:28.541Z"
+    },
+    {
+      "id": "4812cad3-6fc1-4822-85f8-4c352d615f21",
+      "name": "Phase 2-1: 언어 설정 테이블 생성",
+      "description": "PRD TASK-004 구현. language_settings 테이블 생성 및 한국어 기본 설정",
+      "notes": "PostgreSQL Podman 컨테이너 port 5434 사용",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "180f2264-5caa-46a3-8941-e361556e50c1"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T15:57:36.607Z",
+      "relatedFiles": [
+        {
+          "path": "PRD-통합시스템구현계획.md",
+          "type": "REFERENCE",
+          "description": "SQL 스키마",
+          "lineStart": 58,
+          "lineEnd": 70
+        }
+      ],
+      "implementationGuide": "1. language_settings 테이블 생성 SQL 실행\n2. 한국어를 기본 언어로 INSERT\n3. is_default=true는 한국어만\n4. 최대 3개 언어 활성화 제약 확인",
+      "verificationCriteria": "language_settings 테이블 생성 및 한국어 기본 설정 확인",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 2-1 언어 설정 테이블 생성 완료. language_settings 테이블 성공적으로 생성, 한국어를 기본 언어로 설정(is_default=true, enabled=true), 15개 언어 옵션 추가(14개는 비활성화), 최대 3개 언어 활성화 제한 구현.",
+      "completedAt": "2025-09-02T15:57:36.604Z"
+    },
+    {
+      "id": "96cbfa97-a373-4222-afc6-6d6f9c2940ff",
+      "name": "Phase 2-2: 언어팩 테이블 구조 개선",
+      "description": "PRD TASK-005-006 구현. 언어팩 키와 번역 테이블 생성",
+      "notes": "기존 language_packs 테이블 데이터 보존",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "4812cad3-6fc1-4822-85f8-4c352d615f21"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T16:11:51.190Z",
+      "relatedFiles": [
+        {
+          "path": "PRD-통합시스템구현계획.md",
+          "type": "REFERENCE",
+          "description": "SQL 스키마",
+          "lineStart": 73,
+          "lineEnd": 94
+        }
+      ],
+      "implementationGuide": "1. language_pack_keys 테이블 생성\n2. language_pack_translations 테이블 생성\n3. 외래키 제약 설정\n4. 기존 데이터 마이그레이션",
+      "verificationCriteria": "언어팩 테이블 생성 및 외래키 제약 정상 작동",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 2-2: 언어팩 테이블 구조 개선 완료. language_pack_keys 테이블(38개 키)과 language_pack_translations 테이블(한국어 번역) 생성 완료. 외래키 제약 및 인덱스 설정 완료. 섹션(20개), 공통(8개), 헤더(5개), 푸터(5개) 키 모두 입력 완료.",
+      "completedAt": "2025-09-02T16:11:51.186Z"
+    },
+    {
+      "id": "8c26d06e-065a-4341-8ceb-831e3abec72c",
+      "name": "Phase 3-1: DynamicSectionRenderer 확장",
+      "description": "PRD TASK-014 구현. 6개 섹션에서 24개 전체 섹션 지원으로 확장",
+      "notes": "best-sellers, new-arrivals, flash-sale 등 상품 섹션 중점",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "96cbfa97-a373-4222-afc6-6d6f9c2940ff"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T16:16:54.201Z",
+      "relatedFiles": [
+        {
+          "path": "components/DynamicSectionRenderer.tsx",
+          "type": "TO_MODIFY",
+          "description": "섹션 렌더러",
+          "lineStart": 29,
+          "lineEnd": 36
+        },
+        {
+          "path": "components/sections",
+          "type": "DEPENDENCY",
+          "description": "24개 섹션 컴포넌트"
+        }
+      ],
+      "implementationGuide": "1. components/DynamicSectionRenderer.tsx 수정\n2. 18개 추가 섹션 컴포넌트 import\n3. sectionComponents 객체에 매핑 추가\n4. lazy loading 적용으로 성능 최적화",
+      "verificationCriteria": "24개 모든 섹션이 메인 페이지에서 렌더링 가능",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 3-1: DynamicSectionRenderer 확장 완료. 6개 섹션에서 24개 전체 섹션 지원으로 확장 완료. Lazy loading과 Suspense를 적용하여 성능 최적화. 모든 섹션 컴포넌트가 정상적으로 매핑되고 빌드 오류 없이 작동하는 것을 확인.",
+      "completedAt": "2025-09-02T16:16:54.196Z"
+    },
+    {
+      "id": "5f21e4c2-082e-4110-9fa7-e1ff817f813c",
+      "name": "Phase 3-2: 상품 중심 섹션 생성 페이지 개선",
+      "description": "PRD TASK-015 구현. new 섹션 페이지를 상품 중심으로 재설계",
+      "notes": "일반 섹션에서 상품 판매 섹션으로 전환",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "8c26d06e-065a-4341-8ceb-831e3abec72c"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T16:23:02.367Z",
+      "relatedFiles": [
+        {
+          "path": "app/admin/ui-config/sections/new/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "섹션 생성 페이지",
+          "lineStart": 23,
+          "lineEnd": 32
+        }
+      ],
+      "implementationGuide": "1. app/admin/ui-config/sections/new/page.tsx 수정\n2. sectionTypes를 상품 중심으로 변경\n3. best-sellers, new-arrivals, flash-sale 등 추가\n4. 각 섹션별 설정 옵션 구현",
+      "verificationCriteria": "상품 중심 섹션 타입 10개 이상 생성 가능",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "Phase 3-2: 상품 중심 섹션 생성 페이지 개선 완료. 17개 섹션 타입(상품 10개, 브랜드/콘텐츠 3개, 기본 4개)으로 확장. 상품별 설정 옵션(개수, 정렬, 카테고리, 표시 옵션, 슬라이드) 구현. 카테고리별 UI 그룹화 및 실시간 미리보기 기능 추가.",
+      "completedAt": "2025-09-02T16:23:02.363Z"
+    },
+    {
+      "id": "7e4a97b5-a58b-40ac-b516-be0b852fb75f",
+      "name": "Phase 4-1: API 통합 및 리디렉션",
+      "description": "PRD TASK-008-011 구현. 기존 API를 i18n으로 통합하고 리디렉션 설정",
+      "notes": "하위 호환성 유지를 위한 리디렉션 필수",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "5f21e4c2-082e-4110-9fa7-e1ff817f813c"
+        }
+      ],
+      "createdAt": "2025-09-02T15:18:25.655Z",
+      "updatedAt": "2025-09-02T16:33:25.209Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/admin/languages",
+          "type": "TO_MODIFY",
+          "description": "언어 설정 API"
+        },
+        {
+          "path": "app/api/admin/language-packs",
+          "type": "TO_MODIFY",
+          "description": "언어팩 API"
+        },
+        {
+          "path": "app/api/admin/translations",
+          "type": "TO_MODIFY",
+          "description": "번역 API"
+        },
+        {
+          "path": "app/api/admin/i18n",
+          "type": "CREATE",
+          "description": "통합 API"
+        }
+      ],
+      "implementationGuide": "1. languages/settings를 i18n/settings로 이동\n2. language-packs를 i18n/content로 이동\n3. translations를 i18n/translate로 통합\n4. 기존 경로에 리디렉션 설정",
+      "verificationCriteria": "모든 API가 i18n 경로에서 작동하고 기존 경로는 리디렉션",
+      "analysisResult": "E-Commerce 다국어 통합 시스템 구축 - PRD 기반 5일 구현 계획. 언어팩 시스템 통합(8개→3개 디렉토리), 섹션 관리 실시간 동기화(6개→24개 섹션), 한국어 기본 언어 시스템, JSON 기반 고속 렌더링 구현",
+      "summary": "✅ Phase 4-1: API 통합 및 리디렉션 완료 - 새로운 i18n API 구조로 이전하고 이전 경로에서 301 리디렉션 설정으로 하위 호환성 확보. 언어 설정(/api/admin/i18n/settings), 언어팩 콘텐츠(/api/admin/i18n/content), 번역 관리(/api/admin/i18n/translate)가 체계적으로 분리되어 명확한 API 구조 구축됨",
+      "completedAt": "2025-09-02T16:33:25.205Z"
+    }
+  ]
+}

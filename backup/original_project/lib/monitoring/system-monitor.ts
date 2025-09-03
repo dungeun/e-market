@@ -2,12 +2,10 @@
  * 시스템 모니터링 서비스 - 실시간 성능 추적
  */
 
-import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 import os from 'os'
 import { performance } from 'perf_hooks'
 
-const prisma = new PrismaClient()
 const redis = new Redis(process.env.REDIS_URL!)
 
 export interface SystemMetrics {
@@ -387,7 +385,7 @@ export class SystemMonitorService {
   private async sendImmediateNotification(alert: Alert) {
     // 관리자에게 즉시 알림 발송 (이메일/SMS/슬랙 등)
     // 현재는 로그만 출력
-    console.error(`🚨 CRITICAL ALERT: ${alert.message}`)
+
   }
 
   /**
@@ -395,7 +393,7 @@ export class SystemMonitorService {
    */
   async getMetricsHistory(hours = 24) {
     const now = Math.floor(Date.now() / 60000)
-    const history: any[] = []
+    const history: unknown[] = []
 
     for (let i = hours * 60; i >= 0; i -= 5) { // 5분 간격
       const key = `metrics:${now - i}`

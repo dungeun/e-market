@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import type { User, RequestContext } from '@/lib/types/common';
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
 import { AppError } from '../middleware/error'
@@ -35,7 +35,7 @@ export class PaymentService {
       }
 
       // Check if payment already exists
-      const existingPayment = await prisma.payment.findFirst({
+      const existingPayment = await query({
         where: {
           orderId: data.orderId,
           status: {
@@ -49,7 +49,7 @@ export class PaymentService {
       }
 
       // Get user info
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: order.userId },
         select: {
           id: true,
@@ -113,7 +113,7 @@ export class PaymentService {
       const gatewayResponse = await gateway.initiatePayment(paymentRequest)
 
       // Update payment with gateway session data
-      await prisma.payment.update({
+      await query({
         where: { id: payment.id },
         data: {
           gatewayResponse: {
@@ -137,7 +137,7 @@ export class PaymentService {
 
   // Confirm payment after return from gateway
   async confirmPayment(data: ConfirmPaymentInput): Promise<PaymentWithOrder> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id: data.paymentId },
       include: {
         order: true,
@@ -211,7 +211,7 @@ export class PaymentService {
 
   // Cancel payment
   async cancelPayment(id: string, data: CancelPaymentInput): Promise<PaymentWithOrder> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id },
     })
 
@@ -262,7 +262,7 @@ export class PaymentService {
 
   // Process refund
   async refundPayment(id: string, data: RefundPaymentInput): Promise<PaymentWithOrder> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id },
     })
 
@@ -408,7 +408,7 @@ export class PaymentService {
     const skip = (page - 1) * limit
 
     const [payments, total] = await Promise.all([
-      prisma.payment.findMany({
+      query({
         where,
         skip,
         take: limit,
@@ -428,7 +428,7 @@ export class PaymentService {
           },
         },
       }),
-      prisma.payment.count({ where }),
+      query({ where }),
     ])
 
     const paymentsWithOrder = payments.map(payment => this.formatPaymentWithOrder(payment))
@@ -448,7 +448,7 @@ export class PaymentService {
   async savePaymentMethod(userId: string, data: SavePaymentMethodInput): Promise<PaymentMethod> {
     // If setting as default, unset other defaults
     if (data.isDefault) {
-      await prisma.paymentMethod.updateMany({
+      await queryMany({
         where: {
           userId,
           isDefault: true,
@@ -459,7 +459,7 @@ export class PaymentService {
       })
     }
 
-    const paymentMethod = await prisma.paymentMethod.create({
+    const paymentMethod = await query({
       data: {
         userId,
         type: this.mapToValidPaymentMethodType(data.type),
@@ -478,7 +478,7 @@ export class PaymentService {
 
   // Get user payment methods
   async getUserPaymentMethods(userId: string): Promise<PaymentMethod[]> {
-    const methods = await prisma.paymentMethod.findMany({
+    const methods = await query({
       where: { userId },
       orderBy: [
         { isDefault: 'desc' },
@@ -491,7 +491,7 @@ export class PaymentService {
 
   // Delete payment method
   async deletePaymentMethod(id: string, userId: string): Promise<void> {
-    const method = await prisma.paymentMethod.findFirst({
+    const method = await query({
       where: { id, userId },
     })
 
@@ -499,7 +499,7 @@ export class PaymentService {
       throw new AppError('Payment method not found', 404)
     }
 
-    await prisma.paymentMethod.delete({
+    await query({
       where: { id },
     })
 
@@ -508,7 +508,7 @@ export class PaymentService {
 
   // Generate payment receipt
   async generateReceipt(paymentId: string): Promise<PaymentReceipt> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id: paymentId },
       include: {
         order: {
@@ -546,7 +546,7 @@ export class PaymentService {
       : {}
 
     const [totalPayments, paymentStats] = await Promise.all([
-      prisma.payment.count({ where }),
+      query({ where }),
       prisma.payment.aggregate({
         where,
         _sum: {
@@ -585,7 +585,7 @@ export class PaymentService {
     // Calculate success rates by gateway
     const gatewayStats = await Promise.all(
       paymentsByGateway.map(async (gw) => {
-        const successCount = await prisma.payment.count({
+        const successCount = await query({
           where: {
             ...where,
             gateway: gw.gateway,
@@ -605,7 +605,7 @@ export class PaymentService {
     )
 
     // Get recent payments
-    const recentPayments = await prisma.payment.findMany({
+    const recentPayments = await query({
       where,
       take: 10,
       orderBy: { createdAt: 'desc' },
@@ -626,7 +626,7 @@ export class PaymentService {
   }
 
   // Process webhook from payment gateway
-  async processWebhook(gateway: string, payload: any, signature?: string): Promise<void> {
+  async processWebhook(gateway: string, payload: unknown, signature?: string): Promise<void> {
     const paymentGateway = PaymentGatewayFactory.getGateway(gateway)
 
     // Verify webhook signature
@@ -641,7 +641,7 @@ export class PaymentService {
 
   // Private helper methods
   private async getPaymentWithOrder(paymentId: string): Promise<PaymentWithOrder> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id: paymentId },
       include: {
         order: {
@@ -666,7 +666,7 @@ export class PaymentService {
     return this.formatPaymentWithOrder(payment)
   }
 
-  private formatPaymentWithOrder(payment: any): PaymentWithOrder {
+  private formatPaymentWithOrder(payment: unknown): PaymentWithOrder {
     return {
       id: payment.id,
       orderId: payment.orderId,
@@ -676,9 +676,9 @@ export class PaymentService {
       gateway: payment.gateway,
       method: payment.method || undefined,
       transactionId: payment.transactionId || undefined,
-      gatewayResponse: payment.gatewayResponse as Record<string, any>,
+      gatewayResponse: payment.gatewayResponse as Record<string, unknown>,
       processedAt: payment.processedAt || undefined,
-      metadata: payment.metadata as Record<string, any>,
+      metadata: payment.metadata as Record<string, unknown>,
       createdAt: payment.createdAt,
       updatedAt: payment.updatedAt,
       order: {
@@ -697,7 +697,7 @@ export class PaymentService {
     }
   }
 
-  private formatPaymentDetails(payment: any): PaymentDetails {
+  private formatPaymentDetails(payment: unknown): PaymentDetails {
     return {
       id: payment.id,
       orderId: payment.orderId,
@@ -707,15 +707,15 @@ export class PaymentService {
       gateway: payment.gateway,
       method: payment.method || undefined,
       transactionId: payment.transactionId || undefined,
-      gatewayResponse: payment.gatewayResponse as Record<string, any>,
+      gatewayResponse: payment.gatewayResponse as Record<string, unknown>,
       processedAt: payment.processedAt || undefined,
-      metadata: payment.metadata as Record<string, any>,
+      metadata: payment.metadata as Record<string, unknown>,
       createdAt: payment.createdAt,
       updatedAt: payment.updatedAt,
     }
   }
 
-  private formatPaymentMethod(method: any): PaymentMethod {
+  private formatPaymentMethod(method: unknown): PaymentMethod {
     const currentYear = new Date().getFullYear()
     const currentMonth = new Date().getMonth() + 1
 

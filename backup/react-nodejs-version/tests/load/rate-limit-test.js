@@ -11,7 +11,7 @@ const { performance } = require('perf_hooks');
 
 class LoadTester {
   constructor(options = {}) {
-    this.baseUrl = options.baseUrl || 'http://localhost:3000';
+    this.baseUrl = options.baseUrl || env.appUrl;
     this.concurrency = options.concurrency || 10;
     this.duration = options.duration || 60000; // 60 seconds
     this.endpoints = options.endpoints || ['/api/products', '/api/health'];
@@ -138,13 +138,6 @@ class LoadTester {
    * Generate concurrent load for specified duration
    */
   async runLoadTest() {
-    console.log(`Starting load test...`);
-    console.log(`Base URL: ${this.baseUrl}`);
-    console.log(`Concurrency: ${this.concurrency}`);
-    console.log(`Duration: ${this.duration}ms`);
-    console.log(`Endpoints: ${this.endpoints.join(', ')}`);
-    console.log(`User Tiers: ${this.userTiers.join(', ')}`);
-    console.log('---');
 
     this.isRunning = true;
     const startTime = Date.now();
@@ -183,19 +176,19 @@ class LoadTester {
         
         // Log rate limiting events
         if (result.statusCode === 429) {
-          console.log(`[RATE LIMITED] Worker ${workerId}: ${userTier} tier hit rate limit on ${endpoint}`);
+
         }
         
         // Log critical errors
         if (result.statusCode >= 500) {
-          console.log(`[ERROR] Worker ${workerId}: ${result.statusCode} on ${endpoint}`);
+
         }
         
         // Small delay to prevent overwhelming
         await this.sleep(Math.random() * 100); // 0-100ms random delay
         
       } catch (error) {
-        console.error(`Worker ${workerId} error:`, error.message);
+
         await this.sleep(1000); // Wait longer on error
       }
     }
@@ -205,49 +198,37 @@ class LoadTester {
    * Print comprehensive test results
    */
   printResults(duration) {
-    console.log('\n=== LOAD TEST RESULTS ===');
-    console.log(`Duration: ${duration}ms`);
-    console.log(`Total Requests: ${this.metrics.requests}`);
-    console.log(`Total Responses: ${this.metrics.responses}`);
-    console.log(`Success Rate: ${((this.metrics.responses - this.metrics.errors) / this.metrics.responses * 100).toFixed(2)}%`);
-    console.log(`Error Rate: ${(this.metrics.errors / this.metrics.responses * 100).toFixed(2)}%`);
-    console.log(`Rate Limited: ${this.metrics.rateLimited} (${(this.metrics.rateLimited / this.metrics.responses * 100).toFixed(2)}%)`);
-    console.log(`Requests/sec: ${(this.metrics.requests / (duration / 1000)).toFixed(2)}`);
-    
+
     // Response time statistics
     const avgResponseTime = this.metrics.responseTimeSum / this.metrics.responses;
-    console.log('\n--- Response Time ---');
-    console.log(`Average: ${avgResponseTime.toFixed(2)}ms`);
-    console.log(`Min: ${this.metrics.responseTimeMin.toFixed(2)}ms`);
-    console.log(`Max: ${this.metrics.responseTimeMax.toFixed(2)}ms`);
-    
+
     // Status code breakdown
-    console.log('\n--- Status Codes ---');
+
     Object.entries(this.metrics.statusCodes)
       .sort(([a], [b]) => a - b)
       .forEach(([code, count]) => {
         const percentage = (count / this.metrics.responses * 100).toFixed(2);
-        console.log(`${code}: ${count} (${percentage}%)`);
+        
       });
     
     // Error type breakdown
     if (Object.keys(this.metrics.errorTypes).length > 0) {
-      console.log('\n--- Error Types ---');
+
       Object.entries(this.metrics.errorTypes)
         .sort(([,a], [,b]) => b - a)
         .forEach(([type, count]) => {
           const percentage = (count / this.metrics.errors * 100).toFixed(2);
-          console.log(`${type}: ${count} (${percentage}%)`);
+          
         });
     }
     
     // Rate limit by tier
     if (Object.keys(this.metrics.rateLimitTiers).length > 0) {
-      console.log('\n--- Rate Limits by Tier ---');
+
       Object.entries(this.metrics.rateLimitTiers)
         .sort(([,a], [,b]) => b - a)
         .forEach(([tier, count]) => {
-          console.log(`${tier}: ${count} rate limits`);
+
         });
     }
   }
@@ -256,11 +237,9 @@ class LoadTester {
    * Test rate limiting thresholds for different user tiers
    */
   async testRateLimitThresholds() {
-    console.log('\n=== TESTING RATE LIMIT THRESHOLDS ===');
-    
+
     for (const tier of this.userTiers) {
-      console.log(`\nTesting ${tier} tier...`);
-      
+
       const requests = [];
       const maxRequests = 150; // Exceed all tier limits
       
@@ -272,12 +251,7 @@ class LoadTester {
       
       const successCount = results.filter(r => r.statusCode === 200).length;
       const rateLimitCount = results.filter(r => r.statusCode === 429).length;
-      
-      console.log(`${tier} tier results:`);
-      console.log(`  Successful requests: ${successCount}`);
-      console.log(`  Rate limited: ${rateLimitCount}`);
-      console.log(`  Rate limit threshold: ~${successCount}`);
-      
+
       // Wait before testing next tier
       await this.sleep(2000);
     }
@@ -287,8 +261,7 @@ class LoadTester {
    * Test circuit breaker functionality
    */
   async testCircuitBreaker() {
-    console.log('\n=== TESTING CIRCUIT BREAKER ===');
-    
+
     // Make requests to an endpoint that might trigger circuit breaker
     const results = [];
     for (let i = 0; i < 20; i++) {
@@ -296,7 +269,7 @@ class LoadTester {
       results.push(result);
       
       if (result.statusCode === 503) {
-        console.log(`Circuit breaker opened after ${i + 1} requests`);
+
         break;
       }
       
@@ -305,7 +278,7 @@ class LoadTester {
     }
     
     const serviceUnavailable = results.filter(r => r.statusCode === 503).length;
-    console.log(`Service unavailable responses: ${serviceUnavailable}`);
+
   }
 
   /**
@@ -346,11 +319,10 @@ const testConfigs = {
 // Main execution
 async function main() {
   const testType = process.argv[2] || 'moderate';
-  const baseUrl = process.argv[3] || 'http://localhost:3000';
+  const baseUrl = process.argv[3] || env.appUrl;
   
   if (!testConfigs[testType]) {
-    console.error(`Unknown test type: ${testType}`);
-    console.error(`Available types: ${Object.keys(testConfigs).join(', ')}`);
+
     process.exit(1);
   }
   
@@ -368,27 +340,24 @@ async function main() {
   const tester = new LoadTester(config);
   
   try {
-    console.log(`Running ${testType} load test against ${baseUrl}`);
-    
+
     // Run main load test
     await tester.runLoadTest();
     
     // Additional specific tests
-    console.log('\nRunning additional tests...');
+
     await tester.testRateLimitThresholds();
     await tester.testCircuitBreaker();
-    
-    console.log('\n=== ALL TESTS COMPLETED ===');
-    
+
   } catch (error) {
-    console.error('Load test failed:', error);
+
     process.exit(1);
   }
 }
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\nReceived SIGINT. Shutting down gracefully...');
+
   process.exit(0);
 });
 

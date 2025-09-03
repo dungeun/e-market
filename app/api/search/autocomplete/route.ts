@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 검색 자동완성 API
  */
@@ -24,8 +26,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: suggestions
     })
-  } catch (error: any) {
-    console.error('Autocomplete error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Autocomplete failed' },
       { status: 500 }

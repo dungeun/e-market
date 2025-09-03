@@ -1,7 +1,14 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import dynamic from 'next/dynamic'
-import { ProductSection } from '@/lib/stores/ui-config.store'
+// 섹션 타입 정의
+interface SectionType {
+  id: string
+  type: string
+  config?: any
+}
 import { Skeleton } from '@/components/ui/skeleton'
 
 // 동적 임포트로 섹션 컴포넌트 로드 - Orvio 템플릿 우선 사용
@@ -61,27 +68,47 @@ function SectionSkeleton({ height = '400px' }: { height?: string }) {
 }
 
 interface DynamicSectionProps {
-  section: ProductSection
+  section?: SectionType
   data?: any
+  sectionId?: string
+  className?: string
+  config?: any
+  props?: any
 }
 
-export default function DynamicSection({ section, data }: DynamicSectionProps) {
-  const Component = sectionComponents[section.type]
+const DynamicSection = React.memo(function DynamicSection({ section, data, sectionId, className, config, props }: DynamicSectionProps) {
+  // Handle case where section prop is not provided (when called from DynamicSectionRenderer)
+  const sectionType = section?.type || 'dynamic'
+  const sectionConfig = section?.config || config || {}
+  const sectionData = data || []
+  
+  const Component = sectionComponents[sectionType]
 
-  if (!Component) {
-    console.warn(`Section component not found for type: ${section.type}`)
+  if (!Component && sectionType !== 'dynamic') {
+    console.warn(`DynamicSection: Unknown section type "${sectionType}"`)
     return null
   }
 
   // config의 layout이 'list'인 경우 'grid'로 변환
   const adjustedConfig = {
-    ...section.config,
-    layout: section.config?.layout === 'list' ? 'grid' : section.config?.layout
+    ...sectionConfig,
+    layout: sectionConfig?.layout === 'list' ? 'grid' : sectionConfig?.layout
   }
 
+  // For dynamic sections without specific component, render empty div
+  if (!Component) {
+    return (
+      <div id={`section-${sectionId || section?.id || 'dynamic'}`} className={className || "section-wrapper"}>
+        {/* Dynamic section placeholder */}
+      </div>
+    )
+  }
+  
   return (
-    <div id={`section-${section.id}`} className="section-wrapper">
-      <Component config={adjustedConfig} products={data} data={data} />
+    <div id={`section-${sectionId || section?.id || sectionType}`} className={className || "section-wrapper"}>
+      <Component config={adjustedConfig} products={sectionData} data={sectionData} {...props} />
     </div>
-  )
-}
+    )
+});
+
+export default DynamicSection;

@@ -51,7 +51,7 @@ export function ProductsTable() {
         setProducts(data)
       }
     } catch (error) {
-      console.error('Error fetching products:', error)
+
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +71,7 @@ export function ProductsTable() {
         setProducts(products.filter(p => p.id !== productId))
       }
     } catch (error) {
-      console.error('Error deleting product:', error)
+
     }
   }
 
@@ -91,7 +91,7 @@ export function ProductsTable() {
         ))
       }
     } catch (error) {
-      console.error('Error updating product status:', error)
+
     }
   }
 

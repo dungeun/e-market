@@ -61,7 +61,7 @@ export class PayPalGateway extends PaymentGateway {
       this.tokenExpiry = new Date(Date.now() + (response.data.expires_in - 60) * 1000)
       
       return this.accessToken || ''
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal get access token error:', error)
       throw new AppError('Failed to authenticate with PayPal', 500)
     }
@@ -101,7 +101,7 @@ export class PayPalGateway extends PaymentGateway {
         }
       )
 
-      const approveLink = response.data.links.find((link: any) => link.rel === 'approve')
+      const approveLink = response.data.links.find((link: unknown) => link.rel === 'approve')
 
       return {
         paymentId: response.data.id,
@@ -111,13 +111,13 @@ export class PayPalGateway extends PaymentGateway {
         },
         expiresAt: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3 hours
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal initiate payment error:', error)
       throw new AppError(error.response?.data?.message || 'Failed to initiate payment', 500)
     }
   }
 
-  async confirmPayment(paymentId: string, _data: any): Promise<GatewayResponse> {
+  async confirmPayment(paymentId: string, _data: unknown): Promise<GatewayResponse> {
     try {
       const accessToken = await this.getAccessToken()
 
@@ -150,7 +150,7 @@ export class PayPalGateway extends PaymentGateway {
           rawResponse: response.data,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal confirm payment error:', error)
       
       return {
@@ -219,7 +219,7 @@ export class PayPalGateway extends PaymentGateway {
           rawResponse: response.data,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal refund payment error:', error)
       
       return {
@@ -249,7 +249,7 @@ export class PayPalGateway extends PaymentGateway {
         transactionId: response.data.id,
         rawResponse: response.data,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal get payment status error:', error)
       
       return {
@@ -261,7 +261,7 @@ export class PayPalGateway extends PaymentGateway {
     }
   }
 
-  verifyWebhookSignature(_payload: any, _signature: string): boolean {
+  verifyWebhookSignature(_payload: unknown, _signature: string): boolean {
     try {
       // PayPal webhook verification requires additional API call
       // For simplicity, returning true here
@@ -313,7 +313,7 @@ export class PayPalGateway extends PaymentGateway {
           approvalNumber: capture.id,
         },
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('PayPal generate receipt error:', error)
       throw new AppError('Failed to generate receipt', 500)
     }

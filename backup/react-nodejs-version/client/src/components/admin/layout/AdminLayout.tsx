@@ -71,7 +71,7 @@ const adminRoutes: AdminRoute[] = [
   },
 ]
 
-const iconMap: { [key: string]: React.ComponentType<any> } = {
+const iconMap: { [key: string]: React.ComponentType<unknown> } = {
   LayoutDashboard,
   Package,
   ShoppingCart,

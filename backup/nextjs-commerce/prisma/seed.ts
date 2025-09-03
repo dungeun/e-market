@@ -1,16 +1,13 @@
 import { PrismaClient, UserRole, ProductStatus, ProductType } from '@prisma/client'
 import bcrypt from 'bcrypt'
 
-const prisma = new PrismaClient()
-
 async function main() {
-  console.log('🌱 Starting database seeding...')
 
   // Create admin users
   const hashedAdminPassword = await bcrypt.hash('admin123', 12)
   const hashedUserPassword = await bcrypt.hash('user123', 12)
   
-  const adminUser = await prisma.user.upsert({
+  const adminUser = await query({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
@@ -24,7 +21,7 @@ async function main() {
     },
   })
 
-  const regularUser = await prisma.user.upsert({
+  const regularUser = await query({
     where: { email: 'user@example.com' },
     update: {},
     create: {
@@ -38,12 +35,9 @@ async function main() {
     },
   })
 
-  console.log('✅ Admin user created:', adminUser.email)
-  console.log('✅ Regular user created:', regularUser.email)
-
   // Create categories
   const categories = await Promise.all([
-    prisma.category.upsert({
+    query({
       where: { slug: 'electronics' },
       update: {},
       create: {
@@ -53,7 +47,7 @@ async function main() {
         sortOrder: 1,
       },
     }),
-    prisma.category.upsert({
+    query({
       where: { slug: 'clothing' },
       update: {},
       create: {
@@ -63,7 +57,7 @@ async function main() {
         sortOrder: 2,
       },
     }),
-    prisma.category.upsert({
+    query({
       where: { slug: 'books' },
       update: {},
       create: {
@@ -75,11 +69,9 @@ async function main() {
     }),
   ])
 
-  console.log('✅ Categories created:', categories.length)
-
   // Create subcategories
   const subcategories = await Promise.all([
-    prisma.category.upsert({
+    query({
       where: { slug: 'smartphones' },
       update: {},
       create: {
@@ -90,7 +82,7 @@ async function main() {
         sortOrder: 1,
       },
     }),
-    prisma.category.upsert({
+    query({
       where: { slug: 'laptops' },
       update: {},
       create: {
@@ -101,7 +93,7 @@ async function main() {
         sortOrder: 2,
       },
     }),
-    prisma.category.upsert({
+    query({
       where: { slug: 't-shirts' },
       update: {},
       create: {
@@ -114,37 +106,33 @@ async function main() {
     }),
   ])
 
-  console.log('✅ Subcategories created:', subcategories.length)
-
   // Create tags
   const tags = await Promise.all([
-    prisma.tag.upsert({
+    query({
       where: { slug: 'bestseller' },
       update: {},
       create: { name: 'Bestseller', slug: 'bestseller' },
     }),
-    prisma.tag.upsert({
+    query({
       where: { slug: 'new-arrival' },
       update: {},
       create: { name: 'New Arrival', slug: 'new-arrival' },
     }),
-    prisma.tag.upsert({
+    query({
       where: { slug: 'sale' },
       update: {},
       create: { name: 'Sale', slug: 'sale' },
     }),
-    prisma.tag.upsert({
+    query({
       where: { slug: 'premium' },
       update: {},
       create: { name: 'Premium', slug: 'premium' },
     }),
   ])
 
-  console.log('✅ Tags created:', tags.length)
-
   // Create sample products
   const products = await Promise.all([
-    prisma.product.upsert({
+    query({
       where: { slug: 'iphone-15-pro' },
       update: {},
       create: {
@@ -221,7 +209,7 @@ async function main() {
         },
       },
     }),
-    prisma.product.upsert({
+    query({
       where: { slug: 'macbook-air-m3' },
       update: {},
       create: {
@@ -269,7 +257,7 @@ async function main() {
         },
       },
     }),
-    prisma.product.upsert({
+    query({
       where: { slug: 'premium-cotton-tshirt' },
       update: {},
       create: {
@@ -350,11 +338,9 @@ async function main() {
     }),
   ])
 
-  console.log('✅ Products created:', products.length)
-
   // Create coupons
   const coupons = await Promise.all([
-    prisma.coupon.upsert({
+    query({
       where: { code: 'WELCOME10' },
       update: {},
       create: {
@@ -369,7 +355,7 @@ async function main() {
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       },
     }),
-    prisma.coupon.upsert({
+    query({
       where: { code: 'FREESHIP' },
       update: {},
       create: {
@@ -386,11 +372,9 @@ async function main() {
     }),
   ])
 
-  console.log('✅ Coupons created:', coupons.length)
-
   // Create system settings
   const settings = await Promise.all([
-    prisma.setting.upsert({
+    query({
       where: { key: 'site_name' },
       update: {},
       create: {
@@ -400,7 +384,7 @@ async function main() {
         isPublic: true,
       },
     }),
-    prisma.setting.upsert({
+    query({
       where: { key: 'default_currency' },
       update: {},
       create: {
@@ -410,7 +394,7 @@ async function main() {
         isPublic: true,
       },
     }),
-    prisma.setting.upsert({
+    query({
       where: { key: 'tax_rate' },
       update: {},
       create: {
@@ -420,7 +404,7 @@ async function main() {
         isPublic: false,
       },
     }),
-    prisma.setting.upsert({
+    query({
       where: { key: 'shipping_rates' },
       update: {},
       create: {
@@ -436,14 +420,11 @@ async function main() {
     }),
   ])
 
-  console.log('✅ Settings created:', settings.length)
-
-  console.log('🎉 Database seeding completed successfully!')
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during seeding:', e)
+
     process.exit(1)
   })
   .finally(async () => {

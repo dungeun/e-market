@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
 const defaultUISections = [
   {
@@ -347,7 +345,7 @@ async function main() {
 
   try {
     for (const sectionData of defaultUISections) {
-      await prisma.uISection.upsert({
+      await query({
         where: {
           key: sectionData.key
         },

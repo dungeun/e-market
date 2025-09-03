@@ -37,7 +37,7 @@ export class InicisGateway extends PaymentGateway {
     }
   }
 
-  private generateSignature(params: Record<string, any>): string {
+  private generateSignature(params: Record<string, unknown>): string {
     // Inicis signature generation
     const signData = Object.keys(params)
       .sort()
@@ -97,7 +97,7 @@ export class InicisGateway extends PaymentGateway {
     }
   }
 
-  async confirmPayment(_paymentId: string, data: any): Promise<GatewayResponse> {
+  async confirmPayment(_paymentId: string, data: unknown): Promise<GatewayResponse> {
     try {
       const { authToken, authUrl } = data
 
@@ -131,7 +131,7 @@ export class InicisGateway extends PaymentGateway {
           rawResponse: response.data,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Inicis confirm payment error:', error)
       
       return {
@@ -205,7 +205,7 @@ export class InicisGateway extends PaymentGateway {
           rawResponse: response.data,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Inicis refund payment error:', error)
       
       return {
@@ -257,7 +257,7 @@ export class InicisGateway extends PaymentGateway {
           rawResponse: response.data,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Inicis get payment status error:', error)
       
       return {
@@ -268,7 +268,7 @@ export class InicisGateway extends PaymentGateway {
     }
   }
 
-  verifyWebhookSignature(payload: any, signature: string): boolean {
+  verifyWebhookSignature(payload: unknown, signature: string): boolean {
     try {
       // Inicis webhook verification
       const expectedSignature = this.generateSignature(payload)

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import type { User, RequestContext } from '@/lib/types/common';
 import { logger } from '../utils/logger'
 
 export class QueryOptimizationService {
@@ -77,7 +77,7 @@ export class QueryOptimizationService {
   /**
    * Analyze query performance
    */
-  async analyzeQuery(query: string): Promise<any> {
+  async analyzeQuery(query: string): Promise<unknown> {
     try {
       const result = await this.prisma.$executeRawUnsafe(`EXPLAIN ANALYZE ${query}`)
       return result
@@ -112,7 +112,7 @@ export class QueryOptimizationService {
         LIMIT ${limit}
       `
 
-      return slowQueries as any[]
+      return slowQueries as unknown[]
     } catch (error) {
       logger.error('Error getting slow queries:', error)
       return []
@@ -126,7 +126,7 @@ export class QueryOptimizationService {
     return {
       // Product listing with pagination
       productList: (limit: number, offset: number, categoryId?: string) => {
-        const baseQuery = this.prisma.product.findMany({
+        const baseQuery = this.query({
           where: {
             status: 'PUBLISHED',
             ...(categoryId && { categoryId }),
@@ -213,7 +213,7 @@ export class QueryOptimizationService {
 
       // Order with all related data (optimized joins)
       orderWithDetails: (orderId: string) => {
-        return this.prisma.order.findUnique({
+        return this.query({
           where: { id: orderId },
           include: {
             items: {
@@ -251,7 +251,7 @@ export class QueryOptimizationService {
   /**
    * Database connection pooling stats
    */
-  async getConnectionPoolStats(): Promise<any> {
+  async getConnectionPoolStats(): Promise<unknown> {
     try {
       const stats = await this.prisma.$queryRaw`
         SELECT 
@@ -299,7 +299,7 @@ export class QueryOptimizationService {
  * Query result cache wrapper
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function withQueryCache<T extends (...args: any[]) => Promise<any>>(
+export function withQueryCache<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getCacheKey: (...args: Parameters<T>) => string,

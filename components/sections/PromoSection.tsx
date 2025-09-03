@@ -1,8 +1,11 @@
 'use client';
 
+import React from 'react';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface PromoBanner {
   id: string;
@@ -22,30 +25,66 @@ interface PromoSectionProps {
   className?: string;
 }
 
-export default function PromoSection({ sectionId = 'promo', className = '' }: PromoSectionProps) {
+const PromoSection = React.memo(function PromoSection({ sectionId = 'promo', className = '' }: PromoSectionProps) {
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const { currentLanguage } = useLanguage();
 
   useEffect(() => {
     loadPromoData();
-  }, [sectionId]);
+  }, [sectionId, currentLanguage]);
 
   const loadPromoData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/ui-sections/${sectionId}`);
+      const response = await fetch(`/api/ui-sections/${sectionId}`, {
+        headers: {
+          'Accept-Language': currentLanguage
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
         if (data.section) {
-          const visibleBanners = data.section.content?.banners?.filter((banner: PromoBanner) => banner.visible) || [];
-          setPromoBanners(visibleBanners.sort((a: PromoBanner, b: PromoBanner) => a.order - b.order));
+          // Check for banners in different possible locations
+          const banners = data.section.data?.banners || data.section.content?.banners || [];
+          const visibleBanners = banners.filter((banner: PromoBanner) => banner.visible !== false);
+          if (visibleBanners.length > 0) {
+            setPromoBanners(visibleBanners.sort((a: PromoBanner, b: PromoBanner) => a.order - b.order));
+          } else {
+            // 기본 프로모 배너 데이터 설정
+            const defaultBanners: PromoBanner[] = [
+              {
+                id: '1',
+                title: '여름 특가 세일',
+                subtitle: '최대 50% 할인',
+                buttonText: '지금 쇼핑하기',
+                link: '/products?sale=summer',
+                backgroundColor: 'bg-gradient-to-r from-orange-400 to-pink-500',
+                textColor: 'text-white',
+                visible: true,
+                order: 1
+              },
+              {
+                id: '2',
+                title: '신규 회원 혜택',
+                subtitle: '첫 구매 시 무료배송',
+                buttonText: '회원가입하기',
+                link: '/auth/register',
+                backgroundColor: 'bg-gradient-to-r from-blue-500 to-purple-600',
+                textColor: 'text-white',
+                visible: true,
+                order: 2
+              }
+            ];
+            setPromoBanners(defaultBanners);
+          }
           setIsVisible(data.section.isActive !== false);
         }
       }
     } catch (error) {
-      console.error('Error loading promo section:', error);
+
     } finally {
       setLoading(false);
     }
@@ -65,7 +104,7 @@ export default function PromoSection({ sectionId = 'promo', className = '' }: Pr
     );
   }
 
-  if (!isVisible || promoBanners.length === 0) {
+  if (!isVisible) {
     return null;
   }
 
@@ -122,4 +161,5 @@ export default function PromoSection({ sectionId = 'promo', className = '' }: Pr
       </div>
     </section>
   );
-}
+});
+export default PromoSection;

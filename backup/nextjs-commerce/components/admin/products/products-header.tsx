@@ -45,7 +45,7 @@ export function ProductsHeader() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => {
-          console.log('Product data:', data)
+
           setIsModalOpen(false)
         }}
       />

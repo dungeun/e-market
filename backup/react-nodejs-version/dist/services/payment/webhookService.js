@@ -375,7 +375,7 @@ class WebhookService {
                 };
                 break;
         }
-        return await database_1.prisma.payment.findFirst({ where });
+        return await database_1.query({ where });
     }
     /**
      * Extract failure reason from gateway data (currently unused)

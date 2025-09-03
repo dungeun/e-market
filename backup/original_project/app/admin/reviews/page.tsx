@@ -127,11 +127,11 @@ const reviews = [
 
 export default function ReviewsPage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedReview, setSelectedReview] = useState<any>(null)
+  const [selectedReview, setSelectedReview] = useState<unknown>(null)
   const [replyText, setReplyText] = useState('')
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       approved: { label: '승인됨', color: 'bg-green-100 text-green-800', icon: CheckCircle },
       pending: { label: '검토중', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
       flagged: { label: '신고됨', color: 'bg-red-100 text-red-800', icon: Flag },
@@ -164,7 +164,7 @@ export default function ReviewsPage() {
     )
   }
 
-  const handleReviewAction = (action: string, review: any) => {
+  const handleReviewAction = (action: string, review: unknown) => {
     switch(action) {
       case 'view':
         setSelectedReview(review)

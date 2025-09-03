@@ -169,7 +169,7 @@ class AdminService {
     }
   }
 
-  async createProduct(productData: any) {
+  async createProduct(productData: unknown) {
     try {
       const response = await api.post('/api/v1/products', productData)
       return response.data
@@ -178,7 +178,7 @@ class AdminService {
     }
   }
 
-  async updateProduct(productId: string, productData: any) {
+  async updateProduct(productId: string, productData: unknown) {
     try {
       const response = await api.put(`/api/v1/products/${productId}`, productData)
       return response.data
@@ -269,7 +269,7 @@ class AdminService {
     }
   }
 
-  async generateReport(type: string, options: any) {
+  async generateReport(type: string, options: unknown) {
     try {
       const response = await api.post('/api/v1/reports/generate', {
         type,
@@ -295,7 +295,7 @@ class AdminService {
     }
   }
 
-  async updateSettings(settings: any) {
+  async updateSettings(settings: unknown) {
     try {
       const response = await api.put('/api/v1/settings', settings)
       return response.data
@@ -335,13 +335,13 @@ class AdminService {
     try {
       await api.patch(`/api/v1/notifications/${notificationId}/read`)
     } catch (error) {
-      console.error('알림 읽음 처리 실패:', error)
+
     }
   }
 
   // ============= 검색 및 필터링 =============
   
-  async searchProducts(query: string, filters?: any) {
+  async searchProducts(query: string, filters?: unknown) {
     try {
       const params = new URLSearchParams({
         q: query,

@@ -1,3 +1,4 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 
 interface RouteParams {
@@ -22,7 +23,7 @@ export async function PATCH(
       redirect: '/api/admin/ui-config'
     }, { status: 501 })
   } catch (error) {
-    console.error('Failed to update section:', error)
+
     return NextResponse.json(
       { error: 'Failed to update section' },
       { status: 500 }
@@ -44,7 +45,7 @@ export async function DELETE(
       redirect: '/api/admin/ui-config'
     }, { status: 501 })
   } catch (error) {
-    console.error('Failed to delete section:', error)
+
     return NextResponse.json(
       { error: 'Failed to delete section' },
       { status: 500 }

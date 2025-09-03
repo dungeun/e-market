@@ -1,15 +1,17 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import { env } from '@/lib/config/env';
 import { Server } from 'socket.io'
 import { NextRequest } from 'next/server'
 
-const SocketHandler = (req: NextRequest, res: any) => {
+const SocketHandler = (req: NextRequest, res: unknown) => {
   if (res.socket.server.io) {
-    console.log('Socket is already running')
+
   } else {
-    console.log('Socket is initializing')
+
     const io = new Server(res.socket.server, {
       path: '/api/socket',
       cors: {
-        origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+        origin: process.env.NEXT_PUBLIC_APP_URL || env.appUrl,
         methods: ['GET', 'POST'],
       },
     })
@@ -17,7 +19,6 @@ const SocketHandler = (req: NextRequest, res: any) => {
     res.socket.server.io = io
 
     io.on('connection', (socket) => {
-      console.log('New client connected:', socket.id)
 
       // 주문 상태 업데이트
       socket.on('order:status', (data) => {
@@ -42,17 +43,17 @@ const SocketHandler = (req: NextRequest, res: any) => {
       // 사용자별 룸 참가
       socket.on('user:join', (userId) => {
         socket.join(`user:${userId}`)
-        console.log(`User ${userId} joined their room`)
+
       })
 
       // 관리자 룸
       socket.on('admin:join', () => {
         socket.join('admin')
-        console.log('Admin joined admin room')
+
       })
 
       socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id)
+
       })
     })
   }

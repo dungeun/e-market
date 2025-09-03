@@ -1,5 +1,4 @@
 import { UpdateCustomerProfile, CustomerAddress, CustomerPaymentMethod, UpdatePaymentMethod, CustomerPreferences, CustomerAnalytics, CustomerSearch, WishlistQuery, CustomerActivityQuery } from '../types/customer';
-import { Prisma } from '@prisma/client';
 export declare class CustomerService {
     static getProfile(userId: string): Promise<{
         email: string;

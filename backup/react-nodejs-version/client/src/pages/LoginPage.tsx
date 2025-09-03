@@ -37,7 +37,7 @@ export default function LoginPage() {
       } else {
         navigate('/');
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.response?.data?.error?.message || 'Invalid email or password');
     } finally {
       setLoading(false);

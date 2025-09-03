@@ -9,7 +9,7 @@ describe('Cart with Product Options Integration', () => {
 
   beforeAll(async () => {
     // Create test product
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test T-Shirt',
         slug: 'test-t-shirt',
@@ -25,7 +25,7 @@ describe('Cart with Product Options Integration', () => {
     productId = product.id
 
     // Create product options
-    const option = await prisma.productOption.create({
+    const option = await query({
       data: {
         productId,
         name: 'size',
@@ -62,11 +62,11 @@ describe('Cart with Product Options Integration', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await prisma.cartItem.deleteMany()
-    await prisma.cart.deleteMany()
-    await prisma.productOptionValue.deleteMany()
-    await prisma.productOption.deleteMany()
-    await prisma.product.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
   })
 
   describe('POST /api/v1/carts', () => {
@@ -116,7 +116,7 @@ describe('Cart with Product Options Integration', () => {
 
       // Find the small size item
       const smallItem = response.body.data.items.find(
-        (item: any) => item.options?.size === 'S'
+        (item: unknown) => item.options?.size === 'S'
       )
       expect(smallItem).toBeDefined()
       expect(smallItem.unitPrice).toBe(29.99) // No price adjustment for Small
@@ -140,7 +140,7 @@ describe('Cart with Product Options Integration', () => {
 
       // Find the large size item
       const largeItem = response.body.data.items.find(
-        (item: any) => item.options?.size === 'L'
+        (item: unknown) => item.options?.size === 'L'
       )
       expect(largeItem).toBeDefined()
       expect(largeItem.quantity).toBe(3) // Should be combined: 2 + 1
@@ -171,7 +171,7 @@ describe('Cart with Product Options Integration', () => {
         .get(`/api/v1/carts/${cartId}`)
 
       const smallItem = cartResponse.body.data.items.find(
-        (item: any) => item.options?.size === 'S'
+        (item: unknown) => item.options?.size === 'S'
       )
 
       const response = await request(app)
@@ -188,7 +188,7 @@ describe('Cart with Product Options Integration', () => {
 
       // Should now have price adjustment for Large size
       const updatedItem = response.body.data.items.find(
-        (item: any) => item.id === smallItem.id
+        (item: unknown) => item.id === smallItem.id
       )
       expect(updatedItem.unitPrice).toBe(34.99)
       expect(updatedItem.quantity).toBe(2)
@@ -206,7 +206,7 @@ describe('Cart with Product Options Integration', () => {
       expect(response.body.data.items).toHaveLength(2)
 
       // Check that all items have options
-      response.body.data.items.forEach((item: any) => {
+      response.body.data.items.forEach((item: unknown) => {
         expect(item.options).toBeDefined()
         expect(item.options.size).toMatch(/^[SLM]$/)
       })

@@ -122,7 +122,7 @@ export class SearchIndexService {
   /**
    * 인덱스 상태 확인
    */
-  async getIndexHealth(): Promise<any> {
+  async getIndexHealth(): Promise<unknown> {
     try {
       return await elasticsearchService.getIndexStats();
     } catch (error) {

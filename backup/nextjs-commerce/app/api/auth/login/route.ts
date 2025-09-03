@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { env } from '@/lib/config/env';
+import { prisma } from "@/lib/db"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
@@ -9,7 +10,7 @@ const LoginSchema = z.object({
   password: z.string(),
 })
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET || env.jwt.secret
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     const validatedData = LoginSchema.parse(body)
     
     // Find user
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { email: validatedData.email },
     })
     
@@ -62,8 +63,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error('Error logging in:', error)
+
     return NextResponse.json(
       { error: 'Failed to login' },
       { status: 500 }

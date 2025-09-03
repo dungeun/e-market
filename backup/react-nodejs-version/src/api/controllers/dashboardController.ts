@@ -14,7 +14,7 @@ export class DashboardController {
         success: true,
         data: metrics
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Dashboard metrics error:', error);
       res.status(500).json({
         success: false,
@@ -52,7 +52,7 @@ export class DashboardController {
         metric as string,
         start,
         end,
-        intervalType as any
+        intervalType as unknown
       );
 
       res.json({
@@ -65,7 +65,7 @@ export class DashboardController {
           values: data
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Time series data error:', error);
       res.status(500).json({
         success: false,
@@ -114,7 +114,7 @@ export class DashboardController {
           sales: salesData
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Realtime sales error:', error);
       res.status(500).json({
         success: false,
@@ -147,7 +147,7 @@ export class DashboardController {
           statusBreakdown: ordersByStatus
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Order analytics error:', error);
       res.status(500).json({
         success: false,
@@ -182,7 +182,7 @@ export class DashboardController {
           topCustomers
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Customer analytics error:', error);
       res.status(500).json({
         success: false,
@@ -231,7 +231,7 @@ export class DashboardController {
           categoryPerformance
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Product analytics error:', error);
       res.status(500).json({
         success: false,
@@ -266,7 +266,7 @@ export class DashboardController {
           recentMovements: stockMovements
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Inventory analytics error:', error);
       res.status(500).json({
         success: false,
@@ -301,7 +301,7 @@ export class DashboardController {
         success: true,
         message: '이벤트가 기록되었습니다.'
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Record event error:', error);
       res.status(500).json({
         success: false,

@@ -13,23 +13,23 @@ describe('Order Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean up database before each test
-    await prisma.orderTimeline.deleteMany()
-    await prisma.orderCoupon.deleteMany()
-    await prisma.orderAddress.deleteMany()
-    await prisma.orderItem.deleteMany()
-    await prisma.order.deleteMany()
-    await prisma.cartCoupon.deleteMany()
-    await prisma.cartItem.deleteMany()
-    await prisma.cart.deleteMany()
-    await prisma.productImage.deleteMany()
-    await prisma.productVariant.deleteMany()
-    await prisma.inventoryLog.deleteMany()
-    await prisma.product.deleteMany()
-    await prisma.address.deleteMany()
-    await prisma.user.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
 
     // Create test user
-    const user = await prisma.user.create({
+    const user = await query({
       data: {
         email: 'test@example.com',
         password: 'hashedpassword',
@@ -46,7 +46,7 @@ describe('Order Integration Tests', () => {
     authToken = jwt.sign({ id: userId, email: user.email }, config.jwtSecret)
 
     // Create test address
-    const address = await prisma.address.create({
+    const address = await query({
       data: {
         userId,
         type: 'SHIPPING',
@@ -64,7 +64,7 @@ describe('Order Integration Tests', () => {
     addressId = address.id
 
     // Create test product
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test Product',
         slug: 'test-product',
@@ -79,7 +79,7 @@ describe('Order Integration Tests', () => {
     productId = product.id
 
     // Create test cart with item
-    const cart = await prisma.cart.create({
+    const cart = await query({
       data: {
         userId,
         currency: 'USD',
@@ -93,7 +93,7 @@ describe('Order Integration Tests', () => {
     })
     cartId = cart.id
 
-    await prisma.cartItem.create({
+    await query({
       data: {
         cartId,
         productId,
@@ -142,17 +142,17 @@ describe('Order Integration Tests', () => {
       })
 
       // Verify cart was deleted
-      const deletedCart = await prisma.cart.findUnique({ where: { id: cartId } })
+      const deletedCart = await query({ where: { id: cartId } })
       expect(deletedCart).toBeNull()
 
       // Verify inventory was updated
-      const updatedProduct = await prisma.product.findUnique({ where: { id: productId } })
+      const updatedProduct = await query({ where: { id: productId } })
       expect(updatedProduct?.quantity).toBe(8) // 10 - 2
     })
 
     it('should fail with empty cart', async () => {
       // Create empty cart
-      const emptyCart = await prisma.cart.create({
+      const emptyCart = await query({
         data: {
           userId,
           currency: 'USD',
@@ -191,7 +191,7 @@ describe('Order Integration Tests', () => {
 
     beforeEach(async () => {
       // Create test order
-      const order = await prisma.order.create({
+      const order = await query({
         data: {
           orderNumber: 'ORD-20240101-0001',
           userId,
@@ -207,7 +207,7 @@ describe('Order Integration Tests', () => {
       orderId = order.id
 
       // Create order items
-      await prisma.orderItem.create({
+      await query({
         data: {
           orderId,
           productId,
@@ -220,7 +220,7 @@ describe('Order Integration Tests', () => {
       })
 
       // Create order addresses
-      await prisma.orderAddress.createMany({
+      await queryMany({
         data: [
           {
             orderId,
@@ -271,7 +271,7 @@ describe('Order Integration Tests', () => {
 
     it('should return 403 for unauthorized access', async () => {
       // Create another user
-      const otherUser = await prisma.user.create({
+      const otherUser = await query({
         data: {
           email: 'other@example.com',
           password: 'hashedpassword',
@@ -293,7 +293,7 @@ describe('Order Integration Tests', () => {
   describe('GET /api/v1/orders/my-orders', () => {
     beforeEach(async () => {
       // Create multiple orders
-      await prisma.order.createMany({
+      await queryMany({
         data: [
           {
             orderNumber: 'ORD-20240101-0001',
@@ -353,7 +353,7 @@ describe('Order Integration Tests', () => {
 
     beforeEach(async () => {
       // Create cancellable order
-      const order = await prisma.order.create({
+      const order = await query({
         data: {
           orderNumber: 'ORD-20240101-0001',
           userId,
@@ -369,7 +369,7 @@ describe('Order Integration Tests', () => {
       orderId = order.id
 
       // Create order item
-      await prisma.orderItem.create({
+      await query({
         data: {
           orderId,
           productId,
@@ -398,13 +398,13 @@ describe('Order Integration Tests', () => {
       expect(response.body.data.status).toBe('CANCELLED')
 
       // Verify inventory was restored
-      const updatedProduct = await prisma.product.findUnique({ where: { id: productId } })
+      const updatedProduct = await query({ where: { id: productId } })
       expect(updatedProduct?.quantity).toBe(11) // 10 + 1
     })
 
     it('should fail to cancel delivered order', async () => {
       // Update order to delivered status
-      await prisma.order.update({
+      await query({
         where: { id: orderId },
         data: { status: 'DELIVERED' },
       })
@@ -429,7 +429,7 @@ describe('Order Integration Tests', () => {
 
     beforeEach(async () => {
       // Create order with timeline events
-      const order = await prisma.order.create({
+      const order = await query({
         data: {
           orderNumber: 'ORD-20240101-0001',
           userId,
@@ -445,7 +445,7 @@ describe('Order Integration Tests', () => {
       orderId = order.id
 
       // Create timeline events
-      await prisma.orderTimeline.createMany({
+      await queryMany({
         data: [
           {
             orderId,
@@ -484,7 +484,7 @@ describe('Order Integration Tests', () => {
   describe('GET /api/v1/orders/my-analytics', () => {
     beforeEach(async () => {
       // Create orders with different statuses
-      await prisma.order.createMany({
+      await queryMany({
         data: [
           {
             orderNumber: 'ORD-20240101-0001',

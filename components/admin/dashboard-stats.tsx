@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useEffect, useState } from 'react'
 import { TrendingUp, TrendingDown, Package, ShoppingCart, Users, DollarSign } from 'lucide-react'
@@ -68,7 +70,7 @@ export function DashboardStats() {
         setStats(data)
       }
     } catch (error) {
-      console.error('Error fetching stats:', error)
+
     } finally {
       setLoading(false)
     }

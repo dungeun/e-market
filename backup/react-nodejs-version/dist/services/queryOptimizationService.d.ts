@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 export declare class QueryOptimizationService {
     private prisma;
     constructor(prisma: PrismaClient);

@@ -129,7 +129,7 @@ export function SectionOrderTab() {
     const uniqueIds = new Set(allIds);
     
     if (allIds.length !== uniqueIds.size) {
-      console.warn('Duplicate section IDs detected in stored configuration');
+
     }
   }, [config]);
   
@@ -163,7 +163,7 @@ export function SectionOrderTab() {
       // ID가 이미 사용 중이면 새로운 ID 생성
       if (usedIds.has(finalId)) {
         finalId = `${finalId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        console.warn(`Duplicate custom section ID detected: ${cs.id}, using new ID: ${finalId}`);
+
       }
       
       usedIds.add(finalId);
@@ -194,7 +194,7 @@ export function SectionOrderTab() {
       } else {
         // 중복된 ID가 있으면 새로운 ID로 변경
         const newId = `${section.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        console.warn(`Duplicate section ID found: ${section.id}, changing to ${newId}`);
+
         sectionMap.set(newId, { ...section, id: newId });
       }
     });
@@ -203,8 +203,7 @@ export function SectionOrderTab() {
     
     // 디버깅용 로그
     if (process.env.NODE_ENV === 'development') {
-      console.log('All sections:', allSections);
-      console.log('Section IDs:', allSections.map(s => s.id));
+
     }
     
     setSections(allSections);
@@ -217,7 +216,7 @@ export function SectionOrderTab() {
     })
   );
 
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = async (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -267,7 +266,7 @@ export function SectionOrderTab() {
           throw new Error('저장 실패');
         }
       } catch (error) {
-        console.error('섹션 순서 저장 실패:', error);
+
         setSaveMessage({ type: 'error', message: '섹션 순서 저장에 실패했습니다.' });
         setTimeout(() => setSaveMessage(null), 3000);
       }
@@ -311,7 +310,7 @@ export function SectionOrderTab() {
         throw new Error('저장 실패');
       }
     } catch (error) {
-      console.error('섹션 표시 상태 저장 실패:', error);
+
       setSaveMessage({ type: 'error', message: '섹션 표시 상태 저장에 실패했습니다.' });
       setTimeout(() => setSaveMessage(null), 3000);
     }
@@ -332,7 +331,7 @@ export function SectionOrderTab() {
     // 커스텀 섹션은 중복 제거하여 유지
     const existingCustomSections = config.mainPage?.customSections || [];
     const seenCustomIds = new Set<string>();
-    const cleanedCustomSections = existingCustomSections.filter((section: any) => {
+    const cleanedCustomSections = existingCustomSections.filter((section: unknown) => {
       if (seenCustomIds.has(section.id)) {
         return false;
       }

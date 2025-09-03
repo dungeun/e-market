@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       take: 10,
       orderBy: {
         createdAt: 'desc'
@@ -28,7 +28,7 @@ export async function GET() {
 
     return NextResponse.json({ orders })
   } catch (error) {
-    console.error('Error fetching recent orders:', error)
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -21,7 +23,7 @@ interface AutoSlideBannerProps {
   height?: string
 }
 
-export default function AutoSlideBanner({ 
+const AutoSlideBanner = React.memo(function AutoSlideBanner({ 
   slides, 
   autoplay = true,
   interval = 5000,
@@ -149,5 +151,7 @@ export default function AutoSlideBanner({
         </div>
       )}
     </div>
-  )
-}
+    )
+});
+
+export default AutoSlideBanner;

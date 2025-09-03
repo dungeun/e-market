@@ -1,3 +1,4 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { SectionService } from '@/lib/services/sections/section-service'
 
@@ -8,7 +9,7 @@ export async function GET() {
     const sections = await SectionService.getActiveSections()
     return NextResponse.json(sections)
   } catch (error) {
-    console.error('Failed to get sections:', error)
+
     return NextResponse.json(
       { error: 'Failed to get sections' },
       { status: 500 }
@@ -22,10 +23,10 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
     // TODO: Implement createSection method in SectionService
     // const section = await SectionService.createSection(data)
-    console.log('Section creation requested:', data)
+
     return NextResponse.json({ success: true, section: data })
   } catch (error) {
-    console.error('Failed to create section:', error)
+
     return NextResponse.json(
       { error: 'Failed to create section' },
       { status: 500 }

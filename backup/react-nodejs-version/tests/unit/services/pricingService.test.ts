@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { PricingService } from '../../../src/services/pricingService'
 import { prisma } from '../../../src/utils/database'
 
@@ -28,7 +29,7 @@ describe('PricingService', () => {
         quantity: 50
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
       mockPrisma.pricingRule.findMany.mockResolvedValue([])
 
       const request = {
@@ -75,11 +76,11 @@ describe('PricingService', () => {
         customerGroups: []
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as unknown)
       mockPrisma.pricingApplication.count.mockResolvedValue(0)
-      mockPrisma.pricingApplication.create.mockResolvedValue({} as any)
-      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as any)
+      mockPrisma.pricingApplication.create.mockResolvedValue({} as unknown)
+      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as unknown)
 
       const request = {
         productId: 'product-1',
@@ -123,11 +124,11 @@ describe('PricingService', () => {
         customerGroups: []
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as unknown)
       mockPrisma.pricingApplication.count.mockResolvedValue(0)
-      mockPrisma.pricingApplication.create.mockResolvedValue({} as any)
-      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as any)
+      mockPrisma.pricingApplication.create.mockResolvedValue({} as unknown)
+      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as unknown)
 
       const request = {
         productId: 'product-1',
@@ -186,11 +187,11 @@ describe('PricingService', () => {
         }
       ]
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue(mockRules as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue(mockRules as unknown)
       mockPrisma.pricingApplication.count.mockResolvedValue(0)
-      mockPrisma.pricingApplication.create.mockResolvedValue({} as any)
-      mockPrisma.pricingRule.update.mockResolvedValue({} as any)
+      mockPrisma.pricingApplication.create.mockResolvedValue({} as unknown)
+      mockPrisma.pricingRule.update.mockResolvedValue({} as unknown)
 
       const request = {
         productId: 'product-1',
@@ -232,8 +233,8 @@ describe('PricingService', () => {
         customerGroups: []
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as unknown)
 
       const request = {
         productId: 'product-1',
@@ -267,8 +268,8 @@ describe('PricingService', () => {
       ]
 
       mockPrisma.product.findUnique
-        .mockResolvedValueOnce(mockProducts[0] as any)
-        .mockResolvedValueOnce(mockProducts[1] as any)
+        .mockResolvedValueOnce(mockProducts[0] as unknown)
+        .mockResolvedValueOnce(mockProducts[1] as unknown)
       
       mockPrisma.pricingRule.findMany.mockResolvedValue([])
 
@@ -300,10 +301,10 @@ describe('PricingService', () => {
         discountValue: 10
       }
 
-      mockPrisma.pricingRule.create.mockResolvedValue(mockRule as any)
-      mockPrisma.pricingRuleCategory.createMany.mockResolvedValue({ count: 0 } as any)
-      mockPrisma.pricingRuleProduct.createMany.mockResolvedValue({ count: 0 } as any)
-      mockPrisma.pricingRuleCustomerGroup.createMany.mockResolvedValue({ count: 0 } as any)
+      mockPrisma.pricingRule.create.mockResolvedValue(mockRule as unknown)
+      mockPrisma.pricingRuleCategory.createMany.mockResolvedValue({ count: 0 } as unknown)
+      mockPrisma.pricingRuleProduct.createMany.mockResolvedValue({ count: 0 } as unknown)
+      mockPrisma.pricingRuleCustomerGroup.createMany.mockResolvedValue({ count: 0 } as unknown)
 
       const data = {
         name: 'Test Rule',
@@ -328,8 +329,8 @@ describe('PricingService', () => {
     test('should create rule with category associations', async () => {
       const mockRule = { id: 'rule-1', name: 'Category Rule' }
 
-      mockPrisma.pricingRule.create.mockResolvedValue(mockRule as any)
-      mockPrisma.pricingRuleCategory.createMany.mockResolvedValue({ count: 2 } as any)
+      mockPrisma.pricingRule.create.mockResolvedValue(mockRule as unknown)
+      mockPrisma.pricingRuleCategory.createMany.mockResolvedValue({ count: 2 } as unknown)
 
       const data = {
         name: 'Category Rule',
@@ -370,7 +371,7 @@ describe('PricingService', () => {
         }
       ]
 
-      mockPrisma.pricingRule.findMany.mockResolvedValue(mockRules as any)
+      mockPrisma.pricingRule.findMany.mockResolvedValue(mockRules as unknown)
 
       const filters = { isActive: true, type: 'QUANTITY_DISCOUNT' }
       const result = await pricingService.getPricingRules(filters)
@@ -406,7 +407,7 @@ describe('PricingService', () => {
         }
       ]
 
-      mockPrisma.pricingApplication.findMany.mockResolvedValue(mockApplications as any)
+      mockPrisma.pricingApplication.findMany.mockResolvedValue(mockApplications as unknown)
 
       const result = await pricingService.getPricingAnalytics()
 
@@ -414,8 +415,8 @@ describe('PricingService', () => {
       expect(result.summary.totalSavings).toBe(25)
       expect(result.summary.averageDiscount).toBe(12.5)
       expect(result.rulePerformance).toHaveLength(1)
-      expect((result.rulePerformance as any)[0].applications).toBe(2)
-      expect((result.rulePerformance as any)[0].totalSavings).toBe(25)
+      expect((result.rulePerformance as unknown)[0].applications).toBe(2)
+      expect((result.rulePerformance as unknown)[0].totalSavings).toBe(25)
     })
   })
 
@@ -446,16 +447,16 @@ describe('PricingService', () => {
         customerGroups: []
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as unknown)
       mockPrisma.pricingApplication.count.mockResolvedValue(0)
-      mockPrisma.pricingApplication.create.mockResolvedValue({} as any)
-      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as any)
+      mockPrisma.pricingApplication.create.mockResolvedValue({} as unknown)
+      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as unknown)
 
       // Mock current time to be within happy hour (e.g., 14:00)
       const mockDate = new Date()
       mockDate.setHours(14, 0, 0, 0)
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any)
+      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as unknown)
 
       const request = {
         productId: 'product-1',
@@ -495,11 +496,11 @@ describe('PricingService', () => {
         customerGroups: []
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
-      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
+      mockPrisma.pricingRule.findMany.mockResolvedValue([mockRule] as unknown)
       mockPrisma.pricingApplication.count.mockResolvedValue(0)
-      mockPrisma.pricingApplication.create.mockResolvedValue({} as any)
-      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as any)
+      mockPrisma.pricingApplication.create.mockResolvedValue({} as unknown)
+      mockPrisma.pricingRule.update.mockResolvedValue(mockRule as unknown)
 
       const request = {
         productId: 'product-1',

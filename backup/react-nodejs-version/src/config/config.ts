@@ -57,7 +57,7 @@ const configSchema = z.object({
 
   // CORS
   cors: z.object({
-    origin: z.string().default('http://localhost:3000'),
+    origin: z.string().default(env.appUrl),
     credentials: z.boolean().default(true),
   }),
 
@@ -208,7 +208,7 @@ const rawConfig = {
     },
   },
   cors: {
-    origin: process.env['CORS_ORIGIN'] || 'http://localhost:3000',
+    origin: process.env['CORS_ORIGIN'] || env.appUrl,
     credentials: process.env['CORS_CREDENTIALS'] === 'true',
   },
   upload: {

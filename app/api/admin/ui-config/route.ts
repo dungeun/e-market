@@ -1,281 +1,197 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db';
+import { getServerSession } from '@/lib/auth-server';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-// 기본 상품 섹션 설정
-const defaultProductSections = {
-  sections: [
-    {
-      id: 'hero',
-      type: 'hero',
-      name: '히어로 섹션',
-      description: '메인 배너 슬라이드',
-      enabled: true,
-      order: 1,
-      config: {
-        slides: [
-          {
-            id: 'slide-1',
-            title: '특별한 할인 혜택',
-            subtitle: '최대 70% 할인된 상품을 만나보세요',
-            image: '/placeholder-hero-1.jpg',
-            link: '/products',
-            buttonText: '지금 쇼핑하기'
-          }
-        ],
-        autoplay: true,
-        interval: 5000,
-        height: '600px'
-      }
-    },
-    {
-      id: 'categories',
-      type: 'categories',
-      name: '카테고리 쇼케이스',
-      description: '상품 카테고리 그리드',
-      enabled: true,
-      order: 2,
-      config: {
-        title: '카테고리별 쇼핑',
-        layout: 'grid',
-        showProductCount: true,
-        categories: [
-          { id: 'electronics', name: '전자제품', icon: '📱', image: '/category-electronics.jpg', productCount: 120 },
-          { id: 'fashion', name: '패션', icon: '👕', image: '/category-fashion.jpg', productCount: 200 },
-          { id: 'home', name: '홈&리빙', icon: '🏠', image: '/category-home.jpg', productCount: 80 },
-          { id: 'beauty', name: '뷰티', icon: '💄', image: '/category-beauty.jpg', productCount: 150 },
-          { id: 'sports', name: '스포츠', icon: '⚽', image: '/category-sports.jpg', productCount: 95 },
-          { id: 'books', name: '도서', icon: '📚', image: '/category-books.jpg', productCount: 300 }
-        ]
-      }
-    },
-    {
-      id: 'featured',
-      type: 'featured',
-      name: '추천 상품',
-      description: '큐레이션된 추천 상품 목록',
-      enabled: true,
-      order: 3,
-      config: {
-        title: '추천 상품',
-        subtitle: '엄선된 상품을 만나보세요',
-        limit: 8,
-        columns: 4,
-        showBadge: true,
-        badgeText: '추천'
-      }
-    },
-    {
-      id: 'flash-sale',
-      type: 'flash-sale',
-      name: '플래시 세일',
-      description: '한정 시간 특가 상품',
-      enabled: true,
-      order: 4,
-      config: {
-        title: '⚡ 플래시 세일',
-        subtitle: '지금 놓치면 후회하는 특가!',
-        limit: 4,
-        showTimer: true,
-        endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-      }
-    },
-    {
-      id: 'bestsellers',
-      type: 'bestsellers',
-      name: '베스트셀러',
-      description: '인기 상품 랭킹',
-      enabled: true,
-      order: 5,
-      config: {
-        title: '🏆 베스트셀러',
-        subtitle: '가장 인기있는 상품들',
-        limit: 10,
-        period: 'month',
-        showRanking: true,
-        showSalesCount: true
-      }
-    },
-    {
-      id: 'new-arrivals',
-      type: 'new-arrivals',
-      name: '신상품',
-      description: '최신 출시 상품',
-      enabled: true,
-      order: 6,
-      config: {
-        title: '✨ 신상품',
-        subtitle: '따끈따끈한 신제품을 만나보세요',
-        limit: 12,
-        daysLimit: 30,
-        layout: 'grid',
-        columns: 6,
-        showArrivalDate: true
-      }
-    },
-    {
-      id: 'recommended',
-      type: 'recommended',
-      name: 'AI 추천',
-      description: 'AI 기반 개인화 추천',
-      enabled: true,
-      order: 7,
-      config: {
-        title: '🤖 당신을 위한 추천',
-        subtitle: 'AI가 선택한 맞춤 상품',
-        limit: 8,
-        algorithm: 'collaborative-filtering',
-        personalized: true,
-        fallbackToPopular: true
-      }
-    },
-    {
-      id: 'trending',
-      type: 'trending',
-      name: '트렌딩',
-      description: '지금 뜨고 있는 상품',
-      enabled: true,
-      order: 8,
-      config: {
-        title: '🔥 트렌딩 NOW',
-        subtitle: '지금 가장 핫한 상품들',
-        limit: 8,
-        timeWindow: 7,
-        showTrendingScore: true,
-        updateInterval: 1
-      }
-    },
-    {
-      id: 'brand-spotlight',
-      type: 'brand-spotlight',
-      name: '브랜드 스포트라이트',
-      description: '특별한 브랜드 소개',
-      enabled: false,
-      order: 9,
-      config: {
-        title: '🌟 브랜드 스포트라이트',
-        brandId: null,
-        showBrandStory: true,
-        productLimit: 6,
-        layout: 'showcase'
-      }
-    },
-    {
-      id: 'special-offers',
-      type: 'special-offers',
-      name: '특가 혜택',
-      description: '할인 및 프로모션 상품',
-      enabled: true,
-      order: 10,
-      config: {
-        title: '💰 특가 혜택',
-        subtitle: '놓치면 후회하는 할인가!',
-        minDiscount: 20,
-        limit: 6,
-        showOriginalPrice: true,
-        showDiscountPercentage: true,
-        highlightColor: '#ff0000'
-      }
-    },
-    {
-      id: 'newsletter',
-      type: 'newsletter',
-      name: '뉴스레터 구독',
-      description: '이메일 뉴스레터 가입',
-      enabled: true,
-      order: 11,
-      config: {
-        title: '📧 특별한 소식을 받아보세요',
-        subtitle: '신상품, 할인 정보를 가장 먼저 알려드립니다',
-        placeholder: '이메일 주소를 입력하세요',
-        buttonText: '구독하기',
-        successMessage: '구독 신청이 완료되었습니다!',
-        benefit: '신규 가입시 10% 할인 쿠폰 증정'
-      }
-    }
-  ],
-  globalSettings: {
-    theme: {
-      primaryColor: '#dc2626',
-      backgroundColor: '#000000',
-      textColor: '#ffffff'
-    },
-    layout: {
-      maxWidth: '7xl',
-      spacing: 'normal'
-    }
-  }
-};
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Loading UI config from database...');
-    
+    // 인증 확인
+    const session = await getServerSession();
+    if (!session || session.user.type !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // DB에서 UI 설정 조회
-    const uiConfig = await prisma.siteConfig.findUnique({
-      where: { key: 'product-sections-config' }
+    const uiConfig = await query({
+      where: { key: 'ui-config' }
     });
 
     if (!uiConfig) {
-      console.log('📝 No config found, returning default product sections');
-      return NextResponse.json({ config: defaultProductSections });
+      // 기본 설정 반환
+      const defaultConfig = {
+        header: {
+          logo: {
+            text: 'E-Market Korea',
+            imageUrl: null
+          },
+          menus: [
+            { id: 'menu-1', label: 'header.menu.campaigns', href: '/campaigns', order: 1, visible: true },
+            { id: 'menu-2', label: 'header.menu.influencers', href: '/influencers', order: 2, visible: true },
+            { id: 'menu-3', label: 'header.menu.community', href: '/community', order: 3, visible: true },
+          ],
+          ctaButton: {
+            text: 'header.cta.start',
+            href: '/register',
+            visible: true
+          }
+        },
+        footer: {
+          columns: [
+            {
+              id: 'column-1',
+              title: 'footer.column.service',
+              order: 1,
+              links: [
+                { id: 'link-1', label: 'footer.link.find_influencers', href: '/influencers', order: 1, visible: true },
+                { id: 'link-2', label: 'footer.link.create_campaign', href: '/campaigns/create', order: 2, visible: true },
+              ]
+            },
+            {
+              id: 'column-2',
+              title: 'footer.column.company',
+              order: 2,
+              links: [
+                { id: 'link-3', label: 'footer.link.about', href: '/about', order: 1, visible: true },
+                { id: 'link-4', label: 'footer.link.contact', href: '/contact', order: 2, visible: true },
+              ]
+            },
+            {
+              id: 'column-3',
+              title: 'footer.column.legal',
+              order: 3,
+              links: [
+                { id: 'link-5', label: 'footer.link.terms', href: '/terms', order: 1, visible: true },
+                { id: 'link-6', label: 'footer.link.privacy', href: '/privacy', order: 2, visible: true },
+              ]
+            }
+          ],
+          copyright: 'footer.copyright'
+        },
+        mainPage: {
+          heroSlides: [
+            {
+              id: 'slide-1',
+              type: 'blue' as const,
+              tag: 'hero.slide1.tag',
+              title: 'hero.slide1.title',
+              subtitle: 'hero.slide1.subtitle',
+              bgColor: 'bg-gradient-to-br from-blue-400 to-blue-600',
+              order: 1,
+              visible: true,
+            },
+            {
+              id: 'slide-2',
+              type: 'dark' as const,
+              title: 'hero.slide2.title',
+              subtitle: 'hero.slide2.subtitle',
+              bgColor: 'bg-gradient-to-br from-gray-800 to-gray-900',
+              order: 2,
+              visible: true,
+            },
+            {
+              id: 'slide-3',
+              type: 'green' as const,
+              title: 'hero.slide3.title',
+              subtitle: 'hero.slide3.subtitle',
+              bgColor: 'bg-gradient-to-br from-green-400 to-green-600',
+              order: 3,
+              visible: true,
+            },
+          ],
+          categoryMenus: [
+            { id: 'cat-1', name: 'category.beauty', categoryId: 'beauty', icon: '', order: 1, visible: true },
+            { id: 'cat-2', name: 'category.fashion', categoryId: 'fashion', icon: '', order: 2, visible: true },
+            { id: 'cat-3', name: 'category.food', categoryId: 'food', icon: '', badge: 'badge.hot', order: 3, visible: true },
+            { id: 'cat-4', name: 'category.travel', categoryId: 'travel', icon: '', order: 4, visible: true },
+            { id: 'cat-5', name: 'category.tech', categoryId: 'tech', icon: '', order: 5, visible: true },
+            { id: 'cat-6', name: 'category.fitness', categoryId: 'fitness', icon: '', order: 6, visible: true },
+            { id: 'cat-7', name: 'category.lifestyle', categoryId: 'lifestyle', icon: '', order: 7, visible: true },
+            { id: 'cat-8', name: 'category.pet', categoryId: 'pet', icon: '', order: 8, visible: true },
+          ],
+          quickLinks: [
+            { id: 'quick-1', title: 'quicklink.events', icon: '🎁', link: '/events', order: 1, visible: true },
+            { id: 'quick-2', title: 'quicklink.coupons', icon: '🎟️', link: '/coupons', order: 2, visible: true },
+            { id: 'quick-3', title: 'quicklink.ranking', icon: '🏆', link: '/ranking', order: 3, visible: true },
+          ],
+          promoBanner: {
+            title: 'promo.title',
+            subtitle: 'promo.subtitle',
+            icon: '📦',
+            visible: true,
+          },
+          rankingSection: {
+            visible: true,
+            title: 'ranking.title',
+            subtitle: 'ranking.subtitle',
+            criteria: 'popular' as const,
+            count: 5,
+            showBadge: true,
+          }
+        }
+      };
+      
+      return NextResponse.json({ config: defaultConfig });
     }
 
-    const config = JSON.parse(uiConfig.value);
-    console.log('✅ UI config loaded successfully');
-    return NextResponse.json({ config });
+    return NextResponse.json({ config: JSON.parse(uiConfig.value) });
   } catch (error) {
-    console.error('❌ Failed to load UI config:', error);
-    return NextResponse.json({ 
-      config: defaultProductSections,
-      error: 'Failed to load from database, using defaults'
-    });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('💾 Saving UI config to database...');
-    
-    const { config } = await request.json();
-
-    if (!config) {
-      return NextResponse.json({ error: 'Config is required' }, { status: 400 });
+    // 인증 확인
+    const session = await getServerSession();
+    if (!session || session.user.type !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { config } = await request.json();
+
     // 중복 섹션 ID 정리
-    if (config.sections) {
+    if (config.mainPage?.sectionOrder) {
+      // sectionOrder에서 중복 제거
       const seenIds = new Set<string>();
-      const cleanedSections = config.sections.filter((section: any) => {
+      const cleanedSectionOrder = config.mainPage.sectionOrder.filter((section: unknown) => {
         if (seenIds.has(section.id)) {
-          console.log(`🧹 Removing duplicate section ID: ${section.id}`);
+
           return false;
         }
         seenIds.add(section.id);
         return true;
       });
-      config.sections = cleanedSections;
+      config.mainPage.sectionOrder = cleanedSectionOrder;
     }
 
-    // DB에 UI 설정 저장
-    await prisma.siteConfig.upsert({
-      where: { key: 'product-sections-config' },
-      update: { 
-        value: JSON.stringify(config),
-        updatedAt: new Date()
-      },
-      create: { 
-        key: 'product-sections-config', 
-        value: JSON.stringify(config)
-      }
+    if (config.mainPage?.customSections) {
+      // customSections에서 중복 제거
+      const seenCustomIds = new Set<string>();
+      const cleanedCustomSections = config.mainPage.customSections.filter((section: unknown) => {
+        if (seenCustomIds.has(section.id)) {
+
+          return false;
+        }
+        seenCustomIds.add(section.id);
+        return true;
+      });
+      config.mainPage.customSections = cleanedCustomSections;
+    }
+
+    // DB에 UI 설정 저장 - JSON을 문자열로 변환
+    await query({
+      where: { key: 'ui-config' },
+      update: { value: JSON.stringify(config) },
+      create: { key: 'ui-config', value: JSON.stringify(config) }
     });
 
-    console.log('✅ UI config saved successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('❌ UI config save error:', error);
+
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'

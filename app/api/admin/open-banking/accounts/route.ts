@@ -1,6 +1,6 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // GET - 연결된 계좌 목록 조회
 export async function GET(request: NextRequest) {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const userId = searchParams.get('userId') // 실제 구현에서는 인증에서 가져오기
 
-    const accounts = await prisma.bankAccount.findMany({
+    const accounts = await query({
       where: userId ? { userId } : {},
       orderBy: [
         { isPrimary: 'desc' },
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(accounts)
   } catch (error) {
-    console.error('Bank accounts fetch error:', error)
+
     return NextResponse.json(
       { error: '계좌 목록 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     // 중복 계좌 체크
-    const existingAccount = await prisma.bankAccount.findFirst({
+    const existingAccount = await query({
       where: {
         bankCode,
         accountNumber,
@@ -74,11 +74,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 첫 번째 계좌인 경우 기본 계좌로 설정
-    const accountCount = await prisma.bankAccount.count({
+    const accountCount = await query({
       where: { userId }
     })
 
-    const account = await prisma.bankAccount.create({
+    const account = await query({
       data: {
         userId,
         bankCode,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(account, { status: 201 })
   } catch (error) {
-    console.error('Account registration error:', error)
+
     return NextResponse.json(
       { error: '계좌 연결 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -132,7 +132,7 @@ async function registerWithOpenBanking(accountData: {
       message: '계좌 연결 성공'
     }
   } catch (error) {
-    console.error('Open Banking API Error:', error)
+
     return {
       success: false,
       message: '오픈뱅킹 계좌 연결에 실패했습니다.'

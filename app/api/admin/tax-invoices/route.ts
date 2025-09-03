@@ -1,5 +1,8 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '@/lib/db'
 
 // GET - 세금계산서 목록 조회
 export async function GET(request: NextRequest) {
@@ -10,7 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search')
 
-    const where: any = {}
+    const where: unknown = {}
 
     if (status && status !== 'ALL') {
       where.status = status
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [invoices, total] = await Promise.all([
-      prisma.taxInvoice.findMany({
+      query({
         where,
         include: {
           items: true,
@@ -41,7 +44,7 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit
       }),
-      prisma.taxInvoice.count({ where })
+      query({ where })
     ])
 
     return NextResponse.json({
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Tax invoices fetch error:', error)
+
     return NextResponse.json(
       { error: '세금계산서 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     let totalSupplyAmount = 0
     let totalTaxAmount = 0
 
-    const processedItems = items.map((item: any) => {
+    const processedItems = items.map((item: unknown) => {
       const supplyAmount = item.quantity * item.unitPrice
       const taxAmount = Math.round(supplyAmount * 0.1) // 부가세 10%
       
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
     // 세금계산서 번호 생성
     const invoiceNumber = `INV${Date.now()}`
 
-    const invoice = await prisma.taxInvoice.create({
+    const invoice = await query({
       data: {
         invoiceNumber,
         orderId,
@@ -137,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(invoice, { status: 201 })
   } catch (error) {
-    console.error('Tax invoice creation error:', error)
+
     return NextResponse.json(
       { error: '세금계산서 생성 중 오류가 발생했습니다.' },
       { status: 500 }

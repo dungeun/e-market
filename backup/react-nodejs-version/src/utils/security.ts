@@ -76,7 +76,7 @@ export class SecurityUtils {
   /**
    * Generate JWT token
    */
-  static generateJWT(payload: any, expiresIn: string | number = '1h'): string {
+  static generateJWT(payload: unknown, expiresIn: string | number = '1h'): string {
     const options: jwt.SignOptions = {
       algorithm: 'HS256',
       issuer: 'commerce-plugin',
@@ -85,7 +85,7 @@ export class SecurityUtils {
     if (expiresIn) {
       // Handle string/number union type for expiresIn
       if (typeof expiresIn === 'string') {
-        options.expiresIn = expiresIn as any
+        options.expiresIn = expiresIn as unknown
       } else {
         options.expiresIn = Number(expiresIn)
       }
@@ -131,7 +131,7 @@ export class SecurityUtils {
   /**
    * Anonymize personal data (GDPR right to be forgotten)
    */
-  static anonymizeData(data: Record<string, any>): Record<string, any> {
+  static anonymizeData(data: Record<string, unknown>): Record<string, unknown> {
     const anonymized = { ...data }
 
     // Anonymize personal fields
@@ -248,7 +248,7 @@ export class SecurityUtils {
   /**
    * Redact sensitive data from logs
    */
-  static redactSensitiveData(data: any): any {
+  static redactSensitiveData(data: unknown): any {
     if (typeof data !== 'object' || data === null) {
       return data
     }

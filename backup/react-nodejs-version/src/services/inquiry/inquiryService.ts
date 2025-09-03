@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import bcrypt from 'bcryptjs';
 import { logger } from '../../utils/logger';
 import {
@@ -32,7 +32,7 @@ export class InquiryService {
         hashedPassword = await bcrypt.hash(data.guestPassword, 10);
       }
 
-      const inquiry = await this.prisma.inquiry.create({
+      const inquiry = await this.query({
         data: {
           userId,
           guestName: !userId ? data.guestName : undefined,
@@ -91,7 +91,7 @@ export class InquiryService {
         sortOrder = 'desc'
       } = params;
 
-      const where: any = {};
+      const where: unknown = {};
 
       if (userId) where.userId = userId;
       if (status) where.status = status;
@@ -114,7 +114,7 @@ export class InquiryService {
       }
 
       const [inquiries, total] = await Promise.all([
-        this.prisma.inquiry.findMany({
+        this.query({
           where,
           skip: (page - 1) * limit,
           take: limit,
@@ -130,7 +130,7 @@ export class InquiryService {
             }
           }
         }),
-        this.prisma.inquiry.count({ where })
+        this.query({ where })
       ]);
 
       return {
@@ -153,7 +153,7 @@ export class InquiryService {
    */
   async getInquiry(id: string, userId?: string, guestPassword?: string) {
     try {
-      const inquiry = await this.prisma.inquiry.findUnique({
+      const inquiry = await this.query({
         where: { id },
         include: {
           user: true,
@@ -178,7 +178,7 @@ export class InquiryService {
       }
 
       // 조회수 증가
-      await this.prisma.inquiry.update({
+      await this.query({
         where: { id },
         data: { viewCount: { increment: 1 } }
       });
@@ -195,7 +195,7 @@ export class InquiryService {
    */
   async updateInquiry(id: string, data: UpdateInquiryDto, userId?: string) {
     try {
-      const inquiry = await this.prisma.inquiry.findUnique({
+      const inquiry = await this.query({
         where: { id }
       });
 
@@ -208,7 +208,7 @@ export class InquiryService {
         throw new Error('문의 수정 권한이 없습니다.');
       }
 
-      const updatedInquiry = await this.prisma.inquiry.update({
+      const updatedInquiry = await this.query({
         where: { id },
         data: {
           ...data,
@@ -243,7 +243,7 @@ export class InquiryService {
         throw new Error('답변 작성 권한이 없습니다.');
       }
 
-      const reply = await this.prisma.inquiryReply.create({
+      const reply = await this.query({
         data: {
           inquiryId,
           userId,
@@ -258,7 +258,7 @@ export class InquiryService {
 
       // 문의 상태 업데이트
       if (!data.isInternal) {
-        await this.prisma.inquiry.update({
+        await this.query({
           where: { id: inquiryId },
           data: { 
             status: InquiryStatus.ANSWERED,
@@ -291,7 +291,7 @@ export class InquiryService {
         avgResponseTime,
         satisfactionData
       ] = await Promise.all([
-        this.prisma.inquiry.count({ where }),
+        this.query({ where }),
         this.prisma.inquiry.groupBy({
           by: ['status'],
           where,
@@ -340,10 +340,10 @@ export class InquiryService {
    */
   async getTemplates(category?: string) {
     try {
-      const where: any = { isActive: true };
+      const where: unknown = { isActive: true };
       if (category) where.category = category;
 
-      return await this.prisma.inquiryTemplate.findMany({
+      return await this.query({
         where,
         orderBy: { usageCount: 'desc' }
       });
@@ -359,7 +359,7 @@ export class InquiryService {
     content: string;
   }) {
     try {
-      return await this.prisma.inquiryTemplate.create({ data });
+      return await this.query({ data });
     } catch (error) {
       logger.error('Failed to create template', error);
       throw error;
@@ -371,7 +371,7 @@ export class InquiryService {
    */
   async rateSatisfaction(inquiryId: string, rating: number, note?: string) {
     try {
-      const inquiry = await this.prisma.inquiry.update({
+      const inquiry = await this.query({
         where: { id: inquiryId },
         data: {
           satisfaction: rating,
@@ -390,7 +390,7 @@ export class InquiryService {
   /**
    * Private methods
    */
-  private async canAccessInquiry(inquiry: any, userId?: string, guestPassword?: string): Promise<boolean> {
+  private async canAccessInquiry(inquiry: unknown, userId?: string, guestPassword?: string): Promise<boolean> {
     // 관리자는 모든 문의 접근 가능
     if (userId && await this.isAdmin(userId)) {
       return true;
@@ -412,7 +412,7 @@ export class InquiryService {
   private async isAdmin(userId?: string): Promise<boolean> {
     if (!userId) return false;
 
-    const user = await this.prisma.user.findUnique({
+    const user = await this.query({
       where: { id: userId },
       select: { role: true }
     });
@@ -439,15 +439,15 @@ export class InquiryService {
     return InquiryPriority.NORMAL;
   }
 
-  private async checkAutoReply(inquiry: any) {
+  private async checkAutoReply(inquiry: unknown) {
     // TODO: 자동 응답 로직 구현
     // 카테고리별 자동 응답 템플릿 확인
     // FAQ 기반 자동 응답
   }
 
-  private async notifyAdmins(inquiry: any) {
+  private async notifyAdmins(inquiry: unknown) {
     // 관리자에게 새 문의 알림
-    const admins = await this.prisma.user.findMany({
+    const admins = await this.query({
       where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } }
     });
 
@@ -462,7 +462,7 @@ export class InquiryService {
     }
   }
 
-  private async notifyStatusChange(inquiry: any) {
+  private async notifyStatusChange(inquiry: unknown) {
     if (inquiry.userId) {
       await this.notificationService.sendNotification({
         userId: inquiry.userId,
@@ -485,8 +485,8 @@ export class InquiryService {
     }
   }
 
-  private async notifyReply(inquiryId: string, reply: any) {
-    const inquiry = await this.prisma.inquiry.findUnique({
+  private async notifyReply(inquiryId: string, reply: unknown) {
+    const inquiry = await this.query({
       where: { id: inquiryId }
     });
 
@@ -513,8 +513,8 @@ export class InquiryService {
     }
   }
 
-  private async calculateAvgResponseTime(where: any): Promise<number> {
-    const inquiries = await this.prisma.inquiry.findMany({
+  private async calculateAvgResponseTime(where: unknown): Promise<number> {
+    const inquiries = await this.query({
       where: {
         ...where,
         status: { in: [InquiryStatus.ANSWERED, InquiryStatus.CLOSED] }
@@ -543,8 +543,8 @@ export class InquiryService {
     return Math.round(avgTime / (1000 * 60 * 60)); // Convert to hours
   }
 
-  private async calculateSatisfactionRate(where: any): Promise<number> {
-    const inquiries = await this.prisma.inquiry.findMany({
+  private async calculateSatisfactionRate(where: unknown): Promise<number> {
+    const inquiries = await this.query({
       where: {
         ...where,
         satisfaction: { not: null }

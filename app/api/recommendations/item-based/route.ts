@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 상품 기반 추천 API (연관 상품)
  */
@@ -35,8 +37,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: recommendations
     })
-  } catch (error: any) {
-    console.error('Item-based recommendations error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to get item-based recommendations' },
       { status: 500 }

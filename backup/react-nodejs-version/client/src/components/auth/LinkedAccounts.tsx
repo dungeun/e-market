@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { env } from '@/lib/config/env';
 import { authService } from '../../services/authService';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -6,7 +7,7 @@ import { ko } from 'date-fns/locale';
 interface LinkedAccount {
   provider: string;
   connectedAt: string;
-  profile: any;
+  profile: unknown;
 }
 
 export function LinkedAccounts() {
@@ -23,7 +24,7 @@ export function LinkedAccounts() {
       const data = await authService.getLinkedAccounts();
       setAccounts(data);
     } catch (error) {
-      console.error('Failed to load linked accounts:', error);
+
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +39,7 @@ export function LinkedAccounts() {
     try {
       await authService.unlinkOAuthAccount(provider);
       await loadLinkedAccounts();
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       alert(error.message || '계정 연결 해제에 실패했습니다.');
     } finally {
       setUnlinkingProvider(null);
@@ -46,7 +47,7 @@ export function LinkedAccounts() {
   };
 
   const handleLink = (provider: string) => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL || env.appUrl;
     window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
   };
 

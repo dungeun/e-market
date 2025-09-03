@@ -1,12 +1,10 @@
+import type { User, RequestContext } from '@/lib/types/common';
 /**
  * B2B/B2C 비즈니스 모드 관리 서비스
  * 사업자 인증, 세금계산서, 가격 그룹 관리
  */
 
-import { PrismaClient } from '@prisma/client'
 import axios from 'axios'
-
-const prisma = new PrismaClient()
 
 export interface BusinessRegistrationCheck {
   businessNumber: string  // 사업자등록번호
@@ -90,8 +88,7 @@ export class B2BService {
         }
       }
     } catch (error) {
-      console.error('Business verification error:', error)
-      
+
       // 개발 환경에서는 테스트용 로직
       if (process.env.NODE_ENV === 'development') {
         // 테스트용 사업자번호
@@ -121,9 +118,9 @@ export class B2BService {
     businessCategory: string
     businessAddress: string
     taxInvoiceEmail: string
-  }): Promise<any> {
+  }): Promise<unknown> {
     // 사업자번호 중복 확인
-    const existing = await prisma.businessAccount.findUnique({
+    const existing = await query({
       where: { businessNumber: data.businessNumber }
     })
 
@@ -142,7 +139,7 @@ export class B2BService {
     }
 
     // 사업자 계정 생성
-    const businessAccount = await prisma.businessAccount.create({
+    const businessAccount = await query({
       data: {
         userId,
         ...data,
@@ -157,12 +154,12 @@ export class B2BService {
     })
 
     // 기본 가격 그룹 할당 (B2B 기본 그룹)
-    const defaultB2BGroup = await prisma.priceGroup.findFirst({
+    const defaultB2BGroup = await query({
       where: { name: 'B2B_DEFAULT' }
     })
 
     if (defaultB2BGroup) {
-      await prisma.priceGroupMember.create({
+      await query({
         data: {
           businessAccountId: businessAccount.id,
           priceGroupId: defaultB2BGroup.id
@@ -176,8 +173,8 @@ export class B2BService {
   /**
    * 세금계산서 발행
    */
-  async issueTaxInvoice(request: TaxInvoiceRequest): Promise<any> {
-    const order = await prisma.order.findUnique({
+  async issueTaxInvoice(request: TaxInvoiceRequest): Promise<unknown> {
+    const order = await query({
       where: { id: request.orderId },
       include: {
         items: {
@@ -193,7 +190,7 @@ export class B2BService {
     // 세금계산서 번호 생성 (YYYYMMDD-XXXXX 형식)
     const today = new Date()
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-    const count = await prisma.taxInvoice.count({
+    const count = await query({
       where: {
         invoiceNumber: { startsWith: dateStr }
       }
@@ -206,7 +203,7 @@ export class B2BService {
     const totalAmount = amount + tax
 
     // 세금계산서 생성
-    const taxInvoice = await prisma.taxInvoice.create({
+    const taxInvoice = await query({
       data: {
         invoiceNumber,
         orderId: request.orderId,
@@ -232,7 +229,7 @@ export class B2BService {
     }
 
     // 발행 완료 처리
-    await prisma.taxInvoice.update({
+    await query({
       where: { id: taxInvoice.id },
       data: {
         status: 'ISSUED',
@@ -247,8 +244,8 @@ export class B2BService {
    * 전자세금계산서 발행 (외부 서비스 연동)
    */
   private async sendElectronicTaxInvoice(
-    invoice: any,
-    businessAccount: any,
+    invoice: unknown,
+    businessAccount: unknown,
     email?: string
   ): Promise<void> {
     // 실제 구현 시 더존, 이지페이, 빌36524 등 전자세금계산서 ASP 연동
@@ -257,8 +254,7 @@ export class B2BService {
     const recipientEmail = email || businessAccount.taxInvoiceEmail
     
     // 이메일 발송 로직
-    console.log(`Sending tax invoice ${invoice.invoiceNumber} to ${recipientEmail}`)
-    
+
     // TODO: 실제 이메일 발송 구현
   }
 
@@ -272,7 +268,7 @@ export class B2BService {
     discountType: string
   }> {
     // 상품 원가 조회
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id: productId }
     })
 
@@ -281,7 +277,7 @@ export class B2BService {
     }
 
     // 사업자 계정의 가격 그룹 조회
-    const priceGroups = await prisma.priceGroupMember.findMany({
+    const priceGroups = await query({
       where: { businessAccountId },
       include: {
         priceGroup: {
@@ -347,7 +343,7 @@ export class B2BService {
     }
 
     // 사업자 계정 기본 할인율 적용 (추가 할인)
-    const businessAccount = await prisma.businessAccount.findUnique({
+    const businessAccount = await query({
       where: { id: businessAccountId }
     })
 
@@ -372,8 +368,8 @@ export class B2BService {
   async createBulkOrderRequest(
     businessAccountId: string,
     items: Array<{ productId: string; quantity: number }>
-  ): Promise<any> {
-    const bulkOrder = await prisma.bulkOrder.create({
+  ): Promise<unknown> {
+    const bulkOrder = await query({
       data: {
         businessAccountId,
         status: 'DRAFT',
@@ -400,7 +396,7 @@ export class B2BService {
     }
 
     // 예상 금액 업데이트
-    await prisma.bulkOrder.update({
+    await query({
       where: { id: bulkOrder.id },
       data: { estimatedAmount }
     })
@@ -412,7 +408,7 @@ export class B2BService {
    * 비즈니스 모드 전환 (시스템 전체)
    */
   async switchBusinessMode(mode: 'B2C' | 'B2B' | 'HYBRID'): Promise<void> {
-    await prisma.systemConfig.upsert({
+    await query({
       where: { id: 'default' },
       create: {
         id: 'default',
@@ -445,7 +441,7 @@ export class B2BService {
     mode: string
     features: any
   }> {
-    const config = await prisma.systemConfig.findUnique({
+    const config = await query({
       where: { id: 'default' }
     })
 

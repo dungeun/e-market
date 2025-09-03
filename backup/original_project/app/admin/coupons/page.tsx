@@ -151,7 +151,7 @@ export default function CouponsPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       active: { label: '활성', color: 'bg-green-100 text-green-800', icon: CheckCircle },
       expired: { label: '만료', color: 'bg-gray-100 text-gray-800', icon: XCircle },
       draft: { label: '초안', color: 'bg-yellow-100 text-yellow-800', icon: Clock }
@@ -194,7 +194,7 @@ export default function CouponsPage() {
     }
   }
 
-  const handleCouponAction = (action: string, coupon: any) => {
+  const handleCouponAction = (action: string, coupon: unknown) => {
     switch(action) {
       case 'edit':
         toast.info(`${coupon.code} 쿠폰 수정`)

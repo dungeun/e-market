@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 사업자등록번호 확인 API
  */
@@ -39,8 +41,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result
     })
-  } catch (error: any) {
-    console.error('Business verification error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to verify business registration' },
       { status: 500 }

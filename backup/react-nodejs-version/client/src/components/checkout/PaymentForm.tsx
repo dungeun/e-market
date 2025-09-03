@@ -4,7 +4,7 @@ import { CreditCard, Smartphone, Building2, Wallet, Shield, Lock } from 'lucide-
 
 interface PaymentFormProps {
   order: Order
-  onPayment: (method: string, details?: any) => void
+  onPayment: (method: string, details?: unknown) => void
   onBack: () => void
   isProcessing: boolean
 }

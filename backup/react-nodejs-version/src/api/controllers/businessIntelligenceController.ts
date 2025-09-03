@@ -37,7 +37,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: analysis
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Sales analysis error:', error);
       res.status(500).json({
         success: false,
@@ -81,7 +81,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: performance
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Product performance analysis error:', error);
       res.status(500).json({
         success: false,
@@ -120,7 +120,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: insights
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Customer insights analysis error:', error);
       res.status(500).json({
         success: false,
@@ -159,7 +159,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: insights
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Marketing insights analysis error:', error);
       res.status(500).json({
         success: false,
@@ -196,7 +196,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: segmentDetails
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Customer segment analysis error:', error);
       res.status(500).json({
         success: false,
@@ -232,7 +232,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: profitability
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Profitability analysis error:', error);
       res.status(500).json({
         success: false,
@@ -265,7 +265,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: forecast
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Forecast analysis error:', error);
       res.status(500).json({
         success: false,
@@ -327,7 +327,7 @@ export class BusinessIntelligenceController {
         success: true,
         data: kpis
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('KPI dashboard error:', error);
       res.status(500).json({
         success: false,
@@ -372,27 +372,27 @@ export class BusinessIntelligenceController {
     };
   }
 
-  private calculateRetentionRate(insights: any): number {
+  private calculateRetentionRate(insights: unknown): number {
     const cohorts = insights.cohortAnalysis;
     if (cohorts.length === 0) return 0;
     
-    const avgRetention = cohorts.reduce((sum: number, cohort: any) => 
+    const avgRetention = cohorts.reduce((sum: number, cohort: unknown) => 
       sum + cohort.retention.month1, 0) / cohorts.length;
     
     return avgRetention;
   }
 
-  private calculateAverageLTV(insights: any): number {
+  private calculateAverageLTV(insights: unknown): number {
     const segments = insights.segments;
     if (segments.length === 0) return 0;
     
-    const totalCustomers = segments.reduce((sum: number, segment: any) => sum + segment.count, 0);
-    const totalRevenue = segments.reduce((sum: number, segment: any) => sum + segment.totalRevenue, 0);
+    const totalCustomers = segments.reduce((sum: number, segment: unknown) => sum + segment.count, 0);
+    const totalRevenue = segments.reduce((sum: number, segment: unknown) => sum + segment.totalRevenue, 0);
     
     return totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
   }
 
-  private calculateOverallROI(channels: any[]): number {
+  private calculateOverallROI(channels: unknown[]): number {
     const totalRevenue = channels.reduce((sum, channel) => sum + channel.revenue, 0);
     const totalCost = channels.reduce((sum, channel) => sum + channel.cost, 0);
     

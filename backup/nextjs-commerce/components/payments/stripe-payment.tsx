@@ -19,7 +19,7 @@ interface StripePaymentFormProps {
   orderId: string
   customerEmail?: string
   customerName?: string
-  onSuccess: (paymentIntent: any) => void
+  onSuccess: (paymentIntent: unknown) => void
   onError: (error: string) => void
 }
 
@@ -87,7 +87,7 @@ function StripePaymentForm({
         toast.success('결제가 완료되었습니다!')
       }
     } catch (error) {
-      console.error('Payment error:', error)
+
       onError(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setIsProcessing(false)

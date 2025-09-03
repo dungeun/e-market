@@ -196,7 +196,7 @@ export const checkPhoneVerificationStatus = async (req: Request, res: Response) 
       });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { id: userId },
       select: {
         phone: true,

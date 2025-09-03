@@ -24,7 +24,7 @@ export interface ScalingEvent {
   fromInstances: number;
   toInstances: number;
   timestamp: Date;
-  metrics: any;
+  metrics: unknown;
 }
 
 export interface ServiceScalingConfig {
@@ -415,7 +415,7 @@ export class AutoScaler extends EventEmitter {
       this.emit('metricsReceived', metrics);
     });
 
-    performanceMonitor.on('alertTriggered', (alert: any) => {
+    performanceMonitor.on('alertTriggered', (alert: unknown) => {
       // 알림 기반 즉시 스케일링
       this.handlePerformanceAlert(alert);
     });
@@ -424,7 +424,7 @@ export class AutoScaler extends EventEmitter {
   /**
    * 성능 알림 처리
    */
-  private async handlePerformanceAlert(alert: any): Promise<void> {
+  private async handlePerformanceAlert(alert: unknown): Promise<void> {
     // 크리티컬 알림 시 즉시 스케일링
     if (alert.threshold.severity === 'critical') {
       for (const [serviceName, config] of this.scalingConfigs.entries()) {
@@ -481,7 +481,7 @@ export class AutoScaler extends EventEmitter {
    */
   private getMetricValue(metrics: PerformanceMetrics, path: string): number {
     const parts = path.split('.');
-    let value: any = metrics;
+    let value: unknown = metrics;
     
     for (const part of parts) {
       value = value?.[part];

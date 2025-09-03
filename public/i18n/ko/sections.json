@@ -1,0 +1,358 @@
+{
+  "version": "2025.8.29.1200",
+  "lastUpdated": "2025-09-03T13:08:43.957Z",
+  "language": "ko",
+  "sectionOrder": [],
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "visible": true,
+      "data": {
+        "slides": [
+          {
+            "tag": "✅ 수정완료",
+            "title": "데이터베이스 수정 완료",
+            "bgColor": "bg-gradient-to-br from-indigo-600 to-purple-600",
+            "subtitle": "트리거 오류가 해결되었습니다"
+          },
+          {
+            "id": "1756329390243",
+            "tag": "NEW",
+            "order": 2,
+            "title": "새 슬라이드",
+            "bgColor": "bg-gradient-to-br from-blue-600 to-cyan-600",
+            "visible": true,
+            "subtitle": "부제목을 입력하세요"
+          },
+          {
+            "id": "1756329396708",
+            "tag": "NEW",
+            "order": 3,
+            "title": "새 슬라이드",
+            "bgColor": "bg-gradient-to-br from-emerald-500 to-teal-600",
+            "visible": true,
+            "subtitle": "부제목을 입력하세요"
+          }
+        ]
+      }
+    },
+    "category": {
+      "type": "category",
+      "visible": true,
+      "data": {
+        "title": "카테고리",
+        "categories": [
+          {
+            "id": "cat_fashion",
+            "name": "패션/의류",
+            "order": 1,
+            "visible": true,
+            "categoryId": "fashion"
+          },
+          {
+            "id": "cat_beauty",
+            "name": "뷰티/화장품",
+            "badge": "HOT",
+            "order": 2,
+            "visible": true,
+            "categoryId": "beauty"
+          },
+          {
+            "id": "cat_electronics",
+            "name": "전자제품",
+            "order": 3,
+            "visible": true,
+            "categoryId": "electronics"
+          },
+          {
+            "id": "cat_home",
+            "name": "홈/인테리어",
+            "order": 4,
+            "visible": true,
+            "categoryId": "home"
+          },
+          {
+            "id": "cat_food",
+            "name": "식품/음료",
+            "badge": "신규",
+            "order": 5,
+            "visible": true,
+            "categoryId": "food"
+          },
+          {
+            "id": "cat_sports",
+            "name": "스포츠/레저",
+            "order": 6,
+            "visible": true,
+            "categoryId": "sports"
+          },
+          {
+            "id": "cat_books",
+            "name": "도서/문구",
+            "order": 7,
+            "visible": true,
+            "categoryId": "books"
+          },
+          {
+            "id": "cat_baby",
+            "name": "유아/출산",
+            "order": 8,
+            "visible": true,
+            "categoryId": "baby"
+          }
+        ],
+        "items": [
+          {
+            "id": "cat_fashion",
+            "name": "패션/의류",
+            "slug": "fashion",
+            "icon": "👗",
+            "image": "/images/categories/fashion.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_beauty",
+            "name": "뷰티/화장품",
+            "slug": "beauty",
+            "icon": "💄",
+            "image": "/images/categories/beauty.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_electronics",
+            "name": "전자제품",
+            "slug": "electronics",
+            "icon": "📱",
+            "image": "/images/categories/electronics.jpg",
+            "productCount": 2
+          },
+          {
+            "id": "cat_home",
+            "name": "홈/인테리어",
+            "slug": "home",
+            "icon": "🏠",
+            "image": "/images/categories/home.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_food",
+            "name": "식품/음료",
+            "slug": "food",
+            "icon": "🍕",
+            "image": "/images/categories/food.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_sports",
+            "name": "스포츠/레저",
+            "slug": "sports",
+            "icon": "⚽",
+            "image": "/images/categories/sports.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_books",
+            "name": "도서/문구",
+            "slug": "books",
+            "icon": "📚",
+            "image": "/images/categories/books.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_baby",
+            "name": "유아/출산",
+            "slug": "baby",
+            "icon": "🍼",
+            "image": "/images/categories/baby.jpg",
+            "productCount": 0
+          }
+        ],
+        "gridLayout": "6x11"
+      }
+    },
+    "quicklinks": {
+      "type": "quicklinks",
+      "visible": true,
+      "data": {
+        "title": "바로가기",
+        "links": [
+          {
+            "id": "quick-1",
+            "icon": "🎉",
+            "link": "/events",
+            "title": "이벤트"
+          },
+          {
+            "id": "quick-2",
+            "icon": "🎫",
+            "link": "/coupons",
+            "title": "쿠폰"
+          },
+          {
+            "id": "quick-3",
+            "icon": "🏆",
+            "link": "/ranking",
+            "title": "랭킹"
+          }
+        ]
+      }
+    },
+    "promo": {
+      "type": "promo",
+      "visible": true,
+      "data": {
+        "banner": {
+          "icon": "🎁",
+          "link": "",
+          "title": "🚀 지금 시작하세요!",
+          "subtitle": "첫 캠페인은 수수료 50% 할인",
+          "textColor": "#000000",
+          "backgroundColor": "#FEF3C7",
+          "backgroundImage": ""
+        }
+      }
+    },
+    "featured-products": {
+      "type": "featured",
+      "visible": true,
+      "data": {
+        "title": "이달의 특가",
+        "subtitle": "놓치면 후회하는 특별 할인",
+        "products": [],
+        "displayCount": 8
+      }
+    },
+    "products": {
+      "type": "products",
+      "visible": true,
+      "data": {
+        "title": "추천 상품",
+        "subtitle": "엄선된 상품들을 만나보세요",
+        "displayCount": 10
+      }
+    },
+    "ranking": {
+      "type": "ranking",
+      "visible": true,
+      "data": {
+        "title": "실시간 랭킹",
+        "subtitle": "가장 인기있는 상품들",
+        "popular": [
+          {
+            "id": "rank_1",
+            "rank": 1,
+            "title": "갤럭시 S24",
+            "description": "최신 AI 기능이 탑재된 플래그십 스마트폰",
+            "price": "999,000원",
+            "originalPrice": "1,199,000원",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "badge": "HOT",
+            "rating": 4.8
+          },
+          {
+            "id": "rank_2",
+            "rank": 2,
+            "title": "LG OLED 55인치 TV",
+            "description": "완벽한 화질의 OLED 스마트 TV",
+            "price": "1,990,000원",
+            "originalPrice": "2,290,000원",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "badge": "SALE",
+            "rating": 4.9
+          },
+          {
+            "id": "rank_3",
+            "rank": 3,
+            "title": "설화수 윤조에센스",
+            "description": "한방 원료의 프리미엄 에센스",
+            "price": "89,000원",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7
+          },
+          {
+            "id": "rank_4",
+            "rank": 4,
+            "title": "다이슨 V15 무선청소기",
+            "description": "레이저 먼지 감지 기능의 강력한 청소기",
+            "price": "899,000원",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6
+          },
+          {
+            "id": "rank_5",
+            "rank": 5,
+            "title": "나이키 에어맥스 270",
+            "description": "편안함과 스타일을 겸비한 운동화",
+            "price": "159,000원",
+            "image": "/images/products/nike-airmax-270.jpg",
+            "link": "/products/nike-airmax-270",
+            "rating": 4.5
+          }
+        ]
+      }
+    },
+    "recommended": {
+      "type": "recommended",
+      "visible": true,
+      "data": {
+        "title": "추천 상품",
+        "subtitle": "선별된 인기 상품을 만나보세요",
+        "items": [
+          {
+            "id": "rec_1",
+            "title": "갤럭시 S24",
+            "description": "AI가 만들어내는 새로운 스마트폰 경험",
+            "price": "999,000원",
+            "originalPrice": "1,199,000원",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "rating": 4.8,
+            "reviewCount": 1247,
+            "isNew": true,
+            "isSale": true
+          },
+          {
+            "id": "rec_2",
+            "title": "LG OLED 55인치 TV",
+            "description": "완벽한 블랙을 구현하는 OLED 디스플레이",
+            "price": "1,990,000원",
+            "originalPrice": "2,290,000원",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "rating": 4.9,
+            "reviewCount": 892,
+            "isSale": true,
+            "badge": "베스트"
+          },
+          {
+            "id": "rec_3",
+            "title": "설화수 윤조에센스",
+            "description": "한방 원료로 만든 프리미엄 스킨케어",
+            "price": "89,000원",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7,
+            "reviewCount": 2456,
+            "badge": "인기"
+          },
+          {
+            "id": "rec_4",
+            "title": "다이슨 V15 무선청소기",
+            "description": "레이저로 먼지를 찾아내는 혁신적인 청소기",
+            "price": "899,000원",
+            "originalPrice": "1,099,000원",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6,
+            "reviewCount": 674,
+            "isSale": true
+          }
+        ]
+      }
+    }
+  }
+}

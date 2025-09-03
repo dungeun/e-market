@@ -1,8 +1,11 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { tossPayment } from '@/lib/toss-payment'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { kakaoAlimtalk } from '@/lib/kakao-alimtalk'
 
 export async function POST(request: NextRequest) {
@@ -18,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { paymentKey, cancelReason, cancelAmount } = await request.json()
 
     // 결제 정보 조회
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { paymentKey },
       include: {
         order: {
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 권한 확인 (본인 또는 관리자) - 이메일로 유저 찾기
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { email: session.user.email! }
     })
     
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // 결제 상태 업데이트
     const isFull = cancelAmount === undefined || cancelAmount === payment.amount
-    await prisma.payment.update({
+    await query({
       where: { id: payment.id },
       data: {
         status: isFull ? 'CANCELLED' : 'PARTIAL_REFUND',
@@ -76,14 +79,14 @@ export async function POST(request: NextRequest) {
 
     // 주문 상태 업데이트
     if (isFull) {
-      await prisma.order.update({
+      await query({
         where: { id: payment.orderId },
         data: { status: 'CANCELLED' },
       })
 
       // 재고 복구
       for (const item of payment.order.items) {
-        await prisma.product.update({
+        await query({
           where: { id: item.productId },
           data: {
             stock: {
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     // 알림톡 발송
     if (payment.order.user?.phone) {
-      await prisma.notification.create({
+      await query({
         data: {
           userId: payment.order.userId!,
           type: 'ORDER_CANCELLED',
@@ -127,8 +130,8 @@ export async function POST(request: NextRequest) {
       cancelAmount: cancelAmount || payment.amount,
       status: cancelResult.status,
     })
-  } catch (error: any) {
-    console.error('Payment cancellation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || '결제 취소 중 오류가 발생했습니다.' },
       { status: 500 }

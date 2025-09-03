@@ -34,9 +34,9 @@ export default function CheckoutPage() {
 
   const handleAddressSearch = () => {
     // Daum 우편번호 API
-    if (typeof window !== 'undefined' && (window as any).daum) {
-      new (window as any).daum.Postcode({
-        oncomplete: function(data: any) {
+    if (typeof window !== 'undefined' && (window as unknown).daum) {
+      new (window as unknown).daum.Postcode({
+        oncomplete: function(data: unknown) {
           setShippingInfo(prev => ({
             ...prev,
             postcode: data.zonecode,
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
       router.push(`/orders/${order.id}/complete`)
       
     } catch (error) {
-      console.error('Payment error:', error)
+
       alert('결제 처리 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
@@ -208,7 +208,7 @@ export default function CheckoutPage() {
                     name="payment"
                     value="card"
                     checked={paymentMethod === 'card'}
-                    onChange={(e) => setPaymentMethod(e.target.value as any)}
+                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
                     className="mr-3"
                   />
                   <div>
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
                     name="payment"
                     value="transfer"
                     checked={paymentMethod === 'transfer'}
-                    onChange={(e) => setPaymentMethod(e.target.value as any)}
+                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
                     className="mr-3"
                   />
                   <div>
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                     name="payment"
                     value="virtual"
                     checked={paymentMethod === 'virtual'}
-                    onChange={(e) => setPaymentMethod(e.target.value as any)}
+                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
                     className="mr-3"
                   />
                   <div>

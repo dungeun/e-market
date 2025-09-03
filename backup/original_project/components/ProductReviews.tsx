@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 'use client'
 
 import { useState } from 'react'
@@ -100,7 +101,7 @@ export default function ProductReviews({ productId, reviews }: ProductReviewsPro
             </h3>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as unknown)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="recent">최신순</option>

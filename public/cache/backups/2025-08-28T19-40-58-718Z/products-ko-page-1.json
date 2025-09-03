@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "language": "ko",
+    "page": 1,
+    "pageSize": 30,
+    "totalPages": 10,
+    "totalItems": 289,
+    "generated": "2025-08-29T10:30:00Z",
+    "cacheVersion": "v1.0.0"
+  },
+  "products": [
+    {
+      "id": "prod-001",
+      "slug": "premium-skincare-set",
+      "name": "프리미엄 스킨케어 세트",
+      "description": "피부 재생을 위한 고급 스킨케어 세트",
+      "price": 89000,
+      "discountPrice": 75000,
+      "images": [
+        "/images/products/skincare-1.jpg",
+        "/images/products/skincare-2.jpg"
+      ],
+      "category": {
+        "id": "cat-beauty",
+        "name": "뷰티",
+        "slug": "beauty"
+      },
+      "tags": ["스킨케어", "안티에이징", "수분공급"],
+      "rating": 4.8,
+      "reviewCount": 342,
+      "stock": 15,
+      "featured": true,
+      "new": false,
+      "attributes": {
+        "brand": "LuxeSkin",
+        "volume": "50ml x 3",
+        "skinType": ["건성", "중성"]
+      }
+    }
+  ],
+  "filters": {
+    "categories": [
+      {"id": "cat-beauty", "name": "뷰티", "count": 89},
+      {"id": "cat-fashion", "name": "패션", "count": 124}
+    ],
+    "priceRange": {
+      "min": 10000,
+      "max": 500000
+    },
+    "brands": [
+      {"name": "LuxeSkin", "count": 23},
+      {"name": "NaturePlus", "count": 15}
+    ]
+  }
+}

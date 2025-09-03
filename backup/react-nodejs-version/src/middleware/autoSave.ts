@@ -16,7 +16,7 @@ interface CartSnapshot {
     productId: string
     variantId?: string
     quantity: number
-    options?: Record<string, any>
+    options?: Record<string, unknown>
   }>
   coupons: string[]
   timestamp: Date
@@ -60,7 +60,7 @@ export function autoSaveMiddleware(config: Partial<AutoSaveConfig> = {}) {
 
       // Override response to trigger save after operation
       const originalJson = res.json
-      res.json = function(data: any) {
+      res.json = function(data: unknown) {
         // Call original json method
         const result = originalJson.call(this, data)
 
@@ -317,15 +317,15 @@ function getSessionId(req: Request): string | null {
          null
 }
 
-function createCartSnapshot(cart: any): CartSnapshot {
-  const items = cart.items.map((item: any) => ({
+function createCartSnapshot(cart: unknown): CartSnapshot {
+  const items = cart.items.map((item: unknown) => ({
     productId: item.productId,
     variantId: item.variantId,
     quantity: item.quantity,
     options: item.options,
   }))
 
-  const coupons = cart.appliedCoupons?.map((coupon: any) => coupon.code) || []
+  const coupons = cart.appliedCoupons?.map((coupon: unknown) => coupon.code) || []
 
   // Create simple checksum for change detection
   const dataString = JSON.stringify({ items, coupons })

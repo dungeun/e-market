@@ -87,7 +87,7 @@ export default function EcountPage() {
         setConnectionStatus('disconnected')
       }
     } catch (error) {
-      console.error('Connection test failed:', error)
+
       setConnectionStatus('disconnected')
     } finally {
       setIsLoading(false)
@@ -108,7 +108,7 @@ export default function EcountPage() {
         await loadData()
       }
     } catch (error) {
-      console.error('RotateCw failed:', error)
+
     } finally {
       setIsLoading(false)
     }
@@ -137,7 +137,7 @@ export default function EcountPage() {
       setOrders(ordersData.data || [])
       setInventory(inventoryData.data || [])
     } catch (error) {
-      console.error('Data load failed:', error)
+
     } finally {
       setIsLoading(false)
     }
@@ -256,7 +256,7 @@ function ConnectionStatus({ status }: { status: string }) {
   )
 }
 
-function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoading }: any) {
+function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoading }: unknown) {
   const stats = [
     {
       title: '총 고객수',
@@ -272,13 +272,13 @@ function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoad
     },
     {
       title: '미완료 주문',
-      value: orders.filter((o: any) => o.status !== 'COMPLETED').length,
+      value: orders.filter((o: unknown) => o.status !== 'COMPLETED').length,
       icon: ShoppingCart,
       color: 'text-orange-600'
     },
     {
       title: '재고 부족 상품',
-      value: inventory.filter((i: any) => i.currentStock < (i.safetyStock || 10)).length,
+      value: inventory.filter((i: unknown) => i.currentStock < (i.safetyStock || 10)).length,
       icon: Database,
       color: 'text-red-600'
     }
@@ -349,7 +349,7 @@ function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoad
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {orders.slice(0, 5).map((order: any, index: number) => (
+              {orders.slice(0, 5).map((order: unknown, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <p className="font-medium">{order.orderNumber}</p>
@@ -371,7 +371,7 @@ function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoad
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {inventory.slice(0, 5).map((item: any, index: number) => (
+              {inventory.slice(0, 5).map((item: unknown, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <p className="font-medium">{item.itemCode}</p>
@@ -395,7 +395,7 @@ function DashboardView({ customers, items, orders, inventory, onRotateCw, isLoad
   )
 }
 
-function CustomersView({ customers, searchTerm, onSearchChange, onRefresh, isLoading }: any) {
+function CustomersView({ customers, searchTerm, onSearchChange, onRefresh, isLoading }: unknown) {
   const filteredCustomers = customers.filter((customer: EcountCustomer) =>
     customer.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.customerCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -476,7 +476,7 @@ function CustomersView({ customers, searchTerm, onSearchChange, onRefresh, isLoa
   )
 }
 
-function ItemsView({ items, searchTerm, onSearchChange, onRefresh, isLoading }: any) {
+function ItemsView({ items, searchTerm, onSearchChange, onRefresh, isLoading }: unknown) {
   const filteredItems = items.filter((item: EcountItem) =>
     item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.itemCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -555,7 +555,7 @@ function ItemsView({ items, searchTerm, onSearchChange, onRefresh, isLoading }: 
   )
 }
 
-function OrdersView({ orders, customers, onRefresh, isLoading }: any) {
+function OrdersView({ orders, customers, onRefresh, isLoading }: unknown) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -616,7 +616,7 @@ function OrdersView({ orders, customers, onRefresh, isLoading }: any) {
   )
 }
 
-function InventoryView({ inventory, items, onRefresh, isLoading }: any) {
+function InventoryView({ inventory, items, onRefresh, isLoading }: unknown) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

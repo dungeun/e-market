@@ -83,7 +83,7 @@ export const csrfProtection = () => {
     }
 
     // Skip CSRF for API requests with valid API key
-    if ((req as any).apiClient) {
+    if ((req as unknown).apiClient) {
       return next()
     }
 
@@ -312,7 +312,7 @@ export const requestSanitizer = (req: Request, res: Response, next: NextFunction
 /**
  * Recursively sanitize object properties
  */
-function sanitizeObject(obj: any): void {
+function sanitizeObject(obj: unknown): void {
   if (!obj || typeof obj !== 'object') return
 
   for (const [key, value] of Object.entries(obj)) {

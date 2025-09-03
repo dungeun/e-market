@@ -5,6 +5,12 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableMenuItemImproved } from './SortableMenuItemImproved';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Plus, Menu } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MenuItem {
   id: string;
@@ -40,19 +46,11 @@ export function HeaderConfigDB() {
       
       if (response.ok) {
         const data = await response.json();
-        const formattedMenus = data.menus.map((menu: any) => ({
-          id: menu.id,
-          label: menu.content?.label || menu.sectionId,
-          name: menu.content?.name || '',
-          href: menu.content?.href || '/',
-          icon: menu.content?.icon,
-          visible: menu.visible,
-          order: menu.order
-        }));
-        setMenus(formattedMenus);
+        // 전체 메뉴 객체를 저장 (content 포함)
+        setMenus(data.menus);
       }
     } catch (error) {
-      console.error('Failed to load menus:', error);
+
     } finally {
       setLoading(false);
     }
@@ -62,7 +60,7 @@ export function HeaderConfigDB() {
     loadMenus();
   }, []);
 
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = async (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -93,8 +91,17 @@ export function HeaderConfigDB() {
     }
   };
 
-  const handleMenuUpdate = async (id: string, updates: Partial<MenuItem>) => {
+  const handleMenuUpdate = async (id: string, updates: Partial<any>) => {
     try {
+      // content 필드 업데이트인 경우 바로 적용
+      if (updates.content) {
+        const newMenus = menus.map((item) =>
+          item.id === id ? { ...item, ...updates.content, content: updates.content } : item
+        );
+        setMenus(newMenus);
+        return;
+      }
+
       const response = await fetch('/api/admin/ui-menus', {
         method: 'PUT',
         headers: {
@@ -109,13 +116,14 @@ export function HeaderConfigDB() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         const newMenus = menus.map((item) =>
-          item.id === id ? { ...item, ...updates } : item
+          item.id === id ? { ...item, ...updates, content: data.menu.content } : item
         );
         setMenus(newMenus);
       }
     } catch (error) {
-      console.error('Failed to update menu:', error);
+      console.error('Menu update error:', error);
       alert('메뉴 업데이트 실패');
     }
   };
@@ -159,7 +167,7 @@ export function HeaderConfigDB() {
         throw new Error('메뉴 추가 실패');
       }
     } catch (error) {
-      console.error('Failed to add menu:', error);
+
       alert('메뉴 추가 중 오류가 발생했습니다.');
     }
   };
@@ -184,104 +192,103 @@ export function HeaderConfigDB() {
         throw new Error('메뉴 삭제 실패');
       }
     } catch (error) {
-      console.error('Failed to delete menu:', error);
+
       alert('메뉴 삭제 중 오류가 발생했습니다.');
     }
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-8">
-          <p className="text-gray-500">메뉴를 불러오는 중...</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-sm text-muted-foreground">메뉴를 불러오는 중...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">헤더 메뉴 설정</h2>
-          <button
-            onClick={() => setIsAddingMenu(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>헤더 메뉴 설정</CardTitle>
+            <CardDescription>웹사이트 상단 네비게이션 메뉴를 관리합니다.</CardDescription>
+          </div>
+          <Button onClick={() => setIsAddingMenu(true)} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
             메뉴 추가
-          </button>
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent>
 
         {/* 새 메뉴 추가 폼 */}
         {isAddingMenu && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-semibold mb-3">새 메뉴 추가</h3>
-            <div className="grid grid-cols-4 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  메뉴 이름 (한국어)
-                </label>
-                <input
-                  type="text"
-                  value={newMenuName}
-                  onChange={(e) => setNewMenuName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="예: 이벤트"
-                />
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base">새 메뉴 추가</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="menu-name">메뉴 이름 (한국어)</Label>
+                  <Input
+                    id="menu-name"
+                    value={newMenuName}
+                    onChange={(e) => setNewMenuName(e.target.value)}
+                    placeholder="예: 이벤트"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="menu-url">링크 URL</Label>
+                  <Input
+                    id="menu-url"
+                    value={newMenuUrl}
+                    onChange={(e) => setNewMenuUrl(e.target.value)}
+                    placeholder="예: /events"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="menu-icon">아이콘 (선택)</Label>
+                  <Input
+                    id="menu-icon"
+                    value={newMenuIcon}
+                    onChange={(e) => setNewMenuIcon(e.target.value)}
+                    placeholder="예: 📅"
+                  />
+                </div>
+                <div className="flex items-end space-x-2">
+                  <Button onClick={handleAddMenu} size="sm">
+                    추가
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsAddingMenu(false);
+                      setNewMenuName('');
+                      setNewMenuUrl('/');
+                      setNewMenuIcon('');
+                    }}
+                  >
+                    취소
+                  </Button>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  링크 URL
-                </label>
-                <input
-                  type="text"
-                  value={newMenuUrl}
-                  onChange={(e) => setNewMenuUrl(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="예: /events"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  아이콘 (선택)
-                </label>
-                <input
-                  type="text"
-                  value={newMenuIcon}
-                  onChange={(e) => setNewMenuIcon(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="예: 📅"
-                />
-              </div>
-              <div className="flex items-end space-x-2">
-                <button
-                  onClick={handleAddMenu}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  추가
-                </button>
-                <button
-                  onClick={() => {
-                    setIsAddingMenu(false);
-                    setNewMenuName('');
-                    setNewMenuUrl('/');
-                    setNewMenuIcon('');
-                  }}
-                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              * 메뉴 이름은 자동으로 영어와 일본어로 번역됩니다.
-            </p>
-          </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                메뉴 이름은 자동으로 영어와 일본어로 번역됩니다.
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {/* 기존 메뉴 목록 */}
-        <div className="space-y-2">
-          <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold text-gray-700">
+        <div className="overflow-hidden">
+          <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 uppercase tracking-wider">
             <div className="col-span-1"></div>
             <div className="col-span-3">메뉴 이름</div>
             <div className="col-span-3">언어팩 키</div>
@@ -291,7 +298,7 @@ export function HeaderConfigDB() {
           
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={menus} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
+              <div className="divide-y divide-gray-200">
                 {menus.map((menu) => (
                   <SortableMenuItemImproved
                     key={menu.id}
@@ -306,11 +313,15 @@ export function HeaderConfigDB() {
         </div>
 
         {menus.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            메뉴가 없습니다. 위의 "메뉴 추가" 버튼을 클릭하여 메뉴를 추가하세요.
+          <div className="text-center py-12">
+            <Menu className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-medium">메뉴가 없습니다</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              위의 "메뉴 추가" 버튼을 클릭하여 메뉴를 추가하세요.
+            </p>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

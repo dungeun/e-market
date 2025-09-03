@@ -1,3 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
 /**
  * B2B 사업자 계정 관리 API
  */
@@ -6,9 +8,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { b2bService } from '@/lib/services/business/b2b-service'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // 사업자 계정 조회
 export async function GET(request: NextRequest) {
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const businessAccount = await prisma.businessAccount.findUnique({
+    const businessAccount = await query({
       where: { userId: session.user.email || '' },
       include: {
         priceGroups: {
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: businessAccount
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to get business account' },
       { status: 500 }
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 이미 사업자 계정이 있는지 확인
-    const existing = await prisma.businessAccount.findUnique({
+    const existing = await query({
       where: { userId: session.user.email }
     })
 
@@ -108,8 +107,8 @@ export async function POST(request: NextRequest) {
       data: businessAccount,
       message: '사업자 계정이 성공적으로 생성되었습니다.'
     })
-  } catch (error: any) {
-    console.error('Business account creation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to create business account' },
       { status: 500 }
@@ -137,7 +136,7 @@ export async function PUT(request: NextRequest) {
       businessCategory
     } = body
 
-    const businessAccount = await prisma.businessAccount.update({
+    const businessAccount = await query({
       where: { userId: session.user.email },
       data: {
         ...(taxInvoiceEmail && { taxInvoiceEmail }),
@@ -152,7 +151,7 @@ export async function PUT(request: NextRequest) {
       data: businessAccount,
       message: '사업자 정보가 수정되었습니다.'
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to update business account' },
       { status: 500 }

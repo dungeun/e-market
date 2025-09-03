@@ -9,7 +9,7 @@ export interface UISection {
   type: string;
   enabled: boolean;
   order: number;
-  config?: any;
+  config?: unknown;
 }
 
 // 홈페이지 섹션 타입
@@ -167,7 +167,7 @@ export function validateSection(section: UISection): boolean {
     return false;
   }
   
-  if (!Object.values(sectionTypes).includes(section.type as any)) {
+  if (!Object.values(sectionTypes).includes(section.type as unknown)) {
     return false;
   }
   

@@ -2,9 +2,9 @@ import { api } from './api';
 
 interface TrackingResponse {
   success: boolean;
-  carrier?: any;
-  trackingInfo?: any;
-  trackingEvents?: any[];
+  carrier?: unknown;
+  trackingInfo?: unknown;
+  trackingEvents?: unknown[];
   error?: string;
 }
 

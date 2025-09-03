@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 // 간단한 메모리 기반 인증 서비스 (개발용)
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
@@ -69,7 +70,7 @@ export class MockAuthService {
 
   async verifyToken(token: string): Promise<User | null> {
     try {
-      const decoded = jwt.verify(token, config.jwt.secret) as any
+      const decoded = jwt.verify(token, config.jwt.secret) as unknown
       return users.find(user => user.id === decoded.userId) || null
     } catch {
       return null

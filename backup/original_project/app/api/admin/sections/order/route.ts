@@ -17,10 +17,10 @@ export async function PUT(request: NextRequest) {
     // await SectionService.updateSectionOrder(sectionIds)
     
     // For now, just return success
-    console.log('Section order update requested:', sectionIds)
+
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to update section order:', error)
+
     return NextResponse.json(
       { error: 'Failed to update section order' },
       { status: 500 }

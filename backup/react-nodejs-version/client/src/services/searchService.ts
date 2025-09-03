@@ -5,7 +5,7 @@ export interface SearchQuery {
   filters?: {
     categories?: string[];
     priceRange?: { min?: number; max?: number };
-    attributes?: Record<string, any>;
+    attributes?: Record<string, unknown>;
     inStock?: boolean;
     tags?: string[];
     rating?: number;
@@ -20,9 +20,9 @@ export interface SearchQuery {
 }
 
 export interface SearchResult {
-  products: any[];
+  products: unknown[];
   total: number;
-  facets: Record<string, any>;
+  facets: Record<string, unknown>;
   suggestions: string[];
   took: number;
 }
@@ -128,7 +128,7 @@ class SearchService {
   /**
    * 검색 인덱스 상태
    */
-  async getIndexStats(): Promise<any> {
+  async getIndexStats(): Promise<unknown> {
     const response = await api.get('/search/index/stats');
     return response.data.data;
   }

@@ -1,9 +1,12 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { ShoppingCart, Heart, Eye } from 'lucide-react'
+import { useState } from 'react'
 
 interface ProductCardProps {
   product: {
@@ -11,38 +14,66 @@ interface ProductCardProps {
     name: string
     slug: string
     description?: string
-    images?: { url: string }[]
-    prices?: {
-      amount: number
-      discountPercentage?: number
-      originalPrice?: number
-    }[]
+    price: number
+    original_price?: number
+    stock: number
+    images: { url: string; alt?: string; order?: number }[]
     rating?: number
-    _count?: {
-      orderItems?: number
-      views?: number
-    }
+    review_count?: number
+    category?: { id: string; name: string; slug: string }
+    featured?: boolean
+    new?: boolean
   }
   showBadge?: boolean
   badgeText?: string
   showRanking?: number
-  showViewCount?: boolean
-  showSalesCount?: boolean
 }
 
-export default function ProductCard({ 
+const ProductCard = React.memo(function ProductCard({ 
   product, 
   showBadge, 
   badgeText,
-  showRanking,
-  showViewCount,
-  showSalesCount
+  showRanking
 }: ProductCardProps) {
-  const price = product.prices?.[0]
+  const [loading, setLoading] = useState(false)
   const image = product.images?.[0]?.url || '/placeholder.jpg'
-  const discountPercentage = price?.discountPercentage || 0
-  const finalPrice = price?.amount || 0
-  const originalPrice = price?.originalPrice || finalPrice
+  const finalPrice = product.price
+  const originalPrice = product.original_price
+  const discountPercentage = originalPrice && originalPrice > finalPrice 
+    ? Math.round(((originalPrice - finalPrice) / originalPrice) * 100)
+    : 0
+
+  const addToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (product.stock <= 0) return
+    
+    setLoading(true)
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: 1
+        }),
+      })
+
+      if (response.ok) {
+        alert('장바구니에 추가되었습니다!')
+      } else {
+        alert('장바구니 추가에 실패했습니다.')
+      }
+    } catch (error) {
+
+      alert('장바구니 추가 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
@@ -82,13 +113,24 @@ export default function ProductCard({
           
           {/* 빠른 액션 버튼 */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors">
+            <button 
+              onClick={addToCart}
+              disabled={loading || product.stock <= 0}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-500 rounded-full p-2 shadow-lg transition-colors"
+            >
               <ShoppingCart className="w-4 h-4 text-white" />
             </button>
             <button className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors">
               <Heart className="w-4 h-4 text-white" />
             </button>
-            <button className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors">
+            <button 
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                window.location.href = `/products/${product.slug}`
+              }}
+              className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors"
+            >
               <Eye className="w-4 h-4 text-white" />
             </button>
           </div>
@@ -101,7 +143,7 @@ export default function ProductCard({
           </h3>
           
           {/* 평점 */}
-          {product.rating && (
+          {product.rating && product.rating > 0 && (
             <div className="flex items-center mb-2">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
@@ -115,6 +157,9 @@ export default function ProductCard({
                 ))}
               </div>
               <span className="text-sm text-gray-400 ml-1">({product.rating})</span>
+              {product.review_count && product.review_count > 0 && (
+                <span className="text-xs text-gray-500 ml-1">{product.review_count}개 리뷰</span>
+              )}
             </div>
           )}
 
@@ -130,17 +175,25 @@ export default function ProductCard({
             </span>
           </div>
 
-          {/* 통계 정보 */}
-          <div className="flex gap-4 mt-2 text-xs text-gray-400">
-            {showViewCount && product._count?.views && (
-              <span>조회 {product._count.views}</span>
+          {/* 재고 및 뱃지 */}
+          <div className="flex gap-2 mt-2 text-xs">
+            {product.stock <= 0 && (
+              <span className="bg-red-600 text-white px-2 py-1 rounded">품절</span>
             )}
-            {showSalesCount && product._count?.orderItems && (
-              <span>구매 {product._count.orderItems}</span>
+            {product.stock > 0 && product.stock < 5 && (
+              <span className="bg-orange-600 text-white px-2 py-1 rounded">재고부족</span>
+            )}
+            {product.new && (
+              <span className="bg-blue-600 text-white px-2 py-1 rounded">NEW</span>
+            )}
+            {product.featured && (
+              <span className="bg-green-600 text-white px-2 py-1 rounded">인기</span>
             )}
           </div>
         </div>
       </div>
     </Link>
-  )
-}
+    )
+});
+
+export default ProductCard;

@@ -69,7 +69,7 @@ export const NotificationCenter: React.FC = () => {
       await api.patch(`/api/admin/notifications/${notificationId}/read`)
       // Optimistically update the notification
     } catch (error) {
-      console.error('Failed to mark notification as read:', error)
+
     }
   }
 
@@ -78,7 +78,7 @@ export const NotificationCenter: React.FC = () => {
       await api.patch('/api/admin/notifications/read-all')
       // Refetch notifications
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error)
+
     }
   }
 

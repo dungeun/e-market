@@ -1,3 +1,4 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { createEcountServiceFromEnv } from '@/lib/services/ecount/ecount-api'
 
@@ -23,8 +24,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
   } catch (error) {
-    console.error('Ecount connection test error:', error)
-    
+
     // 환경변수 누락 에러 처리
     if (error instanceof Error && error.message.includes('환경 변수')) {
       return NextResponse.json({

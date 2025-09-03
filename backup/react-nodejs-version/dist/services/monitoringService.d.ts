@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
 export declare class MonitoringService {
     private prisma;

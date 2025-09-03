@@ -50,7 +50,7 @@ export function cache(options: CacheMiddlewareOptions = {}) {
       const originalSend = res.json.bind(res)
 
       // Override json method to cache the response
-      res.json = function(data: any) {
+      res.json = function(data: unknown) {
         // Only cache successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
           const cachedResponse: CachedResponse = {

@@ -76,7 +76,7 @@ export const DashboardOverview: React.FC = () => {
           setLastUpdated(new Date());
         }
       } catch (error) {
-        console.error('Failed to fetch dashboard metrics:', error);
+
       } finally {
         setLoading(false);
       }

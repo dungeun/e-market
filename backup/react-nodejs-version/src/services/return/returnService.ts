@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { logger } from '../../utils/logger';
 import {
   CreateReturnDto,
@@ -37,7 +37,7 @@ export class ReturnService {
   async createReturn(data: CreateReturnDto, userId?: string) {
     try {
       // 주문 확인
-      const order = await this.prisma.order.findUnique({
+      const order = await this.query({
         where: { id: data.orderId },
         include: {
           items: {
@@ -77,7 +77,7 @@ export class ReturnService {
       const autoApprove = await this.checkAutoApproval(data, policy, refundAmount);
 
       // 반품/교환 생성
-      const returnRequest = await this.prisma.return.create({
+      const returnRequest = await this.query({
         data: {
           orderId: data.orderId,
           orderItemIds: data.orderItemIds,
@@ -135,7 +135,7 @@ export class ReturnService {
         sortOrder = 'desc'
       } = params;
 
-      const where: any = {};
+      const where: unknown = {};
 
       if (userId) where.userId = userId;
       if (orderId) where.orderId = orderId;
@@ -150,7 +150,7 @@ export class ReturnService {
       }
 
       const [returns, total] = await Promise.all([
-        this.prisma.return.findMany({
+        this.query({
           where,
           skip: (page - 1) * limit,
           take: limit,
@@ -164,7 +164,7 @@ export class ReturnService {
             user: true
           }
         }),
-        this.prisma.return.count({ where })
+        this.query({ where })
       ]);
 
       return {
@@ -187,7 +187,7 @@ export class ReturnService {
    */
   async getReturn(id: string) {
     try {
-      const returnRequest = await this.prisma.return.findUnique({
+      const returnRequest = await this.query({
         where: { id },
         include: {
           order: {
@@ -230,7 +230,7 @@ export class ReturnService {
       const returnRequest = await this.getReturn(id);
       const oldStatus = returnRequest.status;
 
-      const updateData: any = {
+      const updateData: unknown = {
         ...data,
         updatedAt: new Date()
       };
@@ -246,7 +246,7 @@ export class ReturnService {
         updateData.completedAt = new Date();
       }
 
-      const updated = await this.prisma.return.update({
+      const updated = await this.query({
         where: { id },
         data: updateData,
         include: {
@@ -336,7 +336,7 @@ export class ReturnService {
       }
 
       // 환불 정보 업데이트
-      await this.prisma.return.update({
+      await this.query({
         where: { id: returnId },
         data: {
           refundAmount: data.refundAmount,
@@ -378,7 +378,7 @@ export class ReturnService {
    */
   async getReturnStats(startDate?: Date, endDate?: Date): Promise<ReturnStats> {
     try {
-      const where: any = {};
+      const where: unknown = {};
       if (startDate || endDate) {
         where.requestedAt = {};
         if (startDate) where.requestedAt.gte = startDate;
@@ -392,7 +392,7 @@ export class ReturnService {
         reasonCounts,
         avgProcessingTime
       ] = await Promise.all([
-        this.prisma.return.count({ where }),
+        this.query({ where }),
         this.prisma.return.groupBy({
           by: ['status'],
           where,
@@ -466,7 +466,7 @@ export class ReturnService {
   /**
    * Private methods
    */
-  private async getApplicablePolicy(order: any, orderItemIds: string[]) {
+  private async getApplicablePolicy(order: unknown, orderItemIds: string[]) {
     // TODO: 상품/카테고리별 정책 조회
     // 기본 정책 반환
     return {
@@ -490,7 +490,7 @@ export class ReturnService {
   }
 
   private async getDaysSinceDelivery(orderId: string): Promise<number> {
-    const shipment = await this.prisma.shipment.findFirst({
+    const shipment = await this.query({
       where: {
         orderId,
         status: 'DELIVERED'
@@ -509,12 +509,12 @@ export class ReturnService {
     return days;
   }
 
-  private async calculateRefundAmount(order: any, orderItemIds: string[], policy: any): Promise<number> {
-    const itemsToReturn = order.items.filter((item: any) => 
+  private async calculateRefundAmount(order: unknown, orderItemIds: string[], policy: unknown): Promise<number> {
+    const itemsToReturn = order.items.filter((item: unknown) => 
       orderItemIds.includes(item.id)
     );
 
-    let refundAmount = itemsToReturn.reduce((sum: number, item: any) => 
+    let refundAmount = itemsToReturn.reduce((sum: number, item: unknown) => 
       sum + Number(item.total), 0
     );
 
@@ -531,7 +531,7 @@ export class ReturnService {
 
   private async checkAutoApproval(
     data: CreateReturnDto,
-    policy: any,
+    policy: unknown,
     refundAmount: number
   ): Promise<boolean> {
     if (!policy.autoApprove) {
@@ -551,11 +551,11 @@ export class ReturnService {
     return true;
   }
 
-  private async processApprovedReturn(returnRequest: any) {
+  private async processApprovedReturn(returnRequest: unknown) {
     // 수거 요청 생성 (필요한 경우)
     if (returnRequest.type !== ReturnType.EXCHANGE) {
       // TODO: 택배사 수거 API 연동
-      await this.prisma.return.update({
+      await this.query({
         where: { id: returnRequest.id },
         data: {
           status: ReturnStatus.PICKUP_SCHEDULED,
@@ -566,9 +566,9 @@ export class ReturnService {
     }
   }
 
-  private async processReceivedReturn(returnRequest: any) {
+  private async processReceivedReturn(returnRequest: unknown) {
     // 검수 시작
-    await this.prisma.return.update({
+    await this.query({
       where: { id: returnRequest.id },
       data: {
         status: ReturnStatus.INSPECTING
@@ -578,14 +578,14 @@ export class ReturnService {
     // TODO: 자동 검수 로직 (이미지 분석 등)
   }
 
-  private async completeReturn(returnRequest: any) {
+  private async completeReturn(returnRequest: unknown) {
     if (returnRequest.type === ReturnType.EXCHANGE) {
       // 교환 상품 발송
       // TODO: 새 배송 생성
     }
 
     // 주문 상태 업데이트
-    const hasMoreItems = await this.prisma.orderItem.count({
+    const hasMoreItems = await this.query({
       where: {
         orderId: returnRequest.orderId,
         id: { notIn: returnRequest.orderItemIds }
@@ -594,16 +594,16 @@ export class ReturnService {
 
     if (hasMoreItems === 0) {
       // 전체 반품인 경우
-      await this.prisma.order.update({
+      await this.query({
         where: { id: returnRequest.orderId },
         data: { status: 'REFUNDED' }
       });
     }
   }
 
-  private async restoreInventory(returnRequest: any) {
+  private async restoreInventory(returnRequest: unknown) {
     for (const itemId of returnRequest.orderItemIds) {
-      const orderItem = returnRequest.order.items.find((item: any) => item.id === itemId);
+      const orderItem = returnRequest.order.items.find((item: unknown) => item.id === itemId);
       if (orderItem) {
         await this.inventoryService.adjustInventory(
           orderItem.productId,
@@ -623,7 +623,7 @@ export class ReturnService {
     performedBy?: string,
     details?: any
   ) {
-    await this.prisma.returnLog.create({
+    await this.query({
       data: {
         returnId,
         action,
@@ -635,8 +635,8 @@ export class ReturnService {
     });
   }
 
-  private async calculateAvgProcessingTime(where: any): Promise<number> {
-    const completedReturns = await this.prisma.return.findMany({
+  private async calculateAvgProcessingTime(where: unknown): Promise<number> {
+    const completedReturns = await this.query({
       where: {
         ...where,
         completedAt: { not: null }
@@ -657,7 +657,7 @@ export class ReturnService {
     return Math.round(totalTime / completedReturns.length / (1000 * 60 * 60)); // hours
   }
 
-  private async notifyReturnCreated(returnRequest: any) {
+  private async notifyReturnCreated(returnRequest: unknown) {
     if (returnRequest.user) {
       await this.notificationService.sendNotification({
         userId: returnRequest.user.id,
@@ -674,7 +674,7 @@ export class ReturnService {
     await this.notifyAdmins('NEW_RETURN', returnRequest);
   }
 
-  private async notifyReturnUpdated(returnRequest: any, oldStatus: string) {
+  private async notifyReturnUpdated(returnRequest: unknown, oldStatus: string) {
     if (returnRequest.user && returnRequest.status !== oldStatus) {
       const statusMessages: Record<string, string> = {
         APPROVED: '승인되었습니다',
@@ -697,8 +697,8 @@ export class ReturnService {
     }
   }
 
-  private async notifyAdmins(type: string, data: any) {
-    const admins = await this.prisma.user.findMany({
+  private async notifyAdmins(type: string, data: unknown) {
+    const admins = await this.query({
       where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } }
     });
 

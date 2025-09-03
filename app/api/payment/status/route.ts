@@ -1,3 +1,6 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 결제 상태 조회 API
  */
@@ -6,8 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway } from '@/lib/services/payment/payment-gateway'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (paymentId) {
       // 결제 ID로 조회
-      payment = await prisma.payment.findUnique({
+      payment = await query({
         where: { id: paymentId },
         include: {
           order: {
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
       })
     } else if (orderId) {
       // 주문 ID로 최신 결제 조회
-      payment = await prisma.payment.findFirst({
+      payment = await query({
         where: { orderId },
         orderBy: { createdAt: 'desc' },
         include: {
@@ -80,7 +82,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 권한 확인 (본인 또는 관리자) - 이메일로 유저 찾기
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { email: session.user.email! }
     })
     
@@ -97,7 +99,7 @@ export async function GET(request: NextRequest) {
       try {
         providerStatus = await paymentGateway.getPaymentStatus(payment.id)
       } catch (error) {
-        console.error('Failed to get provider status:', error)
+
       }
     }
 
@@ -105,7 +107,7 @@ export async function GET(request: NextRequest) {
     let taxInvoice = null
     /*
     if (payment.order.businessAccountId) {
-      taxInvoice = await prisma.taxInvoice.findFirst({
+      taxInvoice = await query({
         where: { orderId: payment.orderId }
       })
     }
@@ -126,8 +128,8 @@ export async function GET(request: NextRequest) {
         }
       }
     })
-  } catch (error: any) {
-    console.error('Payment status error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to get payment status' },
       { status: 500 }

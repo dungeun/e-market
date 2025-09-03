@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response } from 'express'
 import { shippingService } from '../../services/shippingService'
 import { asyncHandler } from '../../middleware/error'
@@ -142,7 +143,7 @@ export class ShippingController {
 
     const trackingData = await shippingService.trackShipment({
       trackingNumber,
-      carrier: carrier as any,
+      carrier: carrier as unknown,
     })
 
     return res.json({
@@ -404,8 +405,7 @@ export class ShippingController {
     const payload = JSON.stringify(_req.body)
     
     // Mock implementation - always return true for now
-    console.log('Webhook signature verification:', { signature, payload })
-    
+
     // This is a mock implementation
     // In real scenario, you would verify the signature using carrier's secret key
     return !!signature && signature.length > 0

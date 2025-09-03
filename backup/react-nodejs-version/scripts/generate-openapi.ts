@@ -1,4 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { env } from '@/lib/config/env';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../src/utils/logger';
@@ -90,7 +91,7 @@ Connect to: \`ws://localhost:3000/socket.io\`
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: env.appUrl,
         description: 'Development server'
       },
       {

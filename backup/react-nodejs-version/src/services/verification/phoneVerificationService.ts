@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { logger } from '../../utils/logger';
 import crypto from 'crypto';
 import {
@@ -19,7 +19,7 @@ export class PhoneVerificationService {
   private prisma: PrismaClient;
   private config: PhoneVerificationConfig;
   private smsConfig: SMSConfig;
-  private gateway: any;
+  private gateway: unknown;
 
   constructor(config: PhoneVerificationConfig, smsConfig: SMSConfig) {
     this.prisma = new PrismaClient();
@@ -55,7 +55,7 @@ export class PhoneVerificationService {
       const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3분 후 만료
 
       // Check for existing pending verification
-      const existing = await this.prisma.phoneVerification.findFirst({
+      const existing = await this.query({
         where: {
           phone: request.phone,
           status: 'PENDING',
@@ -71,7 +71,7 @@ export class PhoneVerificationService {
       }
 
       // Create or update verification record
-      const verification = await this.prisma.phoneVerification.create({
+      const verification = await this.query({
         data: {
           userId: request.userId,
           phone: request.phone,
@@ -94,7 +94,7 @@ export class PhoneVerificationService {
       });
 
       if (!smsResponse.success) {
-        await this.prisma.phoneVerification.update({
+        await this.query({
           where: { id: verification.id },
           data: { status: 'FAILED' }
         });
@@ -105,7 +105,7 @@ export class PhoneVerificationService {
       }
 
       // Update status to SENT
-      await this.prisma.phoneVerification.update({
+      await this.query({
         where: { id: verification.id },
         data: { status: 'SENT' }
       });
@@ -135,7 +135,7 @@ export class PhoneVerificationService {
    */
   async verifyCode(phone: string, code: string): Promise<VerificationResult> {
     try {
-      const verification = await this.prisma.phoneVerification.findFirst({
+      const verification = await this.query({
         where: {
           phone,
           code,
@@ -154,14 +154,14 @@ export class PhoneVerificationService {
       }
 
       // Update attempts
-      await this.prisma.phoneVerification.update({
+      await this.query({
         where: { id: verification.id },
         data: { attempts: { increment: 1 } }
       });
 
       // Check max attempts
       if (verification.attempts >= verification.maxAttempts) {
-        await this.prisma.phoneVerification.update({
+        await this.query({
           where: { id: verification.id },
           data: { status: 'FAILED' }
         });
@@ -182,7 +182,7 @@ export class PhoneVerificationService {
       }
 
       // Update verification status
-      await this.prisma.phoneVerification.update({
+      await this.query({
         where: { id: verification.id },
         data: {
           status: 'VERIFIED',
@@ -192,7 +192,7 @@ export class PhoneVerificationService {
 
       // Update user phone verification status
       if (verification.userId) {
-        await this.prisma.user.update({
+        await this.query({
           where: { id: verification.userId },
           data: { isPhoneVerified: true }
         });
@@ -229,7 +229,7 @@ export class PhoneVerificationService {
       
       if (response.success && response.requestId) {
         // Save verification request
-        await this.prisma.phoneVerification.create({
+        await this.query({
           data: {
             userId: request.userId,
             phone: request.phone,
@@ -261,7 +261,7 @@ export class PhoneVerificationService {
    */
   async checkIdentityVerification(requestId: string): Promise<VerificationResult> {
     try {
-      const verification = await this.prisma.phoneVerification.findFirst({
+      const verification = await this.query({
         where: {
           code: requestId,
           provider: this.config.provider,
@@ -282,7 +282,7 @@ export class PhoneVerificationService {
 
       if (result.verified) {
         // Update verification record
-        await this.prisma.phoneVerification.update({
+        await this.query({
           where: { id: verification.id },
           data: {
             status: 'VERIFIED',
@@ -296,7 +296,7 @@ export class PhoneVerificationService {
 
         // Update user verification status
         if (verification.userId) {
-          await this.prisma.user.update({
+          await this.query({
             where: { id: verification.userId },
             data: { isPhoneVerified: true }
           });
@@ -351,7 +351,7 @@ export class PhoneVerificationService {
    */
   async cleanupExpiredVerifications(): Promise<void> {
     try {
-      const result = await this.prisma.phoneVerification.updateMany({
+      const result = await this.queryMany({
         where: {
           status: { in: ['PENDING', 'SENT'] },
           expiresAt: { lt: new Date() }

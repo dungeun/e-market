@@ -127,9 +127,9 @@ const campaigns = [
 export default function CampaignsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
+  const [selectedCampaign, setSelectedCampaign] = useState<unknown>(null)
 
-  const handleAction = (action: string, campaign: any) => {
+  const handleAction = (action: string, campaign: unknown) => {
     switch(action) {
       case 'view':
         setSelectedCampaign(campaign)
@@ -168,7 +168,7 @@ export default function CampaignsPage() {
   }
 
   const getTypeBadge = (type: string) => {
-    const typeLabels: any = {
+    const typeLabels: unknown = {
       discount: '할인',
       welcome: '환영',
       seasonal: '시즌',

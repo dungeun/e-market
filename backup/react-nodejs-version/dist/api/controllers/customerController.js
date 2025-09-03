@@ -462,7 +462,7 @@ class CustomerController {
             if (typeof isActive !== 'boolean') {
                 throw new error_1.AppError('isActive must be a boolean', 400);
             }
-            await database_1.prisma.user.update({
+            await database_1.query({
                 where: { id: customerId },
                 data: { isActive },
             });

@@ -344,7 +344,7 @@ exports.logRequestBehavior = logRequestBehavior;
 async function addToBlacklist(ip) {
     try {
         const prisma = await getPrisma();
-        await prisma.blacklist.create({
+        await query({
             data: {
                 type: 'IP',
                 value: ip,
@@ -414,7 +414,7 @@ function getKey(req) {
 const blacklistCheck = async (req, _res, next) => {
     try {
         const prisma = await getPrisma();
-        const blacklisted = await prisma.blacklist.findFirst({
+        const blacklisted = await query({
             where: {
                 AND: [
                     {

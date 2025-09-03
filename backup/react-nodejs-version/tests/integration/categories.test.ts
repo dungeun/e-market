@@ -1,8 +1,6 @@
 import request from 'supertest';
-import { PrismaClient } from '@prisma/client';
 import app from '../../src/index';
 
-const prisma = new PrismaClient();
 
 describe('Category API', () => {
   let createdCategoryId: string;
@@ -10,7 +8,7 @@ describe('Category API', () => {
 
   beforeAll(async () => {
     // Clean up any existing test data
-    await prisma.category.deleteMany({
+    await queryMany({
       where: {
         slug: {
           in: ['test-category', 'test-parent-category', 'test-child-category']
@@ -21,7 +19,7 @@ describe('Category API', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await prisma.category.deleteMany({
+    await queryMany({
       where: {
         slug: {
           in: ['test-category', 'test-parent-category', 'test-child-category']
@@ -190,7 +188,7 @@ describe('Category API', () => {
         .get('/api/v1/categories')
         .expect(200);
 
-      const childCategory = categories.body.data.find((cat: any) => 
+      const childCategory = categories.body.data.find((cat: unknown) => 
         cat.slug === 'test-child-category'
       );
 
@@ -256,7 +254,7 @@ describe('Category API', () => {
         .get('/api/v1/categories')
         .expect(200);
 
-      const childCategory = categories.body.data.find((cat: any) => 
+      const childCategory = categories.body.data.find((cat: unknown) => 
         cat.slug === 'test-child-category'
       );
 

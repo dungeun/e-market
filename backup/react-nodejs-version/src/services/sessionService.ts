@@ -85,7 +85,7 @@ export class SessionService {
       // In production, you might want to use Redis or database storage
 
       // Since we don't have a dedicated session table, we'll work with cart sessions
-      const cart = await prisma.cart.findFirst({
+      const cart = await query({
         where: {
           sessionId,
           userId: null, // Only guest carts
@@ -121,7 +121,7 @@ export class SessionService {
   ): Promise<GuestSession> {
     try {
       // Update cart's updatedAt timestamp to track activity
-      const cart = await prisma.cart.findFirst({
+      const cart = await query({
         where: {
           sessionId,
           userId: null,
@@ -130,7 +130,7 @@ export class SessionService {
       })
 
       if (cart) {
-        await prisma.cart.update({
+        await query({
           where: { id: cart.id },
           data: { updatedAt: new Date() },
         })
@@ -170,7 +170,7 @@ export class SessionService {
         const newExpiresAt = new Date()
         newExpiresAt.setHours(newExpiresAt.getHours() + additionalHours)
 
-        await prisma.cart.update({
+        await query({
           where: { id: session.cartId },
           data: { expiresAt: newExpiresAt },
         })
@@ -189,7 +189,7 @@ export class SessionService {
   async transferSessionToUser(sessionId: string, userId: string): Promise<boolean> {
     try {
       // Find guest cart for this session
-      const guestCart = await prisma.cart.findFirst({
+      const guestCart = await query({
         where: {
           sessionId,
           userId: null,
@@ -202,7 +202,7 @@ export class SessionService {
       }
 
       // Check if user already has a cart
-      const userCart = await prisma.cart.findFirst({
+      const userCart = await query({
         where: {
           userId,
           expiresAt: { gt: new Date() },
@@ -215,26 +215,26 @@ export class SessionService {
         logger.info(`Merging guest cart ${guestCart.id} into user cart ${userCart.id}`)
 
         // Move all items from guest cart to user cart
-        await prisma.cartItem.updateMany({
+        await queryMany({
           where: { cartId: guestCart.id },
           data: { cartId: userCart.id },
         })
 
         // Move coupons
-        await prisma.cartCoupon.updateMany({
+        await queryMany({
           where: { cartId: guestCart.id },
           data: { cartId: userCart.id },
         })
 
         // Delete guest cart
-        await prisma.cart.delete({
+        await query({
           where: { id: guestCart.id },
         })
       } else {
         // User has no cart - transfer ownership
         logger.info(`Transferring guest cart ${guestCart.id} to user ${userId}`)
 
-        await prisma.cart.update({
+        await query({
           where: { id: guestCart.id },
           data: {
             userId,
@@ -256,7 +256,7 @@ export class SessionService {
   async cleanupExpiredSessions(): Promise<number> {
     try {
       // Clean up expired guest carts (sessions)
-      const result = await prisma.cart.deleteMany({
+      const result = await queryMany({
         where: {
           userId: null, // Guest carts only
           expiresAt: {
@@ -284,7 +284,7 @@ export class SessionService {
       const hoursAgo = new Date()
       hoursAgo.setHours(hoursAgo.getHours() - hours)
 
-      const activeGuestCarts = await prisma.cart.count({
+      const activeGuestCarts = await query({
         where: {
           userId: null,
           expiresAt: { gt: new Date() },
@@ -292,14 +292,14 @@ export class SessionService {
         },
       })
 
-      const totalGuestCarts = await prisma.cart.count({
+      const totalGuestCarts = await query({
         where: {
           userId: null,
           expiresAt: { gt: new Date() },
         },
       })
 
-      const newGuestCarts = await prisma.cart.count({
+      const newGuestCarts = await query({
         where: {
           userId: null,
           createdAt: { gt: hoursAgo },
@@ -307,7 +307,7 @@ export class SessionService {
       })
 
       // Calculate average session duration (simplified)
-      const sessions = await prisma.cart.findMany({
+      const sessions = await query({
         where: {
           userId: null,
           createdAt: { gt: hoursAgo },
@@ -340,7 +340,7 @@ export class SessionService {
   // Associate cart with session
   async associateCartWithSession(sessionId: string, cartId: string): Promise<void> {
     try {
-      await prisma.cart.update({
+      await query({
         where: { id: cartId },
         data: { sessionId },
       })
@@ -367,7 +367,7 @@ export class SessionService {
       let itemCount = 0
 
       if (session?.cartId) {
-        cart = await prisma.cart.findUnique({
+        cart = await query({
           where: { id: session.cartId },
           include: {
             items: {

@@ -10,7 +10,7 @@ class CategoryService {
      */
     async createCategory(data) {
         try {
-            const category = await prisma.category.create({
+            const category = await query({
                 data,
                 include: {
                     parent: true,
@@ -30,7 +30,7 @@ class CategoryService {
      */
     async getAllCategories(includeInactive = false) {
         try {
-            const categories = await prisma.category.findMany({
+            const categories = await query({
                 where: includeInactive ? {} : { isActive: true },
                 include: {
                     children: {
@@ -53,7 +53,7 @@ class CategoryService {
      */
     async getCategoryById(id) {
         try {
-            const category = await prisma.category.findUnique({
+            const category = await query({
                 where: { id },
                 include: {
                     parent: true,
@@ -79,7 +79,7 @@ class CategoryService {
      */
     async getCategoryBySlug(slug) {
         try {
-            const category = await prisma.category.findUnique({
+            const category = await query({
                 where: { slug },
                 include: {
                     parent: true,
@@ -108,7 +108,7 @@ class CategoryService {
             if (data.parentId) {
                 await this.validateParentCategory(id, data.parentId);
             }
-            const category = await prisma.category.update({
+            const category = await query({
                 where: { id },
                 data,
                 include: {
@@ -130,20 +130,20 @@ class CategoryService {
     async deleteCategory(id) {
         try {
             // Check if category has children
-            const children = await prisma.category.count({
+            const children = await query({
                 where: { parentId: id },
             });
             if (children > 0) {
                 throw new Error('Cannot delete category with children');
             }
             // Check if category has products
-            const products = await prisma.product.count({
+            const products = await query({
                 where: { categoryId: id },
             });
             if (products > 0) {
                 throw new Error('Cannot delete category with products');
             }
-            await prisma.category.delete({
+            await query({
                 where: { id },
             });
             logger_1.logger.info(`Category deleted: ${id}`);
@@ -196,7 +196,7 @@ class CategoryService {
      */
     async searchCategories(query) {
         try {
-            const categories = await prisma.category.findMany({
+            const categories = await query({
                 where: {
                     OR: [
                         { name: { contains: query, mode: 'insensitive' } },
@@ -219,7 +219,7 @@ class CategoryService {
     async getCategoriesByTag(tagId) {
         try {
             // Get products with the tag
-            const products = await prisma.product.findMany({
+            const products = await query({
                 where: {
                     tags: {
                         some: { tagId },
@@ -231,7 +231,7 @@ class CategoryService {
             // Get unique category IDs
             const categoryIds = [...new Set(products.map(p => p.categoryId).filter(Boolean))];
             // Fetch categories
-            const categories = await prisma.category.findMany({
+            const categories = await query({
                 where: {
                     id: { in: categoryIds },
                     isActive: true,
@@ -250,7 +250,7 @@ class CategoryService {
      */
     async reorderCategories(updates) {
         try {
-            await prisma.$transaction(updates.map(({ id, sortOrder }) => prisma.category.update({
+            await prisma.$transaction(updates.map(({ id, sortOrder }) => query({
                 where: { id },
                 data: { sortOrder },
             })));
@@ -287,7 +287,7 @@ class CategoryService {
         return rootCategories;
     }
     async buildCategoryBranch(categoryId) {
-        const category = await prisma.category.findUnique({
+        const category = await query({
             where: { id: categoryId },
             include: {
                 children: {

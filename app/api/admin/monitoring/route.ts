@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 모니터링 & 스케일링 관리 API
  */
@@ -110,8 +112,8 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
-    console.error('Monitoring API error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch monitoring data' },
       { status: 500 }
@@ -200,8 +202,8 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
-    console.error('Monitoring API POST error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to execute monitoring action' },
       { status: 500 }

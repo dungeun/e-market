@@ -38,8 +38,8 @@ export class TossPaymentService {
         { headers: this.headers }
       )
       return response.data
-    } catch (error: any) {
-      console.error('Toss payment confirmation error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       throw new Error(
         error.response?.data?.message || '결제 승인 중 오류가 발생했습니다.'
       )
@@ -58,8 +58,8 @@ export class TossPaymentService {
         { headers: this.headers }
       )
       return response.data
-    } catch (error: any) {
-      console.error('Toss payment cancellation error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       throw new Error(
         error.response?.data?.message || '결제 취소 중 오류가 발생했습니다.'
       )
@@ -74,8 +74,8 @@ export class TossPaymentService {
         { headers: this.headers }
       )
       return response.data
-    } catch (error: any) {
-      console.error('Toss payment inquiry error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       throw new Error(
         error.response?.data?.message || '결제 조회 중 오류가 발생했습니다.'
       )
@@ -98,8 +98,8 @@ export class TossPaymentService {
         { headers: this.headers }
       )
       return response.data
-    } catch (error: any) {
-      console.error('Toss billing key issue error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       throw new Error(
         error.response?.data?.message || '빌링키 발급 중 오류가 발생했습니다.'
       )
@@ -130,8 +130,8 @@ export class TossPaymentService {
         { headers: this.headers }
       )
       return response.data
-    } catch (error: any) {
-      console.error('Toss billing payment error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       throw new Error(
         error.response?.data?.message || '빌링 결제 중 오류가 발생했습니다.'
       )

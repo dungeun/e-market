@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import ProductCard from '@/components/sections/ProductCard'
 import { Slider } from '@/components/ui/slider'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 interface Product {
   id: string
@@ -63,7 +65,7 @@ export default function ProductsPage() {
       setProducts(data.products)
       setTotalPages(data.pagination.totalPages)
     } catch (error) {
-      console.error('Error fetching products:', error)
+
     } finally {
       setLoading(false)
     }
@@ -81,6 +83,7 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">전체 상품</h1>
@@ -243,6 +246,7 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

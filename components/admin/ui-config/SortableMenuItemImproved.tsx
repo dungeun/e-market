@@ -1,27 +1,55 @@
 'use client';
 
+import React from 'react';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState, useEffect } from 'react';
 import type { MenuItem } from '@/lib/stores/ui-config.store';
 
 interface SortableMenuItemProps {
-  menu: MenuItem;
-  onUpdate: (id: string, updates: Partial<MenuItem>) => void;
+  menu: any; // ui_menus 테이블의 데이터
+  onUpdate: (id: string, updates: Partial<any>) => void;
   onDelete: (id: string) => void;
 }
 
+interface Language {
+  code: string;
+  name: string;
+  native_name: string;
+  enabled: boolean;
+}
+
 interface LanguagePackData {
-  key: string;
-  ko: string;
-  en: string;
-  ja: string;
+  [key: string]: string; // 동적 언어 코드 지원
 }
 
 export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableMenuItemProps) {
-  const [languageData, setLanguageData] = useState<LanguagePackData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
+  const [enabledLanguages, setEnabledLanguages] = useState<Language[]>([]);
+  
+  // 활성화된 언어 목록 로드
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch('/api/admin/i18n/settings');
+        if (response.ok) {
+          const data = await response.json();
+          const enabled = data.languages?.filter((lang: Language) => lang.enabled) || [];
+          setEnabledLanguages(enabled);
+        }
+      } catch (error) {
+        console.error('Error fetching languages:', error);
+        // 기본값으로 한국어, 영어 설정
+        setEnabledLanguages([
+          { code: 'ko', name: 'Korean', native_name: '한국어', enabled: true },
+          { code: 'en', name: 'English', native_name: 'English', enabled: true }
+        ]);
+      }
+    };
+    fetchLanguages();
+  }, []);
   
   const {
     attributes,
@@ -38,33 +66,6 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
     opacity: isDragging ? 0.5 : 1,
   };
 
-  useEffect(() => {
-    // 언어팩 데이터 가져오기
-    const fetchLanguageData = async () => {
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('auth-token');
-      if (!token) return;
-
-      try {
-        const response = await fetch(`/api/admin/language-packs/${menu.label}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setLanguageData(data);
-        }
-      } catch (error) {
-        console.error('언어팩 데이터 로드 실패:', error);
-      }
-    };
-
-    if (menu.label.includes('.')) {
-      fetchLanguageData();
-    }
-  }, [menu.label]);
-
   const handleEditName = async () => {
     if (!editedName.trim()) {
       alert('메뉴 이름을 입력해주세요.');
@@ -78,36 +79,58 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
         return;
       }
 
-      // 언어팩 업데이트 (자동 번역)
-      const response = await fetch(`/api/admin/language-packs/${menu.label}`, {
+      // ui_menus 테이블의 content JSONB 필드 업데이트 (활성화된 언어로 자동 번역)
+      const response = await fetch('/api/admin/ui-menus', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ko: editedName,
-          autoTranslate: true // 영어, 일본어 자동 번역
+          id: menu.id,
+          name: editedName,
+          autoTranslate: true, // 활성화된 모든 언어로 자동 번역
+          targetLanguages: enabledLanguages.map(lang => lang.code)
         }),
       });
 
       if (!response.ok) {
-        throw new Error('언어팩 업데이트 실패');
+        throw new Error('메뉴 이름 업데이트 실패');
       }
 
-      const updatedData = await response.json();
-      setLanguageData(updatedData);
-      setIsEditing(false);
+      const data = await response.json();
       
-      alert('메뉴 이름이 업데이트되었습니다.');
+      // 상위 컴포넌트에 업데이트 알림
+      onUpdate(menu.id, { 
+        label: editedName,
+        content: data.menu.content 
+      });
+      
+      setIsEditing(false);
+      alert('메뉴 이름이 업데이트되고 자동 번역되었습니다.');
     } catch (error) {
-      console.error('메뉴 이름 업데이트 실패:', error);
+      console.error('Error updating menu name:', error);
       alert('메뉴 이름 업데이트 중 오류가 발생했습니다.');
     }
   };
 
-  const isCustomMenu = menu.label.startsWith('header.menu.custom_');
-  const displayName = languageData?.ko || menu.label;
+  // content JSONB와 언어팩에서 메뉴 이름 가져오기
+  const menuContent = menu.content || {};
+  const translations = menu.translations || {};
+  
+  // 기본 언어(한국어) 이름 가져오기
+  const defaultLanguage = enabledLanguages.find(lang => lang.code === 'ko') || enabledLanguages[0];
+  const displayName = translations[defaultLanguage?.code] || menuContent.label || menuContent.name || menu.label || '메뉴';
+  
+  // 활성화된 언어별 번역 생성 (기본 언어 제외)
+  const otherLanguageTranslations = enabledLanguages
+    .filter(lang => lang.code !== (defaultLanguage?.code || 'ko'))
+    .map(lang => ({
+      code: lang.code,
+      name: lang.native_name,
+      translation: translations[lang.code] || menuContent[`label_${lang.code}`] || displayName
+    }))
+    .filter(item => item.translation && item.translation !== displayName); // 기본 이름과 다른 번역만 표시
 
   return (
     <div
@@ -158,25 +181,28 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
           ) : (
             <div className="flex items-center space-x-2">
               <span className="font-medium">{displayName}</span>
-              {isCustomMenu && (
-                <button
-                  onClick={() => {
-                    setIsEditing(true);
-                    setEditedName(displayName);
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                  title="이름 편집"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  setIsEditing(true);
+                  setEditedName(displayName);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+                title="이름 편집"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
             </div>
           )}
-          {languageData && (
+          {otherLanguageTranslations.length > 0 && (
             <div className="text-xs text-gray-500 mt-1">
-              EN: {languageData.en} | JA: {languageData.ja}
+              {otherLanguageTranslations.map((trans, index) => (
+                <span key={trans.code}>
+                  {index > 0 && ' | '}
+                  <span className="uppercase">{trans.code}</span>: {trans.translation}
+                </span>
+              ))}
             </div>
           )}
         </div>
@@ -184,7 +210,7 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
         {/* 언어팩 키 (내부용) */}
         <div className="col-span-3">
           <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
-            {menu.label}
+            {menuContent.languagePackKey || menu.sectionId || menu.label}
           </code>
         </div>
 
@@ -192,7 +218,7 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
         <div className="col-span-3">
           <input
             type="text"
-            value={menu.href}
+            value={menuContent.href || menu.href || '/'}
             onChange={(e) => onUpdate(menu.id, { href: e.target.value })}
             className="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
             placeholder="링크 URL"

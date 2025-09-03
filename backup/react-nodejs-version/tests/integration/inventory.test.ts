@@ -159,7 +159,7 @@ describe('Inventory API Integration Tests', () => {
       expect(response.body.count).toBeGreaterThanOrEqual(0)
       
       // Check if our test product is in the low stock list
-      const lowStockProduct = response.body.data.find((p: any) => p.id === testProduct.id)
+      const lowStockProduct = response.body.data.find((p: unknown) => p.id === testProduct.id)
       if (lowStockProduct) {
         expect(lowStockProduct.quantity).toBeLessThanOrEqual(lowStockProduct.lowStockThreshold)
       }
@@ -185,7 +185,7 @@ describe('Inventory API Integration Tests', () => {
       expect(response.body.data).toBeInstanceOf(Array)
       
       // Check if our test product is in the out of stock list
-      const outOfStockProduct = response.body.data.find((p: any) => p.id === testProduct.id)
+      const outOfStockProduct = response.body.data.find((p: unknown) => p.id === testProduct.id)
       if (outOfStockProduct) {
         expect(outOfStockProduct.quantity).toBe(0)
       }

@@ -1,27 +1,47 @@
-import { NextResponse } from 'next/server';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const response = NextResponse.json({
+    // Create response
+    const response = NextResponse.json({ 
       success: true,
-      message: '로그아웃되었습니다.',
-    });
-
-    // 쿠키에서 토큰 제거
+      message: 'Logged out successfully' 
+    })
+    
+    // Clear the auth-token cookie (matches login route)
     response.cookies.set('auth-token', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
+      maxAge: 0, // This immediately expires the cookie
+      path: '/'
+    })
+    
+    // Also clear any other auth-related cookies
+    response.cookies.set('accessToken', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 0,
-      path: '/',
-    });
+      path: '/'
+    })
+    
+    response.cookies.set('refreshToken', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
+    })
 
-    return response;
-  } catch (error) {
-    console.error('Logout error:', error);
+    return response
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
-      { error: '로그아웃 중 오류가 발생했습니다.' },
+      { error: error.message || 'Logout failed' },
       { status: 500 }
-    );
+    )
   }
 }

@@ -10,7 +10,7 @@ export interface ValidationOptions {
   stripUnknown?: boolean
   allowHtml?: boolean
   maxDepth?: number
-  customValidators?: Record<string, (_value: any) => boolean>
+  customValidators?: Record<string, (_value: unknown) => boolean>
 }
 
 export interface SanitizationOptions {
@@ -67,7 +67,7 @@ export const requestValidation = (
                   field: e.path.join('.'),
                   message: e.message,
                   code: e.code,
-                  received: (e as any).received,
+                  received: (e as unknown).received,
                 })),
                 schema: schema.description || 'Request schema',
               },
@@ -116,7 +116,7 @@ export const requestValidation = (
 /**
  * Sanitize data recursively
  */
-async function sanitizeData(data: any, options: SanitizationOptions): Promise<any> {
+async function sanitizeData(data: unknown, options: SanitizationOptions): Promise<unknown> {
   if (data === null || data === undefined) {
     return data
   }
@@ -130,7 +130,7 @@ async function sanitizeData(data: any, options: SanitizationOptions): Promise<an
   }
 
   if (typeof data === 'object') {
-    const sanitized: any = {}
+    const sanitized: unknown = {}
     for (const [key, value] of Object.entries(data)) {
       const sanitizedKey = sanitizeString(key, options)
       sanitized[sanitizedKey] = await sanitizeData(value, options)
@@ -209,8 +209,8 @@ function sanitizeString(str: string, options: SanitizationOptions): string {
 async function performCustomValidations(
   req: Request,
   options: ValidationOptions,
-): Promise<{ isValid: boolean; errors: any[] }> {
-  const errors: any[] = []
+): Promise<{ isValid: boolean; errors: unknown[] }> {
+  const errors: unknown[] = []
 
   // Check object depth
   if (options.maxDepth) {
@@ -329,7 +329,7 @@ async function performSecurityValidations(
 /**
  * Get object depth
  */
-function getObjectDepth(obj: any, depth = 0): number {
+function getObjectDepth(obj: unknown, depth = 0): number {
   if (obj === null || typeof obj !== 'object') {
     return depth
   }
@@ -346,7 +346,7 @@ function getObjectDepth(obj: any, depth = 0): number {
 /**
  * Find email fields in object
  */
-function findEmailFields(obj: any, prefix = ''): string[] {
+function findEmailFields(obj: unknown, prefix = ''): string[] {
   const emailFields: string[] = []
 
   if (typeof obj !== 'object' || obj === null) {
@@ -371,7 +371,7 @@ function findEmailFields(obj: any, prefix = ''): string[] {
 /**
  * Find URL fields in object
  */
-function findUrlFields(obj: any, prefix = ''): string[] {
+function findUrlFields(obj: unknown, prefix = ''): string[] {
   const urlFields: string[] = []
 
   if (typeof obj !== 'object' || obj === null) {
@@ -396,8 +396,8 @@ function findUrlFields(obj: any, prefix = ''): string[] {
 /**
  * Find arrays in object
  */
-function findArrays(obj: any): any[][] {
-  const arrays: any[][] = []
+function findArrays(obj: unknown): unknown[][] {
+  const arrays: unknown[][] = []
 
   if (Array.isArray(obj)) {
     arrays.push(obj)
@@ -413,7 +413,7 @@ function findArrays(obj: any): any[][] {
 /**
  * Get nested value from object
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: unknown, path: string): any {
   return path.split('.').reduce((current, key) => current?.[key], obj)
 }
 
@@ -432,13 +432,13 @@ export const fileUploadValidation = (options: {
   } = options
 
   return (req: Request, _res: Response, next: NextFunction) => {
-    const files = req.files as any[] | undefined
+    const files = req.files as unknown[] | undefined
 
     if (!files || files.length === 0) {
       return next()
     }
 
-    const errors: any[] = []
+    const errors: unknown[] = []
 
     // Check number of files
     if (files.length > maxFiles) {

@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { Server as SocketServer } from 'socket.io';
 import { cacheService } from '../cacheService';
 import { logger } from '../../utils/logger';
@@ -136,7 +135,7 @@ export class AnalyticsDataCollector extends EventEmitter {
 
     // 주요 이벤트는 데이터베이스에도 저장
     if (this.isImportantEvent(event.type)) {
-      await this.prisma.analyticsEvent.create({
+      await this.query({
         data: {
           type: event.type,
           userId: event.userId,
@@ -394,14 +393,14 @@ export class AnalyticsDataCollector extends EventEmitter {
    */
   private async getCustomersMetrics(today: Date) {
     const [total, newToday, active] = await Promise.all([
-      this.prisma.user.count({ where: { role: 'CUSTOMER' } }),
-      this.prisma.user.count({
+      this.query({ where: { role: 'CUSTOMER' } }),
+      this.query({
         where: {
           role: 'CUSTOMER',
           createdAt: { gte: today }
         }
       }),
-      this.prisma.user.count({
+      this.query({
         where: {
           role: 'CUSTOMER',
           lastLoginAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
@@ -427,20 +426,20 @@ export class AnalyticsDataCollector extends EventEmitter {
       outOfStock,
       topSelling
     ] = await Promise.all([
-      this.prisma.product.count({ where: { status: 'PUBLISHED' } }),
-      this.prisma.product.count({
+      this.query({ where: { status: 'PUBLISHED' } }),
+      this.query({
         where: {
           status: 'PUBLISHED',
           quantity: { lte: 10, gt: 0 }
         }
       }),
-      this.prisma.product.count({
+      this.query({
         where: {
           status: 'PUBLISHED',
           quantity: 0
         }
       }),
-      this.prisma.product.findMany({
+      this.query({
         where: { status: 'PUBLISHED' },
         select: {
           id: true,
@@ -476,11 +475,11 @@ export class AnalyticsDataCollector extends EventEmitter {
    */
   private async getInventoryMetrics() {
     const [products, alerts] = await Promise.all([
-      this.prisma.product.findMany({
+      this.query({
         where: { status: 'PUBLISHED', trackQuantity: true },
         select: { quantity: true, price: true }
       }),
-      this.prisma.inventoryAlert.count({
+      this.query({
         where: { isResolved: false }
       })
     ]);

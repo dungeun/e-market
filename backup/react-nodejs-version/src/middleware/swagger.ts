@@ -53,7 +53,7 @@ export const setupSwagger = (app: Express) => {
       filter: true,
       showRequestHeaders: true,
       tryItOutEnabled: true,
-      requestInterceptor: (req: any) => {
+      requestInterceptor: (req: NextRequest) => {
         // Add authentication headers if available
         // Note: This runs on the client-side in the browser
         return req

@@ -1,201 +1,277 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
-interface HeroSlide {
-  id: string;
-  title: string;
-  subtitle: string;
-  tag?: string;
+interface SlideData {
+  id: number | string;
+  title: string | { ko?: string; en?: string; jp?: string; [key: string]: string | undefined };
+  subtitle: string | { ko?: string; en?: string; jp?: string; [key: string]: string | undefined };
+  tag?: string | { ko?: string; en?: string; jp?: string; [key: string]: string | undefined };
   link?: string;
-  bgColor: string;
+  bgColor?: string;
+  textColor?: string;
   backgroundImage?: string;
-  visible: boolean;
-  order: number;
+  useFullImage?: boolean;
+  fullImageUrl?: string;
+  fullImageUrlEn?: string;
+  fullImageUrlJp?: string;
+  fullImageWidth?: number;
+  fullImageHeight?: number;
+  visible?: boolean;
+  order?: number;
+  // 동적 언어 지원을 위한 인덱스 시그니처
+  [key: string]: any;
 }
 
 interface HeroSectionProps {
+  data?: {
+    slides?: SlideData[];
+    autoPlay?: boolean;
+    autoPlayInterval?: number;
+  };
   sectionId?: string;
   className?: string;
 }
 
-export default function HeroSection({ sectionId = 'hero', className = '' }: HeroSectionProps) {
-  const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+const HeroSection = React.memo(function HeroSection({ data, sectionId = 'hero', className = '' }: HeroSectionProps) {
+  const [slides, setSlides] = useState<SlideData[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
+  const { currentLanguage } = useLanguage();
 
-  // 섹션 데이터 로드
+  // 다국어 텍스트 처리 헬퍼 함수
+  const getLocalizedText = (text: string | { ko?: string; en?: string; jp?: string; [key: string]: string | undefined } | undefined): string => {
+    if (!text) return '';
+    if (typeof text === 'string') return text;
+    // 현재 선택된 언어의 텍스트 반환, 없으면 한국어 또는 첫 번째 값
+    return text[currentLanguage] || text.ko || text.en || text.jp || Object.values(text).find(v => v) || '';
+  };
+
+  // 언어별 이미지 URL 가져오기 (언어팩 기반)
+  const getLocalizedImageUrl = (slide: SlideData): string | undefined => {
+    if (!slide.useFullImage) return undefined;
+    
+    // 현재 언어에 맞는 이미지 URL 반환
+    if (currentLanguage === 'ko' && slide.fullImageUrl) {
+      return slide.fullImageUrl; // 기본 이미지 (한국어)
+    } else if (currentLanguage === 'en' && slide.fullImageUrlEn) {
+      return slide.fullImageUrlEn;
+    } else if (currentLanguage === 'ja' && slide.fullImageUrlJp) {
+      return slide.fullImageUrlJp;
+    } else {
+      // 추가 언어 지원을 위한 동적 필드 확인
+      const fieldName = `fullImageUrl${currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1)}`;
+      const dynamicUrl = (slide as any)[fieldName];
+      if (dynamicUrl) return dynamicUrl;
+      
+      // 폴백: 기본 이미지 (한국어)
+      return slide.fullImageUrl;
+    }
+  };
+
+  // DB에서 데이터 로드 또는 props 데이터 사용
   useEffect(() => {
-    loadHeroData();
-  }, [sectionId]);
-
-  // 자동 슬라이드
-  useEffect(() => {
-    if (slides.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [slides.length]);
+    if (data?.slides && Array.isArray(data.slides) && data.slides.length > 0) {
+      setSlides(data.slides);
+      setLoading(false);
+    } else {
+      loadHeroData();
+    }
+  }, [data, sectionId, currentLanguage]);
 
   const loadHeroData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/ui-sections/${sectionId}`);
+      const response = await fetch(`/api/ui-sections/${sectionId}`, {
+        headers: {
+          'Accept-Language': currentLanguage
+        }
+      });
       
       if (response.ok) {
-        const data = await response.json();
-        if (data.section) {
-          const visibleSlides = data.section.content?.slides?.filter((slide: HeroSlide) => slide.visible) || [];
-          setSlides(visibleSlides.sort((a: HeroSlide, b: HeroSlide) => a.order - b.order));
-          setIsVisible(data.section.isActive !== false);
+        const result = await response.json();
+        if (result.section?.data?.slides) {
+          setSlides(result.section.data.slides);
+        } else if (result.section?.config?.slides) {
+          setSlides(result.section.config.slides);
         }
       }
     } catch (error) {
-      console.error('Error loading hero section:', error);
+      console.error('Error loading hero data:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const autoPlay = data?.autoPlay !== false;
+  const autoPlayInterval = data?.autoPlayInterval || 5000;
+
+  // 다음 슬라이드로 이동 (2개씩)
   const nextSlide = () => {
-    setCurrentSlide(prev => (prev + 1) % slides.length);
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 2;
+      return nextIndex >= slides.length ? 0 : nextIndex;
+    });
   };
 
+  // 이전 슬라이드로 이동 (2개씩)
   const prevSlide = () => {
-    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+    setCurrentIndex((prevIndex) => {
+      const prevIdx = prevIndex - 2;
+      return prevIdx < 0 ? Math.max(0, slides.length - 2) : prevIdx;
+    });
   };
+
+  // 자동 재생
+  useEffect(() => {
+    if (autoPlay && !isPaused && slides.length > 2) {
+      const interval = setInterval(nextSlide, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [currentIndex, autoPlay, isPaused, slides.length, autoPlayInterval]);
 
   if (loading) {
     return (
-      <div className={`w-full h-96 bg-gray-100 animate-pulse rounded-lg ${className}`} />
+      <div className={`w-full py-4 ${className}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="h-[280px] lg:h-[320px] bg-gray-200 animate-pulse rounded-2xl" />
+            <div className="h-[280px] lg:h-[320px] bg-gray-200 animate-pulse rounded-2xl" />
+          </div>
+        </div>
+      </div>
     );
   }
 
-  if (!isVisible || slides.length === 0) {
+  if (!slides || slides.length === 0) {
     return null;
   }
 
-  const currentSlideData = slides[currentSlide];
+  // 현재 표시할 2개의 슬라이드
+  const visibleSlides = [
+    slides[currentIndex],
+    slides[currentIndex + 1] || slides[0]
+  ];
+
+  // 인디케이터 개수 계산 (2개씩 그룹)
+  const indicatorCount = Math.ceil(slides.length / 2);
 
   return (
-    <section className={`relative w-full h-[500px] lg:h-[600px] overflow-hidden rounded-lg ${className}`}>
-      {/* 메인 슬라이드 */}
-      <div className="relative h-full">
-        <div 
-          className={`${currentSlideData.bgColor} h-full flex items-center justify-center text-white relative`}
-          style={{
-            backgroundImage: currentSlideData.backgroundImage 
-              ? `url(${currentSlideData.backgroundImage})` 
-              : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        >
-          {/* 오버레이 (배경 이미지가 있을 때) */}
-          {currentSlideData.backgroundImage && (
-            <div className="absolute inset-0 bg-black/40" />
-          )}
-
-          {/* 콘텐츠 */}
-          <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-            {currentSlideData.tag && (
-              <span className="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-sm font-medium mb-4">
-                {currentSlideData.tag}
-              </span>
-            )}
-            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 leading-tight">
-              {currentSlideData.title.split('\n').map((line, index) => (
-                <span key={index}>
-                  {line}
-                  {index < currentSlideData.title.split('\n').length - 1 && <br />}
-                </span>
-              ))}
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl mb-8 opacity-90">
-              {currentSlideData.subtitle}
-            </p>
-            {currentSlideData.link && (
-              <Link
-                href={currentSlideData.link}
-                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+    <section 
+      className={`relative w-full py-4 ${className}`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div className="w-full">
+        {/* 슬라이드 그리드 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {visibleSlides.map((slide, index) => {
+            const fullImageUrl = getLocalizedImageUrl(slide);
+            
+            return (
+              <div
+                key={`${slide.id}-${index}`}
+                className={`relative rounded-2xl overflow-hidden ${
+                  fullImageUrl 
+                    ? 'bg-gray-100' 
+                    : `bg-gradient-to-br ${slide.bgColor || 'from-gray-700 to-gray-900'} ${slide.textColor || 'text-white'} p-8 lg:p-12`
+                } min-h-[280px] lg:min-h-[320px] flex flex-col justify-between group transition-transform hover:scale-[1.02] cursor-pointer`}
+                onClick={() => slide.link && (window.location.href = slide.link)}
+                style={{
+                  backgroundImage: !fullImageUrl && slide.backgroundImage ? `url(${slide.backgroundImage})` : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                자세히 보기
-                <ExternalLink className="ml-2 w-4 h-4" />
-              </Link>
-            )}
-          </div>
+                {fullImageUrl ? (
+                  /* 전체 이미지 모드 */
+                  <div className="absolute inset-0">
+                    <img 
+                      src={fullImageUrl} 
+                      alt={getLocalizedText(slide.title)}
+                      className="w-full h-full object-cover"
+                      style={{
+                        width: slide.fullImageWidth ? `${slide.fullImageWidth}px` : undefined,
+                        height: slide.fullImageHeight ? `${slide.fullImageHeight}px` : undefined,
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {/* 배경 패턴 (텍스트 모드) */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 1px)`,
+                        backgroundSize: '20px 20px'
+                      }}></div>
+                    </div>
+
+                    {/* 텍스트 컨텐츠 */}
+                    <div className="relative z-10">
+                      {slide.tag && (
+                        <span className="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-sm font-medium mb-4">
+                          {getLocalizedText(slide.tag)}
+                        </span>
+                      )}
+                      <h2 className="text-2xl lg:text-3xl font-bold mb-3 leading-tight whitespace-pre-line">
+                        {getLocalizedText(slide.title)}
+                      </h2>
+                      <p className="text-base lg:text-lg opacity-90">
+                        {getLocalizedText(slide.subtitle)}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* 네비게이션 화살표 */}
-        {slides.length > 1 && (
-          <>
+        {/* 네비게이션 및 인디케이터 */}
+        {slides.length > 2 && (
+          <div className="flex items-center justify-center mt-6 gap-4">
+            {/* 이전 버튼 */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              aria-label="Previous slides"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
+
+            {/* 인디케이터 */}
+            <div className="flex gap-2">
+              {Array.from({ length: indicatorCount }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index * 2)}
+                  className={`h-2 transition-all rounded-full ${
+                    Math.floor(currentIndex / 2) === index 
+                      ? 'w-8 bg-gray-800' 
+                      : 'w-2 bg-gray-400'
+                  }`}
+                  aria-label={`Go to slide group ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* 다음 버튼 */}
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors"
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              aria-label="Next slides"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
-          </>
-        )}
-
-        {/* 인디케이터 */}
-        {slides.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentSlide ? 'bg-white' : 'bg-white/50'
-                }`}
-              />
-            ))}
           </div>
         )}
       </div>
-
-      {/* 서브 슬라이드 (2단 구성의 하단 부분) */}
-      {slides.length > 3 && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-3 gap-4">
-              {slides.slice(1, 4).map((slide, index) => (
-                <button
-                  key={slide.id}
-                  onClick={() => setCurrentSlide(index + 1)}
-                  className={`text-left p-3 rounded-lg transition-colors ${
-                    currentSlide === index + 1 
-                      ? 'bg-white/20 backdrop-blur' 
-                      : 'hover:bg-white/10'
-                  }`}
-                >
-                  {slide.tag && (
-                    <span className="text-xs text-white/80 mb-1 block">{slide.tag}</span>
-                  )}
-                  <h3 className="text-white font-medium text-sm mb-1 line-clamp-2">
-                    {slide.title}
-                  </h3>
-                  <p className="text-white/80 text-xs line-clamp-1">
-                    {slide.subtitle}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
-}
+});
+
+export default HeroSection;

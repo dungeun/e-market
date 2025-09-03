@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response } from 'express';
 import { InquiryService } from '../../services/inquiry/inquiryService';
 import { logger } from '../../utils/logger';
@@ -144,7 +145,7 @@ export const inquiryController = {
         success: true,
         data: inquiry
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Failed to get inquiry', error);
       
       if (error.message.includes('권한')) {
@@ -183,7 +184,7 @@ export const inquiryController = {
         success: true,
         data: inquiry
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           success: false,
@@ -230,7 +231,7 @@ export const inquiryController = {
         success: true,
         data: reply
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           success: false,

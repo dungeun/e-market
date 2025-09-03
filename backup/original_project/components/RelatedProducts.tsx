@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import ProductCard from '@/components/sections/ProductCard'
 
 interface RelatedProductsProps {
@@ -9,7 +9,7 @@ interface RelatedProductsProps {
 async function getRelatedProducts(categoryId: string | null, currentProductId: string) {
   if (!categoryId) return []
 
-  const products = await prisma.product.findMany({
+  const products = await query({
     where: {
       categoryId,
       id: { not: currentProductId },

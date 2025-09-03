@@ -46,9 +46,8 @@ export default function MyPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">사용자 타입</label>
                 <p className="text-gray-900">
-                  {user.type === 'INFLUENCER' && '인플루언서'}
-                  {user.type === 'USER' && '일반 사용자'}
                   {user.type === 'BUSINESS' && '비즈니스'}
+                  {user.type === 'INFLUENCER' && '인플루언서'}
                   {user.type === 'ADMIN' && '관리자'}
                 </p>
               </div>
@@ -56,7 +55,7 @@ export default function MyPage() {
           </div>
 
           {/* 인플루언서 전용 메뉴 */}
-          {(user.type === 'INFLUENCER' || user.type === 'USER') && (
+          {user.type === 'INFLUENCER' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-semibold mb-2">캠페인 관리</h3>

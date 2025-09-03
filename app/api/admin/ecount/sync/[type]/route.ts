@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { createEcountServiceFromEnv } from '@/lib/services/ecount/ecount-api'
 
@@ -79,8 +81,7 @@ export async function POST(
     })
     
   } catch (error) {
-    console.error(`Sync error:`, error)
-    
+
     // 개발 모드에서는 목업 동기화 성공 응답
     if (process.env.NODE_ENV === 'development') {
       const mockCounts: Record<string, number> = {
@@ -113,12 +114,12 @@ export async function POST(
 }
 
 // 로컬 데이터베이스에 저장하는 헬퍼 함수 (TODO: Prisma 연동 시 구현)
-async function saveToDatabase(dataType: string, data: any[]) {
+async function saveToDatabase(dataType: string, data: unknown[]) {
   // TODO: Prisma를 사용하여 실제 데이터베이스 저장 로직 구현
   // 예시:
   // switch (dataType) {
   //   case 'customers':
-  //     await prisma.ecountCustomer.createMany({
+  //     await queryMany({
   //       data: data.map(customer => ({
   //         ...customer,
   //         syncedAt: new Date()
@@ -131,6 +132,5 @@ async function saveToDatabase(dataType: string, data: any[]) {
   //     break
   //   // ... 기타 케이스들
   // }
-  
-  console.log(`Saved ${data.length} ${dataType} records to database`)
+
 }

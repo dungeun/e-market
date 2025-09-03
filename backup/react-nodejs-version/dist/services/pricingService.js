@@ -8,7 +8,7 @@ class PricingService {
     async calculatePrice(request) {
         try {
             // Get product with base price
-            const product = await database_1.prisma.product.findUnique({
+            const product = await database_1.query({
                 where: { id: request.productId },
                 select: {
                     id: true,
@@ -59,7 +59,7 @@ class PricingService {
                         conditions: rule.conditions,
                     });
                     // Update rule usage count
-                    await database_1.prisma.pricingRule.update({
+                    await database_1.query({
                         where: { id: rule.id },
                         data: { usageCount: { increment: 1 } },
                     });
@@ -134,7 +134,7 @@ class PricingService {
             ],
         };
         // Get rules that apply to this product specifically
-        const productRules = await database_1.prisma.pricingRule.findMany({
+        const productRules = await database_1.query({
             where: {
                 ...baseWhere,
                 applyToProducts: true,
@@ -149,7 +149,7 @@ class PricingService {
             },
         });
         // Get rules that apply to this product's category
-        const categoryRules = product.categoryId ? await database_1.prisma.pricingRule.findMany({
+        const categoryRules = product.categoryId ? await database_1.query({
             where: {
                 ...baseWhere,
                 applyToCategories: true,
@@ -164,7 +164,7 @@ class PricingService {
             },
         }) : [];
         // Get customer group rules if applicable
-        const customerGroupRules = request.customerGroup ? await database_1.prisma.pricingRule.findMany({
+        const customerGroupRules = request.customerGroup ? await database_1.query({
             where: {
                 ...baseWhere,
                 applyToCustomers: true,
@@ -179,7 +179,7 @@ class PricingService {
             },
         }) : [];
         // Get global rules (no specific targeting)
-        const globalRules = await database_1.prisma.pricingRule.findMany({
+        const globalRules = await database_1.query({
             where: {
                 ...baseWhere,
                 applyToProducts: false,
@@ -205,7 +205,7 @@ class PricingService {
                 }
                 // Check per-customer usage limits
                 if (rule.perCustomerLimit && request.userId) {
-                    const customerUsage = await database_1.prisma.pricingApplication.count({
+                    const customerUsage = await database_1.query({
                         where: {
                             ruleId: rule.id,
                             userId: request.userId,
@@ -347,7 +347,7 @@ class PricingService {
     }
     async recordPricingApplication(data) {
         try {
-            await database_1.prisma.pricingApplication.create({
+            await database_1.query({
                 data: {
                     ruleId: data.ruleId,
                     userId: data.userId,
@@ -367,7 +367,7 @@ class PricingService {
     }
     async createPricingRule(data) {
         try {
-            const rule = await database_1.prisma.pricingRule.create({
+            const rule = await database_1.query({
                 data: {
                     name: data.name,
                     description: data.description,
@@ -390,7 +390,7 @@ class PricingService {
             });
             // Associate with categories if specified
             if (data.categoryIds && data.categoryIds.length > 0) {
-                await database_1.prisma.pricingRuleCategory.createMany({
+                await database_1.queryMany({
                     data: data.categoryIds.map((categoryId) => ({
                         ruleId: rule.id,
                         categoryId,
@@ -399,7 +399,7 @@ class PricingService {
             }
             // Associate with products if specified
             if (data.productIds && data.productIds.length > 0) {
-                await database_1.prisma.pricingRuleProduct.createMany({
+                await database_1.queryMany({
                     data: data.productIds.map((productId) => ({
                         ruleId: rule.id,
                         productId,
@@ -408,7 +408,7 @@ class PricingService {
             }
             // Associate with customer groups if specified
             if (data.customerGroupIds && data.customerGroupIds.length > 0) {
-                await database_1.prisma.pricingRuleCustomerGroup.createMany({
+                await database_1.queryMany({
                     data: data.customerGroupIds.map((groupId) => ({
                         ruleId: rule.id,
                         groupId,
@@ -424,7 +424,7 @@ class PricingService {
     }
     async updatePricingRule(ruleId, data) {
         try {
-            const rule = await database_1.prisma.pricingRule.update({
+            const rule = await database_1.query({
                 where: { id: ruleId },
                 data: {
                     name: data.name,
@@ -465,7 +465,7 @@ class PricingService {
             if (filters?.priority) {
                 where.priority = { gte: filters.priority };
             }
-            const rules = await database_1.prisma.pricingRule.findMany({
+            const rules = await database_1.query({
                 where,
                 include: {
                     categories: {
@@ -495,7 +495,7 @@ class PricingService {
     }
     async deletePricingRule(ruleId) {
         try {
-            await database_1.prisma.pricingRule.delete({
+            await database_1.query({
                 where: { id: ruleId },
             });
         }
@@ -508,7 +508,7 @@ class PricingService {
         try {
             const startDate = filters?.startDate ? new Date(filters.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
             const endDate = filters?.endDate ? new Date(filters.endDate) : new Date();
-            const applications = await database_1.prisma.pricingApplication.findMany({
+            const applications = await database_1.query({
                 where: {
                     appliedAt: {
                         gte: startDate,

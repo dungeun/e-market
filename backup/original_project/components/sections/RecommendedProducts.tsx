@@ -12,7 +12,7 @@ interface RecommendedProductsProps {
     personalized?: boolean
     fallbackToPopular?: boolean
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function RecommendedProducts({ config, products }: RecommendedProductsProps) {

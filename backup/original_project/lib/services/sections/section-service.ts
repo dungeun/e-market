@@ -4,7 +4,7 @@
  */
 
 import { ProductSection, UIConfig } from '@/lib/stores/ui-config.store'
-import { PrismaClient } from '@prisma/client'
+import { env } from '@/lib/config/env';
 
 // Prisma 싱글톤 패턴
 const globalForPrisma = globalThis as unknown as {
@@ -24,10 +24,9 @@ export class SectionService {
    */
   static async getActiveSections(): Promise<ProductSection[]> {
     try {
-      console.log('🔍 Loading UI config from database for homepage...')
-      
+
       // DB에서 UI 설정 조회
-      const uiConfigRecord = await prisma.siteConfig.findUnique({
+      const uiConfigRecord = await query({
         where: { key: 'product-sections-config' }
       })
 
@@ -35,11 +34,11 @@ export class SectionService {
       
       if (uiConfigRecord) {
         config = JSON.parse(uiConfigRecord.value)
-        console.log('✅ UI config loaded from database')
+
       } else {
-        console.log('⚠️ No UI config found in database, using defaults')
+
         // 기본 API 응답에서 기본 설정 가져오기
-        const defaultResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/admin/ui-config`)
+        const defaultResponse = await fetch(`${process.env.NEXTAUTH_URL || env.appUrl}/api/admin/ui-config`)
         const defaultData = await defaultResponse.json()
         config = defaultData.config
       }
@@ -52,10 +51,9 @@ export class SectionService {
       console.log(`📋 Returning ${activeSections.length} active sections:`, activeSections.map(s => s.name))
       return activeSections
     } catch (error) {
-      console.error('❌ Failed to get active sections:', error)
-      
+
       // 에러 발생시 기본 섹션 반환
-      console.log('🔄 Fallback to default sections')
+
       const defaultSections = [
         {
           id: 'hero',
@@ -100,7 +98,7 @@ export class SectionService {
   /**
    * 섹션별 데이터 조회 (어드민 UI 컨피그 섹션 타입 지원)
    */
-  static async getSectionData(section: ProductSection, userId?: string): Promise<any> {
+  static async getSectionData(section: ProductSection, userId?: string): Promise<unknown> {
     try {
       switch (section.type) {
         case 'hero':
@@ -140,17 +138,17 @@ export class SectionService {
           return this.getTestimonialData(section.config)
         
         default:
-          console.warn(`Unknown section type: ${section.type}`)
+
           return null
       }
     } catch (error) {
-      console.error(`Failed to get data for section ${section.type}:`, error)
+
       return null
     }
   }
 
   // Mock 데이터 메서드들
-  private static async getHeroBannerData(config: any) {
+  private static async getHeroBannerData(config: unknown) {
     return {
       slides: [
         {
@@ -171,7 +169,7 @@ export class SectionService {
     }
   }
 
-  private static async getFeaturedProducts(config: any) {
+  private static async getFeaturedProducts(config: unknown) {
     const mockProducts = [
       {
         id: 'featured1',
@@ -205,7 +203,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 4)
   }
 
-  private static async getFlashSaleProducts(config: any) {
+  private static async getFlashSaleProducts(config: unknown) {
     const mockProducts = [
       {
         id: 'flash1',
@@ -229,7 +227,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 4)
   }
 
-  private static async getCategoryData(config: any) {
+  private static async getCategoryData(config: unknown) {
     return {
       categories: [
         { id: 1, name: '패션', image: '/images/categories/fashion.jpg', link: '/category/fashion' },
@@ -240,7 +238,7 @@ export class SectionService {
     }
   }
 
-  private static async getBestSellers(config: any) {
+  private static async getBestSellers(config: unknown) {
     const mockProducts = [
       {
         id: 'best1',
@@ -262,7 +260,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 8)
   }
 
-  private static async getNewArrivals(config: any) {
+  private static async getNewArrivals(config: unknown) {
     const mockProducts = [
       {
         id: 'new1',
@@ -284,7 +282,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 8)
   }
 
-  private static async getRecommendedProducts(userId?: string, config?: any) {
+  private static async getRecommendedProducts(userId?: string, config?: unknown) {
     const mockProducts = [
       {
         id: 'rec1',
@@ -298,7 +296,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 8)
   }
 
-  private static async getBrandData(config: any) {
+  private static async getBrandData(config: unknown) {
     return {
       brands: [
         { id: 1, name: 'Brand A', logo: '/images/brands/brand-a.jpg', link: '/brands/brand-a' },
@@ -307,7 +305,7 @@ export class SectionService {
     }
   }
 
-  private static async getRecentlyViewed(userId?: string, config?: any) {
+  private static async getRecentlyViewed(userId?: string, config?: unknown) {
     if (!userId) return { products: [] }
     
     const mockProducts = [
@@ -322,7 +320,7 @@ export class SectionService {
     return { products: mockProducts.slice(0, config?.limit || 6) }
   }
 
-  private static async getTrendingProducts(config: any) {
+  private static async getTrendingProducts(config: unknown) {
     const mockProducts = [
       {
         id: 'trend1',
@@ -336,7 +334,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 8)
   }
 
-  private static async getSpecialOffers(config: any) {
+  private static async getSpecialOffers(config: unknown) {
     const mockProducts = [
       {
         id: 'offer1',
@@ -351,7 +349,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 6)
   }
 
-  private static async getSeasonalCollection(config: any) {
+  private static async getSeasonalCollection(config: unknown) {
     const mockProducts = [
       {
         id: 'season1',
@@ -365,7 +363,7 @@ export class SectionService {
     return mockProducts.slice(0, config?.limit || 8)
   }
 
-  private static async getTestimonials(config: any) {
+  private static async getTestimonials(config: unknown) {
     return {
       reviews: [
         {
@@ -388,7 +386,7 @@ export class SectionService {
     }
   }
 
-  private static async getVideoData(config: any) {
+  private static async getVideoData(config: unknown) {
     return {
       videos: [
         {
@@ -409,7 +407,7 @@ export class SectionService {
     }
   }
 
-  private static async getNewsletterData(config: any) {
+  private static async getNewsletterData(config: unknown) {
     return {
       title: '특별 혜택을 받아보세요',
       subtitle: '신상품 소식과 할인 쿠폰을 이메일로 받아보세요',
@@ -423,7 +421,7 @@ export class SectionService {
     }
   }
 
-  private static async getTestimonialData(config: any) {
+  private static async getTestimonialData(config: unknown) {
     return {
       testimonials: [
         {
@@ -462,7 +460,7 @@ export class SectionService {
     }
   }
 
-  private static async getInstagramData(config: any) {
+  private static async getInstagramData(config: unknown) {
     return {
       posts: [
         {
@@ -497,7 +495,7 @@ export class SectionService {
     }
   }
 
-  private static async getBannerData(config: any) {
+  private static async getBannerData(config: unknown) {
     return {
       banners: [
         {

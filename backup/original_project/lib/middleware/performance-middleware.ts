@@ -1,3 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
 /**
  * 성능 추적 미들웨어 - 모든 API 요청의 성능을 자동으로 추적
  */
@@ -228,8 +230,7 @@ export class PerformanceMiddleware {
     
     // 최근 1000개만 유지
     await redis.zremrangebyrank('slow_requests', 0, -1001)
-    
-    console.warn(`🐌 Slow request detected: ${context.method} ${context.endpoint} - ${duration}ms`)
+
   }
 
   /**
@@ -255,13 +256,12 @@ export class PerformanceMiddleware {
     const errorType = error.name || 'UnknownError'
     await redis.zincrby('error_types', 1, errorType)
 
-    console.error(`💥 API Error: ${context.method} ${context.endpoint} - ${error.message}`)
   }
 
   /**
    * 실시간 메트릭 스냅샷
    */
-  static async getRealTimeMetrics(): Promise<any> {
+  static async getRealTimeMetrics(): Promise<unknown> {
     const now = Math.floor(Date.now() / 1000)
     const minute = Math.floor(Date.now() / 60000)
 
@@ -315,8 +315,8 @@ export class PerformanceMiddleware {
   /**
    * 느린 요청 데이터 파싱
    */
-  private static parseSlowRequests(data: string[]): any[] {
-    const requests: any[] = []
+  private static parseSlowRequests(data: string[]): unknown[] {
+    const requests: unknown[] = []
     for (let i = 0; i < data.length; i += 2) {
       try {
         const request = JSON.parse(data[i])
@@ -332,7 +332,7 @@ export class PerformanceMiddleware {
   /**
    * 헬스 체크 엔드포인트용 간단 메트릭
    */
-  static async getHealthMetrics(): Promise<any> {
+  static async getHealthMetrics(): Promise<unknown> {
     const minute = Math.floor(Date.now() / 60000)
     
     const [rpmData, errorData] = await Promise.all([

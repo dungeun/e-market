@@ -20,8 +20,8 @@ class CouponController {
         data: coupon,
         message: '쿠폰이 생성되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Create coupon error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '쿠폰 생성 중 오류가 발생했습니다.' 
       });
@@ -45,8 +45,8 @@ class CouponController {
         data: coupon,
         message: '쿠폰이 수정되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Update coupon error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '쿠폰 수정 중 오류가 발생했습니다.' 
       });
@@ -68,8 +68,8 @@ class CouponController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Validate coupon error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '쿠폰 검증 중 오류가 발생했습니다.' 
       });
@@ -87,7 +87,7 @@ class CouponController {
       const query = {
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 20,
-        type: req.query.type as any,
+        type: req.query.type as unknown,
         isActive: req.query.isActive !== 'false',
         isValid: req.query.isValid !== 'false'
       };
@@ -98,8 +98,8 @@ class CouponController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Get user coupons error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '쿠폰 조회 중 오류가 발생했습니다.' 
       });
@@ -120,8 +120,8 @@ class CouponController {
         success: true,
         data: statistics
       });
-    } catch (error: any) {
-      console.error('Get coupon statistics error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '통계 조회 중 오류가 발생했습니다.' 
       });
@@ -153,8 +153,8 @@ class CouponController {
         },
         message: `${codes.length}개의 쿠폰이 생성되었습니다.`
       });
-    } catch (error: any) {
-      console.error('Create bulk coupons error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '대량 쿠폰 생성 중 오류가 발생했습니다.' 
       });
@@ -175,8 +175,8 @@ class CouponController {
         success: true,
         message: '쿠폰이 삭제되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Delete coupon error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '쿠폰 삭제 중 오류가 발생했습니다.' 
       });
@@ -198,8 +198,8 @@ class CouponController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Evaluate promotions error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 평가 중 오류가 발생했습니다.' 
       });
@@ -212,7 +212,7 @@ class CouponController {
       const query = {
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 20,
-        type: req.query.type as any,
+        type: req.query.type as unknown,
         targetCategory: req.query.categoryId as string,
         targetProduct: req.query.productId as string
       };
@@ -223,8 +223,8 @@ class CouponController {
         success: true,
         data: result
       });
-    } catch (error: any) {
-      console.error('Get promotions error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '프로모션 조회 중 오류가 발생했습니다.' 
       });
@@ -245,8 +245,8 @@ class CouponController {
         success: true,
         message: '웰컴 쿠폰이 발급되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Issue welcome coupon error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '웰컴 쿠폰 발급 중 오류가 발생했습니다.' 
       });

@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,7 +17,7 @@ interface CategoryShowcaseProps {
   data?: any
 }
 
-export default function CategoryShowcase({ config, data }: CategoryShowcaseProps) {
+const CategoryShowcase = React.memo(function CategoryShowcase({ config, data }: CategoryShowcaseProps) {
   const categories = data?.categories || config?.categories || [
     { id: 1, name: '패션', image: '/images/categories/fashion.jpg', link: '/category/fashion' },
     { id: 2, name: '전자제품', image: '/images/categories/electronics.jpg', link: '/category/electronics' },
@@ -67,5 +69,7 @@ export default function CategoryShowcase({ config, data }: CategoryShowcaseProps
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default CategoryShowcase;

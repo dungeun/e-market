@@ -252,7 +252,7 @@ describe('Enhanced Middleware Integration Tests', () => {
       expect(response.body.circuitBreakers).toHaveProperty('payment')
       expect(response.body.circuitBreakers).toHaveProperty('external_api')
 
-      Object.values(response.body.circuitBreakers).forEach((cb: any) => {
+      Object.values(response.body.circuitBreakers).forEach((cb: unknown) => {
         expect(cb).toHaveProperty('state')
         expect(cb).toHaveProperty('failureCount')
         expect(cb).toHaveProperty('name')

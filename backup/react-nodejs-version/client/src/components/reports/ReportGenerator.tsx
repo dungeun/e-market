@@ -6,7 +6,7 @@ interface ReportTemplate {
   name: string;
   description: string;
   type: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
-  sections: any[];
+  sections: unknown[];
   isActive: boolean;
 }
 
@@ -47,7 +47,7 @@ export const ReportGenerator: React.FC = () => {
         setTemplates(data.data);
       }
     } catch (error) {
-      console.error('Failed to load templates:', error);
+
     }
   };
 
@@ -60,7 +60,7 @@ export const ReportGenerator: React.FC = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Failed to load reports:', error);
+
       setLoading(false);
     }
   };
@@ -73,7 +73,7 @@ export const ReportGenerator: React.FC = () => {
 
     setIsGenerating(true);
     try {
-      const payload: any = {
+      const payload: unknown = {
         templateId: selectedTemplate,
         format: selectedFormat
       };
@@ -99,7 +99,7 @@ export const ReportGenerator: React.FC = () => {
         alert(`리포트 생성에 실패했습니다: ${data.error}`);
       }
     } catch (error) {
-      console.error('Report generation error:', error);
+
       alert('리포트 생성 중 오류가 발생했습니다.');
     } finally {
       setIsGenerating(false);
@@ -123,7 +123,7 @@ export const ReportGenerator: React.FC = () => {
         alert('리포트 다운로드에 실패했습니다.');
       }
     } catch (error) {
-      console.error('Download error:', error);
+
       alert('다운로드 중 오류가 발생했습니다.');
     }
   };
@@ -161,7 +161,7 @@ export const ReportGenerator: React.FC = () => {
         alert('미리보기 생성에 실패했습니다.');
       }
     } catch (error) {
-      console.error('Preview error:', error);
+
       alert('미리보기 중 오류가 발생했습니다.');
     }
   };

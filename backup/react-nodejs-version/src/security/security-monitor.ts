@@ -1,7 +1,7 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { EventEmitter } from 'events';
 import { logger } from '../utils/logger';
 import { cacheService } from '../services/cacheService';
-import { PrismaClient } from '@prisma/client';
 
 export interface SecurityEvent {
   id: string;
@@ -13,7 +13,7 @@ export interface SecurityEvent {
   ip: string;
   userAgent?: string;
   timestamp: Date;
-  data: any;
+  data: unknown;
   fingerprint?: string;
 }
 
@@ -522,7 +522,7 @@ export class SecurityMonitor extends EventEmitter {
   private async storeEvent(event: SecurityEvent): Promise<void> {
     try {
       // 실제 구현시 Prisma를 사용하여 데이터베이스에 저장
-      // await this.prisma.securityEvent.create({ data: event });
+      // await this.query({ data: event });
       
       // 로그에도 기록
       logger.info(`Security event stored: ${event.id}`);
@@ -598,7 +598,7 @@ export class SecurityMonitor extends EventEmitter {
   /**
    * 이벤트 지문 생성
    */
-  private generateFingerprint(event: any): string {
+  private generateFingerprint(event: unknown): string {
     const hash = require('crypto').createHash('md5');
     hash.update(`${event.type}:${event.ip}:${event.userId || 'anonymous'}`);
     return hash.digest('hex');

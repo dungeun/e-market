@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -22,7 +24,7 @@ interface TestimonialProps {
   totalReviews?: number
 }
 
-export default function OrvioTestimonialSection({ 
+const OrvioTestimonialSection = React.memo(function OrvioTestimonialSection({ 
   testimonials, 
   overallRating = 4.9,
   totalReviews = 3500 
@@ -258,4 +260,6 @@ export default function OrvioTestimonialSection({
       </div>
     </section>
   )
-}
+});
+
+export default OrvioTestimonialSection;

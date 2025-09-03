@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 // import { logger } from './logger'
 
 class DatabaseConnection {

@@ -41,7 +41,7 @@ export class AuthService {
         return this.currentUser;
       }
     } catch (error) {
-      console.error('Failed to get current user:', error);
+
     }
 
     return null;
@@ -83,7 +83,7 @@ export class AuthService {
         });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+
     } finally {
       localStorage.removeItem('auth-token');
       localStorage.removeItem('accessToken');

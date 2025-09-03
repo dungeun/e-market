@@ -1,5 +1,7 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 
 const OrderCreateSchema = z.object({
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const userId = request.headers.get('x-user-id')
     
-    const where: any = {}
+    const where: unknown = {}
     
     if (status) {
       where.status = status
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
       where.userId = userId
     }
     
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       where,
       include: {
         items: {
@@ -80,7 +82,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(orders)
   } catch (error) {
-    console.error('Error fetching orders:', error)
+
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
       { status: 500 }
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
     const shippingFee = validatedData.totalAmount >= 50000 ? 0 : 3000
     const finalTotal = validatedData.totalAmount + shippingFee
     
-    const order = await prisma.order.create({
+    const order = await query({
       data: {
         orderNumber,
         userId: userId || undefined,
@@ -148,8 +150,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error('Error creating order:', error)
+
     return NextResponse.json(
       { error: 'Failed to create order' },
       { status: 500 }

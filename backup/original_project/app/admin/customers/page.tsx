@@ -154,10 +154,10 @@ const customers = [
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
+  const [selectedCustomer, setSelectedCustomer] = useState<unknown>(null)
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       active: { label: '활성', color: 'bg-green-100 text-green-800', icon: UserCheck },
       inactive: { label: '비활성', color: 'bg-gray-100 text-gray-800', icon: UserX },
       blocked: { label: '차단', color: 'bg-red-100 text-red-800', icon: UserX }
@@ -175,7 +175,7 @@ export default function CustomersPage() {
   }
 
   const getTierBadge = (tier: string) => {
-    const tierConfig: any = {
+    const tierConfig: unknown = {
       vip: { label: 'VIP', color: 'bg-purple-100 text-purple-800' },
       gold: { label: 'Gold', color: 'bg-yellow-100 text-yellow-800' },
       silver: { label: 'Silver', color: 'bg-gray-100 text-gray-800' },
@@ -191,7 +191,7 @@ export default function CustomersPage() {
     )
   }
 
-  const handleCustomerAction = (action: string, customer: any) => {
+  const handleCustomerAction = (action: string, customer: unknown) => {
     switch(action) {
       case 'view':
         setSelectedCustomer(customer)

@@ -84,7 +84,7 @@ class EncryptionService {
      */
     async encryptOrderData(orderId) {
         try {
-            const order = await database_1.prisma.order.findUnique({
+            const order = await database_1.query({
                 where: { id: orderId },
                 include: {
                     user: true,
@@ -104,7 +104,7 @@ class EncryptionService {
                 updates.customerPhone = security_1.SecurityUtils.encrypt(order.customerPhone);
             }
             // Update order with encrypted data
-            await database_1.prisma.order.update({
+            await database_1.query({
                 where: { id: orderId },
                 data: updates,
             });
@@ -196,7 +196,7 @@ class EncryptionService {
      */
     async exportUserData(userId) {
         try {
-            const userData = await database_1.prisma.user.findUnique({
+            const userData = await database_1.query({
                 where: { id: userId },
                 include: {
                     addresses: true,
@@ -244,7 +244,7 @@ class EncryptionService {
                 paymentMethods: undefined,
             };
             // Create audit log
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId,
                     action: 'USER_DATA_EXPORTED',
@@ -315,11 +315,11 @@ class EncryptionService {
             const retentionPeriod = 7 * 365 * 24 * 60 * 60 * 1000; // 7 years in milliseconds
             const cutoffDate = new Date(Date.now() - retentionPeriod);
             const [totalUsers, activeUsers, inactiveUsers, dataToBeDeleted, oldestOrder,] = await Promise.all([
-                database_1.prisma.user.count(),
-                database_1.prisma.user.count({ where: { isActive: true } }),
-                database_1.prisma.user.count({ where: { isActive: false } }),
-                database_1.prisma.order.count({ where: { createdAt: { lt: cutoffDate } } }),
-                database_1.prisma.order.findFirst({ orderBy: { createdAt: 'asc' } }),
+                database_1.query(),
+                database_1.query({ where: { isActive: true } }),
+                database_1.query({ where: { isActive: false } }),
+                database_1.query({ where: { createdAt: { lt: cutoffDate } } }),
+                database_1.query({ orderBy: { createdAt: 'asc' } }),
             ]);
             return {
                 totalUsers,

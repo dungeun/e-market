@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import AddToCartButton from '@/components/AddToCartButton'
 import ProductReviews from '@/components/ProductReviews'
 import RelatedProducts from '@/components/RelatedProducts'
@@ -10,7 +10,7 @@ interface PageProps {
 }
 
 async function getProduct(slug: string) {
-  const product = await prisma.product.findUnique({
+  const product = await query({
     where: { slug },
     include: {
       images: true,
@@ -34,7 +34,7 @@ async function getProduct(slug: string) {
 }
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
+  const products = await query({
     where: { status: 'ACTIVE' },
     select: { slug: true },
   })

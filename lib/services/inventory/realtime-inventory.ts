@@ -3,11 +3,10 @@
  * 동시접속 1만명 처리를 위한 엔터프라이즈급 재고 관리
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/lib/db'
 import { EventEmitter } from 'events'
 import Redis from 'ioredis'
 
-const prisma = new PrismaClient()
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
 const inventoryEvents = new EventEmitter()
 
@@ -70,7 +69,7 @@ export class RealtimeInventoryService {
     }
 
     // DB에서 조회 (reservations 관계가 없으므로 제거)
-    const inventory = await prisma.inventory.findFirst({
+    const inventory = await query({
       where: { productId }
     })
 
@@ -152,14 +151,14 @@ export class RealtimeInventoryService {
    * 예약 확정 (주문 완료 시)
    */
   async confirmReservation(reservationId: string): Promise<void> {
-    const reservation = await prisma.inventoryReservation.update({
+    const reservation = await query({
       where: { id: reservationId },
       data: { status: 'CONFIRMED' },
       include: { product: true }
     })
 
     // 실제 재고 차감 (updateMany 사용)
-    await prisma.inventory.updateMany({
+    await queryMany({
       where: { productId: reservation.productId },
       data: {
         quantity: { decrement: reservation.quantity }
@@ -177,7 +176,7 @@ export class RealtimeInventoryService {
    * 예약 취소
    */
   async cancelReservation(reservationId: string): Promise<void> {
-    const reservation = await prisma.inventoryReservation.update({
+    const reservation = await query({
       where: { id: reservationId },
       data: { status: 'CANCELLED' }
     })
@@ -197,7 +196,7 @@ export class RealtimeInventoryService {
       for (const update of updates) {
         const { productId, quantity, type, locationId } = update
 
-        let updateData: any = {}
+        let updateData: unknown = {}
         if (type === 'increment') {
           updateData = { quantity: { increment: quantity } }
         } else if (type === 'decrement') {
@@ -232,7 +231,7 @@ export class RealtimeInventoryService {
    */
   async setLowStockAlert(productId: string, threshold: number): Promise<void> {
     // lowStockThreshold 필드가 없으므로 주석 처리
-    // await prisma.inventory.updateMany({
+    // await queryMany({
     //   where: { productId },
     //   data: { lowStockThreshold: threshold }
     // })
@@ -256,7 +255,7 @@ export class RealtimeInventoryService {
     console.warn(`Inventory Alert: Product ${productId} has ${type.toLowerCase().replace('_', ' ')}. Current: ${currentQuantity}`)
     
     // TODO: 알림 시스템 구현 필요
-    // await prisma.inventoryAlert.create({
+    // await query({
     //   data: {
     //     productId,
     //     type,
@@ -274,7 +273,7 @@ export class RealtimeInventoryService {
    * 만료된 예약 정리 (주기적 실행)
    */
   private async cleanupExpiredReservations(): Promise<void> {
-    const expired = await prisma.inventoryReservation.updateMany({
+    const expired = await queryMany({
       where: {
         status: 'ACTIVE',
         expiresAt: { lte: new Date() }
@@ -283,10 +282,9 @@ export class RealtimeInventoryService {
     })
 
     if (expired.count > 0) {
-      console.log(`Cleaned up ${expired.count} expired reservations`)
-      
+
       // 영향받은 상품의 캐시 무효화
-      const expiredReservations = await prisma.inventoryReservation.findMany({
+      const expiredReservations = await query({
         where: { status: 'EXPIRED' },
         select: { productId: true },
         distinct: ['productId']
@@ -327,7 +325,7 @@ export class RealtimeInventoryService {
   /**
    * 재고 변경 이벤트 발행
    */
-  private emitInventoryUpdate(productId: string, event: string, data?: any): void {
+  private emitInventoryUpdate(productId: string, event: string, data?: unknown): void {
     const update = {
       productId,
       event,
@@ -345,7 +343,7 @@ export class RealtimeInventoryService {
   /**
    * 재고 변경 이벤트 구독
    */
-  onInventoryChange(callback: (update: any) => void): void {
+  onInventoryChange(callback: (update: unknown) => void): void {
     inventoryEvents.on('inventory:changed', callback)
   }
 
@@ -353,14 +351,14 @@ export class RealtimeInventoryService {
    * 재고 스냅샷 생성 (감사 및 분석용)
    */
   async createInventorySnapshot(reason?: string): Promise<void> {
-    const inventories = await prisma.inventory.findMany()
+    const inventories = await query()
 
     for (const inventory of inventories) {
       // reservations 관계가 없으므로 예약 수량은 0으로 처리
       const reserved = 0
       const available = inventory.quantity - reserved
 
-      await prisma.inventorySnapshot.create({
+      await query({
         data: {
           productId: inventory.productId,
           locationId: inventory.locationId,

@@ -1,7 +1,6 @@
 import { PrismaClient, Category } from '@prisma/client'
 import { logger } from '../utils/logger'
 
-const prisma = new PrismaClient()
 
 export interface CategoryWithChildren extends Category {
   children?: CategoryWithChildren[];
@@ -33,7 +32,7 @@ export class CategoryService {
    */
   async createCategory(data: CreateCategoryInput): Promise<Category> {
     try {
-      const category = await prisma.category.create({
+      const category = await query({
         data,
         include: {
           parent: true,
@@ -54,7 +53,7 @@ export class CategoryService {
    */
   async getAllCategories(includeInactive = false): Promise<CategoryWithChildren[]> {
     try {
-      const categories = await prisma.category.findMany({
+      const categories = await query({
         where: includeInactive ? {} : { isActive: true },
         include: {
           children: {
@@ -78,7 +77,7 @@ export class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      const category = await prisma.category.findUnique({
+      const category = await query({
         where: { id },
         include: {
           parent: true,
@@ -105,7 +104,7 @@ export class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const category = await prisma.category.findUnique({
+      const category = await query({
         where: { slug },
         include: {
           parent: true,
@@ -136,7 +135,7 @@ export class CategoryService {
         await this.validateParentCategory(id, data.parentId)
       }
 
-      const category = await prisma.category.update({
+      const category = await query({
         where: { id },
         data,
         include: {
@@ -159,7 +158,7 @@ export class CategoryService {
   async deleteCategory(id: string): Promise<void> {
     try {
       // Check if category has children
-      const children = await prisma.category.count({
+      const children = await query({
         where: { parentId: id },
       })
 
@@ -168,7 +167,7 @@ export class CategoryService {
       }
 
       // Check if category has products
-      const products = await prisma.product.count({
+      const products = await query({
         where: { categoryId: id },
       })
 
@@ -176,7 +175,7 @@ export class CategoryService {
         throw new Error('Cannot delete category with products')
       }
 
-      await prisma.category.delete({
+      await query({
         where: { id },
       })
 
@@ -231,7 +230,7 @@ export class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const categories = await prisma.category.findMany({
+      const categories = await query({
         where: {
           OR: [
             { name: { contains: query, mode: 'insensitive' } },
@@ -255,7 +254,7 @@ export class CategoryService {
   async getCategoriesByTag(tagId: string): Promise<Category[]> {
     try {
       // Get products with the tag
-      const products = await prisma.product.findMany({
+      const products = await query({
         where: {
           tags: {
             some: { tagId },
@@ -269,7 +268,7 @@ export class CategoryService {
       const categoryIds = [...new Set(products.map(p => p.categoryId).filter(Boolean))]
 
       // Fetch categories
-      const categories = await prisma.category.findMany({
+      const categories = await query({
         where: {
           id: { in: categoryIds as string[] },
           isActive: true,
@@ -291,7 +290,7 @@ export class CategoryService {
     try {
       await prisma.$transaction(
         updates.map(({ id, sortOrder }) =>
-          prisma.category.update({
+          query({
             where: { id },
             data: { sortOrder },
           }),
@@ -309,7 +308,7 @@ export class CategoryService {
    * Private helper methods
    */
 
-  private buildCategoryTree(categories: any[]): CategoryWithChildren[] {
+  private buildCategoryTree(categories: unknown[]): CategoryWithChildren[] {
     const categoryMap = new Map<string, CategoryWithChildren>()
     const rootCategories: CategoryWithChildren[] = []
 
@@ -335,7 +334,7 @@ export class CategoryService {
   }
 
   private async buildCategoryBranch(categoryId: string): Promise<CategoryWithChildren> {
-    const category = await prisma.category.findUnique({
+    const category = await query({
       where: { id: categoryId },
       include: {
         children: {

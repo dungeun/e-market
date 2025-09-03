@@ -21,9 +21,9 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   )
 
   // Capture errors
-  let responseError: any = null
+  let responseError: unknown = null
   const originalEmit = res.emit
-  res.emit = function(event: string, ...args: any[]): boolean {
+  res.emit = function(event: string, ...args: unknown[]): boolean {
     if (event === 'error') {
       responseError = args[0]
     }
@@ -32,7 +32,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
 
   // Override res.end to log response
   const originalEnd = res.end
-  res.end = function(this: Response, ..._args: any[]) {
+  res.end = function(this: Response, ..._args: unknown[]) {
     const duration = Date.now() - start
 
     logger.info('Request completed', {
@@ -47,8 +47,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
     auditLogService.logAPIAccess(req, res, duration, responseError)
       .catch(err => logger.error('Failed to log API access', err))
 
-    return originalEnd.apply(res, _args as any)
-  } as any
+    return originalEnd.apply(res, _args as unknown)
+  } as unknown
 
   next()
 }

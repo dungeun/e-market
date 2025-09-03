@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
 import { SecurityUtils } from '../utils/security'
@@ -37,7 +38,7 @@ export class PaymentSecurityService {
       )
 
       // Check if card already tokenized
-      const existingToken = await prisma.paymentToken.findFirst({
+      const existingToken = await query({
         where: { fingerprint },
       })
 
@@ -60,7 +61,7 @@ export class PaymentSecurityService {
         cardNumber: cardData.cardNumber,
       })
 
-      await prisma.paymentToken.create({
+      await query({
         data: {
           token,
           fingerprint,
@@ -157,7 +158,7 @@ export class PaymentSecurityService {
 
     try {
       // Check velocity limits
-      const recentPayments = await prisma.payment.count({
+      const recentPayments = await query({
         where: {
           order: { userId: data.userId },
           createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) }, // Last hour
@@ -185,7 +186,7 @@ export class PaymentSecurityService {
       }
 
       // Check IP reputation
-      const blacklistedIP = await prisma.blacklist.findFirst({
+      const blacklistedIP = await query({
         where: {
           type: 'IP',
           value: data.ipAddress,
@@ -206,7 +207,7 @@ export class PaymentSecurityService {
 
       // Check card reuse across accounts
       if (data.cardToken) {
-        const cardUsage = await prisma.paymentMethod.count({
+        const cardUsage = await query({
           where: {
             last4: data.cardToken?.slice(-4), // Use last 4 digits instead
             userId: { not: data.userId },
@@ -220,7 +221,7 @@ export class PaymentSecurityService {
       }
 
       // Log fraud check
-      await prisma.fraudCheck.create({
+      await query({
         data: {
           userId: data.userId,
           checkType: 'PAYMENT_VALIDATION',
@@ -249,7 +250,7 @@ export class PaymentSecurityService {
   /**
    * Secure payment data for transmission
    */
-  async prepareSecurePaymentData(paymentData: any): Promise<{
+  async prepareSecurePaymentData(paymentData: unknown): Promise<{
     secureData: any
     signature: string
   }> {
@@ -287,7 +288,7 @@ export class PaymentSecurityService {
       }
 
       for (const [window, ms] of Object.entries(timeWindows)) {
-        const payments = await prisma.payment.findMany({
+        const payments = await query({
           where: {
             order: { userId },
             createdAt: { gte: new Date(Date.now() - ms) },
@@ -340,9 +341,9 @@ export class PaymentSecurityService {
   private async createSecurityAlert(
     userId: string,
     alertType: string,
-    metadata: any,
+    metadata: unknown,
   ): Promise<void> {
-    await prisma.securityAlert.create({
+    await query({
       data: {
         userId,
         alertType,
@@ -361,7 +362,7 @@ export class PaymentSecurityService {
       const currentYear = new Date().getFullYear()
       const currentMonth = new Date().getMonth() + 1
 
-      const result = await prisma.paymentToken.deleteMany({
+      const result = await queryMany({
         where: {
           OR: [
             { expiryYear: { lt: currentYear } },
@@ -396,7 +397,7 @@ export class PaymentSecurityService {
 
     try {
       // Check encryption status
-      const unencryptedPayments = await prisma.paymentMethod.count({
+      const unencryptedPayments = await query({
         where: {
           provider: { startsWith: 'stripe' }, // Use provider instead of token
         },
@@ -408,7 +409,7 @@ export class PaymentSecurityService {
       }
 
       // Check access logs
-      const recentAccessLogs = await prisma.auditLog.count({
+      const recentAccessLogs = await query({
         where: {
           action: { in: ['PAYMENT_VIEW', 'PAYMENT_EXPORT'] },
           createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
@@ -427,7 +428,7 @@ export class PaymentSecurityService {
       }
 
       // Check key rotation
-      const oldTokens = await prisma.paymentToken.count({
+      const oldTokens = await query({
         where: {
           createdAt: { lt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) },
         },

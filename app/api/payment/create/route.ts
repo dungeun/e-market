@@ -1,3 +1,6 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 결제 생성 API
  */
@@ -6,8 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway } from '@/lib/services/payment/payment-gateway'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 주문 확인
-    const order = await prisma.order.findUnique({
+    const order = await query({
       where: { id: orderId },
       include: {
         user: true
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 주문자 확인 - 이메일로 유저 찾기
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { email: session.user.email! }
     })
     
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 이미 결제된 주문인지 확인
-    const existingPayment = await prisma.payment.findFirst({
+    const existingPayment = await query({
       where: {
         orderId,
         status: 'COMPLETED'
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 주문 상태 업데이트
-    await prisma.order.update({
+    await query({
       where: { id: orderId },
       data: { status: 'PAYMENT_PENDING' }
     })
@@ -131,8 +133,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: response
     })
-  } catch (error: any) {
-    console.error('Payment creation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to create payment' },
       { status: 500 }

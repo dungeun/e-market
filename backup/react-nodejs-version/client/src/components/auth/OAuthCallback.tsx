@@ -40,13 +40,12 @@ export function OAuthCallback() {
       
       // 성공 메시지와 함께 홈으로 이동
       const providerName = provider === 'naver' ? '네이버' : '카카오';
-      console.log(`${providerName} 로그인 성공`);
-      
+
       // 이전 페이지가 있으면 그곳으로, 없으면 홈으로
       const redirectTo = sessionStorage.getItem('redirectAfterLogin') || '/';
       sessionStorage.removeItem('redirectAfterLogin');
       navigate(redirectTo);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.message || 'SNS 로그인 처리 중 오류가 발생했습니다.');
       setTimeout(() => {
         navigate('/login');

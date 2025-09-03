@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -43,11 +43,12 @@ export default function LoginPage() {
     try {
       const result = await login({ email: testEmail, password: testPassword });
       
-      if (result.success && result.user) {
-        alert(t('login.welcome', `환영합니다, ${result.user.name}님!`));
+      if (result.success) {
+        alert(t('login.welcome', `환영합니다!`));
         
-        // 역할에 따라 리다이렉트
-        if (result.user.role === 'ADMIN' || result.user.role === 'SUPER_ADMIN') {
+        // 관리자인 경우 admin 페이지로 리다이렉트
+        const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.type === 'ADMIN') {
           router.push('/admin');
         } else {
           router.push('/');
@@ -56,7 +57,7 @@ export default function LoginPage() {
         alert(result.error || t('login.failed', '로그인에 실패했습니다.'));
       }
     } catch (error) {
-      console.error('Login failed:', error);
+
       alert(t('login.error', '로그인 중 오류가 발생했습니다.'));
     } finally {
       setIsLoading(false);
@@ -71,11 +72,12 @@ export default function LoginPage() {
     try {
       const result = await login({ email, password });
       
-      if (result.success && result.user) {
-        alert(t('login.welcome', `환영합니다, ${result.user.name}님!`));
+      if (result.success) {
+        alert(t('login.welcome', `환영합니다!`));
         
-        // 역할에 따라 리다이렉트
-        if (result.user.role === 'ADMIN' || result.user.role === 'SUPER_ADMIN') {
+        // 관리자인 경우 admin 페이지로 리다이렉트
+        const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.type === 'ADMIN') {
           router.push('/admin');
         } else {
           router.push('/');
@@ -84,7 +86,7 @@ export default function LoginPage() {
         alert(result.error || t('login.failed', '로그인에 실패했습니다.'));
       }
     } catch (error) {
-      console.error('Login failed:', error);
+
       alert(t('login.error', '로그인 중 오류가 발생했습니다.'));
     } finally {
       setIsLoading(false);
@@ -99,7 +101,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">S</span>
           </div>
-          <span className="text-2xl font-bold text-gray-900">{t('site.name', 'LinkPick')}</span>
+          <span className="text-2xl font-bold text-gray-900">{t('site.name', 'E-Market Korea')}</span>
         </Link>
 
         <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
@@ -232,40 +234,10 @@ export default function LoginPage() {
                   variant="outline"
                   size="sm"
                   className="w-full text-xs h-8 bg-white hover:bg-blue-100 border-blue-200"
-                  onClick={() => quickLogin('admin@shopmall.com', 'test123!')}
+                  onClick={() => quickLogin('admin@example.com', 'admin123')}
                   disabled={isLoading}
                 >
-                  {t('login.admin_login', '🔧 관리자로 로그인 (admin@shopmall.com)')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-8 bg-white hover:bg-blue-100 border-blue-200"
-                  onClick={() => quickLogin('superadmin@shopmall.com', 'test123!')}
-                  disabled={isLoading}
-                >
-                  {t('login.superadmin_login', '👑 슈퍼 관리자로 로그인 (superadmin@shopmall.com)')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-8 bg-white hover:bg-blue-100 border-blue-200"
-                  onClick={() => quickLogin('user1@test.com', 'test123!')}
-                  disabled={isLoading}
-                >
-                  {t('login.user1_login', '👤 홍길동으로 로그인 (user1@test.com)')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-8 bg-white hover:bg-blue-100 border-blue-200"
-                  onClick={() => quickLogin('user2@test.com', 'test123!')}
-                  disabled={isLoading}
-                >
-                  {t('login.user2_login', '👤 김철수로 로그인 (user2@test.com)')}
+                  {t('login.admin_login', '🔧 관리자로 로그인 (admin@example.com)')}
                 </Button>
               </div>
             </div>
@@ -286,55 +258,41 @@ export default function LoginPage() {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => console.log('Google login')}
+                  onClick={() => alert('Google 로그인 준비 중')}
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
                   Google
                 </Button>
-
                 <Button
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => console.log('Naver login')}
+                  onClick={() => alert('Kakao 로그인 준비 중')}
                 >
-                  <div className="w-5 h-5 mr-2 bg-green-500 rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">N</span>
-                  </div>
-                  Naver
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                    <path fill="#FEE500" d="M12 3c5.514 0 10 3.476 10 7.747 0 4.272-4.48 7.748-10 7.748-.62 0-1.227-.044-1.82-.128l-3.823 2.542c-.5.334-1.163-.052-1.163-.68v-3.512C2.846 15.48 1 13.19 1 10.747 1 6.476 5.487 3 12 3z"/>
+                    <path fill="#000000" d="M10.5 12.5l-.9 2.4h-.7l2.4-6.3h.8l2.4 6.3h-.7l-.9-2.4h-2.4zm.3-.6h1.9l-.9-2.5h-.1l-.9 2.5z"/>
+                  </svg>
+                  Kakao
                 </Button>
               </div>
             </div>
           </form>
         </div>
       </div>
-
-      {/* 고객센터 링크 */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-600">
-          로그인에 문제가 있으신가요?{' '}
-          <Link href="/support" className="font-medium text-blue-600 hover:text-blue-500">
-            고객센터
-          </Link>
-        </p>
-      </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -79,7 +79,7 @@ export function InquiryForm() {
 
       // 성공 시 상세 페이지로 이동
       navigate(`/inquiries/${inquiry.id}`);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.message || '문의 등록에 실패했습니다.');
     } finally {
       setIsLoading(false);

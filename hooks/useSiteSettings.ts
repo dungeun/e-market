@@ -73,9 +73,9 @@ interface SiteSettings {
 // 기본 설정값
 const defaultSettings: SiteSettings = {
   general: {
-    siteName: 'LinkPick',
-    siteDescription: '인플루언서 마케팅 플랫폼',
-    supportEmail: 'support@linkpick.com',
+    siteName: 'E-Market Korea',
+    siteDescription: '해외 노동자를 위한 중고 거래 플랫폼',
+    supportEmail: 'support@emarketkorea.com',
     maintenanceMode: false,
     registrationEnabled: true,
     emailVerificationRequired: true
@@ -86,7 +86,7 @@ const defaultSettings: SiteSettings = {
     primaryColor: '#3B82F6',
     secondaryColor: '#10B981',
     footerEnabled: true,
-    footerText: '© 2024 LinkPick. All rights reserved.',
+    footerText: '© 2024 E-Market Korea. All rights reserved.',
     footerLinks: [
       { title: '이용약관', url: '/terms', newWindow: false },
       { title: '개인정보처리방침', url: '/privacy', newWindow: false },
@@ -101,9 +101,9 @@ const defaultSettings: SiteSettings = {
       linkedin: ''
     },
     seo: {
-      metaTitle: 'LinkPick - 인플루언서 마케팅 플랫폼',
-      metaDescription: '최고의 인플루언서와 브랜드를 연결하는 마케팅 플랫폼입니다.',
-      metaKeywords: '인플루언서, 마케팅, 브랜드, 광고, 소셜미디어',
+      metaTitle: 'E-Market Korea - 해외 노동자를 위한 중고 거래 플랫폼',
+      metaDescription: '한국에서 생활하는 외국인 노동자들을 위한 필수품 중고 거래 플랫폼입니다.',
+      metaKeywords: '중고거래, 외국인노동자, 전자제품, 가전제품, 생활용품, 한국, 거래',
       ogImage: '/og-image.svg'
     },
     analytics: {
@@ -161,11 +161,11 @@ export function useSiteSettings() {
         setSettings(mergedSettings)
       } else {
         // 오류 발생 시 기본값 사용
-        console.warn('Failed to load site settings, using defaults')
+
       }
     } catch (err) {
       // 오류 발생 시 기본값 사용
-      console.error('Error loading site settings:', err)
+
       setError('설정을 불러오는데 실패했습니다')
     } finally {
       setLoading(false)

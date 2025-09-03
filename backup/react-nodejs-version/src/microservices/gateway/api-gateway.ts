@@ -174,7 +174,7 @@ export class ApiGateway {
 
       // JWT 토큰 검증
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-      (req as any).user = decoded;
+      (req as unknown).user = decoded;
       
       next();
     } catch (error) {
@@ -204,7 +204,7 @@ export class ApiGateway {
 
         // 응답 캐싱을 위한 response 래핑
         const originalSend = res.send;
-        res.send = function(body: any) {
+        res.send = function(body: unknown) {
           if (res.statusCode === 200) {
             cacheService.set(cacheKey, body, cacheConfig.ttl).catch(err => {
               logger.warn('Cache set failed:', err);
@@ -302,7 +302,7 @@ export class ApiGateway {
     // 서비스 디스커버리 엔드포인트
     this.app.get('/services', (req, res) => {
       const services = serviceRegistry.getAllServices();
-      const serviceList: any = {};
+      const serviceList: unknown = {};
       
       for (const [name, instances] of services.entries()) {
         serviceList[name] = instances.map(instance => ({

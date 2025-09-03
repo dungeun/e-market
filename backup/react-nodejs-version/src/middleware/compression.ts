@@ -65,7 +65,7 @@ export function brotliCompression() {
     const originalEnd = res.end.bind(res)
 
     // Helper function to compress and send
-    const compressAndSend = (data: any, isJson: boolean = false) => {
+    const compressAndSend = (data: unknown, isJson: boolean = false) => {
       // Skip small responses
       const dataStr = isJson ? JSON.stringify(data) : data
       if (!dataStr || dataStr.length < 1024) {
@@ -96,13 +96,13 @@ export function brotliCompression() {
     }
 
     // Override send method
-    res.send = function(data: any) {
+    res.send = function(data: unknown) {
       compressAndSend(data, false)
       return res
     }
 
     // Override json method
-    res.json = function(data: any) {
+    res.json = function(data: unknown) {
       res.setHeader('Content-Type', 'application/json')
       compressAndSend(data, true)
       return res

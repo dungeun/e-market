@@ -141,10 +141,10 @@ const orders = [
 
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [selectedOrder, setSelectedOrder] = useState<unknown>(null)
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       pending: { label: '대기중', color: 'bg-gray-100 text-gray-800', icon: Clock },
       processing: { label: '처리중', color: 'bg-blue-100 text-blue-800', icon: Package },
       shipped: { label: '배송중', color: 'bg-purple-100 text-purple-800', icon: Truck },
@@ -164,7 +164,7 @@ export default function OrdersPage() {
   }
 
   const getPaymentStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       pending: { label: '결제대기', color: 'bg-yellow-100 text-yellow-800' },
       paid: { label: '결제완료', color: 'bg-green-100 text-green-800' },
       refunded: { label: '환불완료', color: 'bg-gray-100 text-gray-800' }
@@ -174,7 +174,7 @@ export default function OrdersPage() {
     return <Badge className={config.color}>{config.label}</Badge>
   }
 
-  const handleOrderAction = (action: string, order: any) => {
+  const handleOrderAction = (action: string, order: unknown) => {
     switch(action) {
       case 'view':
         setSelectedOrder(order)
@@ -439,7 +439,7 @@ export default function OrdersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {selectedOrder.items.map((item: any, index: number) => (
+                    {selectedOrder.items.map((item: unknown, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{item.name}</TableCell>
                         <TableCell className="text-center">{item.quantity}</TableCell>

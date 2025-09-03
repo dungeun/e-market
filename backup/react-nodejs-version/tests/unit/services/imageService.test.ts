@@ -34,12 +34,12 @@ describe('ImageService', () => {
       toFile: vi.fn(),
     }
     
-    mockSharp.mockReturnValue(mockSharpInstance as any)
+    mockSharp.mockReturnValue(mockSharpInstance as unknown)
     
     // Mock file system operations
     mockFs.access.mockResolvedValue(undefined)
     mockFs.mkdir.mockResolvedValue(undefined)
-    mockFs.stat.mockResolvedValue({ size: 1024 } as any)
+    mockFs.stat.mockResolvedValue({ size: 1024 } as unknown)
     
     imageService = new ImageService()
   })
@@ -57,7 +57,7 @@ describe('ImageService', () => {
         format: 'jpeg'
       }
       
-      const mockSharpInstance = mockSharp() as any
+      const mockSharpInstance = mockSharp() as unknown
       mockSharpInstance.metadata.mockResolvedValue(mockMetadata)
       mockSharpInstance.toFile.mockResolvedValue(undefined)
 
@@ -73,7 +73,7 @@ describe('ImageService', () => {
     })
 
     test('should handle invalid image metadata', async () => {
-      const mockSharpInstance = mockSharp() as any
+      const mockSharpInstance = mockSharp() as unknown
       mockSharpInstance.metadata.mockResolvedValue({ width: null, height: null })
 
       await expect(
@@ -88,7 +88,7 @@ describe('ImageService', () => {
         format: 'jpeg'
       }
       
-      const mockSharpInstance = mockSharp() as any
+      const mockSharpInstance = mockSharp() as unknown
       mockSharpInstance.metadata.mockResolvedValue(mockMetadata)
       mockSharpInstance.toFile.mockResolvedValue(undefined)
 
@@ -195,7 +195,7 @@ describe('ImageService', () => {
         density: 72
       }
       
-      const mockSharpInstance = mockSharp() as any
+      const mockSharpInstance = mockSharp() as unknown
       mockSharpInstance.metadata.mockResolvedValue(mockMetadata)
 
       const result = await imageService.getImageInfo('/path/to/image.jpg')
@@ -205,7 +205,7 @@ describe('ImageService', () => {
     })
 
     test('should handle image metadata errors', async () => {
-      const mockSharpInstance = mockSharp() as any
+      const mockSharpInstance = mockSharp() as unknown
       mockSharpInstance.metadata.mockRejectedValue(new Error('Invalid image'))
 
       await expect(

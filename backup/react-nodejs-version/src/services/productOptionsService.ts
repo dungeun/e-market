@@ -29,7 +29,7 @@ export class ProductOptionsService {
             type: data.type,
             isRequired: data.isRequired,
             sortOrder: data.sortOrder,
-            config: data.config ? data.config as any : null,
+            config: data.config ? data.config as unknown : null,
           },
         })
 
@@ -65,7 +65,7 @@ export class ProductOptionsService {
   // Get product option by ID with values
   async getProductOptionById(optionId: string): Promise<ProductOption> {
     try {
-      const option = await prisma.productOption.findUnique({
+      const option = await query({
         where: { id: optionId },
         include: {
           values: {
@@ -84,11 +84,11 @@ export class ProductOptionsService {
         productId: option.productId,
         name: option.name,
         displayName: option.displayName,
-        type: option.type as any,
+        type: option.type as unknown,
         isRequired: option.isRequired,
         sortOrder: option.sortOrder,
         isActive: option.isActive,
-        config: option.config as any,
+        config: option.config as unknown,
         values: option.values.map(value => ({
           id: value.id,
           value: value.value,
@@ -111,7 +111,7 @@ export class ProductOptionsService {
   // Get all options for a product
   async getProductOptions(productId: string): Promise<ProductOption[]> {
     try {
-      const options = await prisma.productOption.findMany({
+      const options = await query({
         where: {
           productId,
           isActive: true,
@@ -130,11 +130,11 @@ export class ProductOptionsService {
         productId: option.productId,
         name: option.name,
         displayName: option.displayName,
-        type: option.type as any,
+        type: option.type as unknown,
         isRequired: option.isRequired,
         sortOrder: option.sortOrder,
         isActive: option.isActive,
-        config: option.config as any,
+        config: option.config as unknown,
         values: option.values.map(value => ({
           id: value.id,
           value: value.value,
@@ -157,7 +157,7 @@ export class ProductOptionsService {
   // Update product option
   async updateProductOption(optionId: string, data: UpdateProductOptionInput): Promise<ProductOption> {
     try {
-      await prisma.productOption.update({
+      await query({
         where: { id: optionId },
         data: {
           name: data.name,
@@ -181,7 +181,7 @@ export class ProductOptionsService {
   // Delete product option
   async deleteProductOption(optionId: string): Promise<void> {
     try {
-      await prisma.productOption.delete({
+      await query({
         where: { id: optionId },
       })
 
@@ -193,9 +193,9 @@ export class ProductOptionsService {
   }
 
   // Add option value to existing option
-  async addOptionValue(optionId: string, valueData: any): Promise<void> {
+  async addOptionValue(optionId: string, valueData: unknown): Promise<void> {
     try {
-      await prisma.productOptionValue.create({
+      await query({
         data: {
           optionId,
           value: valueData.value,
@@ -218,9 +218,9 @@ export class ProductOptionsService {
   }
 
   // Update option value
-  async updateOptionValue(valueId: string, valueData: any): Promise<void> {
+  async updateOptionValue(valueId: string, valueData: unknown): Promise<void> {
     try {
-      await prisma.productOptionValue.update({
+      await query({
         where: { id: valueId },
         data: {
           value: valueData.value,
@@ -245,7 +245,7 @@ export class ProductOptionsService {
   // Delete option value
   async deleteOptionValue(valueId: string): Promise<void> {
     try {
-      await prisma.productOptionValue.delete({
+      await query({
         where: { id: valueId },
       })
 
@@ -259,7 +259,7 @@ export class ProductOptionsService {
   // Get product with all options and values
   async getProductWithOptions(productId: string): Promise<ProductWithOptions> {
     try {
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: productId },
         include: {
           images: {
@@ -314,17 +314,17 @@ export class ProductOptionsService {
           name: variant.name,
           sku: variant.sku,
           price: Number(variant.price),
-          attributes: variant.attributes as Record<string, any>,
+          attributes: variant.attributes as Record<string, unknown>,
           quantity: variant.quantity,
         })),
         options: product.options.map(option => ({
           id: option.id,
           name: option.name,
           displayName: option.displayName,
-          type: option.type as any,
+          type: option.type as unknown,
           isRequired: option.isRequired,
           sortOrder: option.sortOrder,
-          config: option.config as Record<string, any> || undefined,
+          config: option.config as Record<string, unknown> || undefined,
           values: option.values.map(value => ({
             id: value.id,
             value: value.value,
@@ -378,7 +378,7 @@ export class ProductOptionsService {
 
           // Validate checkbox selections
           if (option.type === 'CHECKBOX' && Array.isArray(selectedValue)) {
-            const config = option.config as any
+            const config = option.config as unknown
             if (config?.maxSelections && selectedValue.length > config.maxSelections) {
               errors.push({
                 optionName: option.name,
@@ -391,7 +391,7 @@ export class ProductOptionsService {
           // Validate number range
           if (option.type === 'NUMBER' || option.type === 'RANGE') {
             const numValue = Number(selectedValue)
-            const config = option.config as any
+            const config = option.config as unknown
             if (config?.min !== undefined && numValue < config.min) {
               errors.push({
                 optionName: option.name,
@@ -411,7 +411,7 @@ export class ProductOptionsService {
           // Validate text length
           if (option.type === 'TEXT' || option.type === 'TEXTAREA') {
             const textValue = String(selectedValue)
-            const config = option.config as any
+            const config = option.config as unknown
             if (config?.minLength && textValue.length < config.minLength) {
               errors.push({
                 optionName: option.name,
@@ -444,7 +444,7 @@ export class ProductOptionsService {
   // Calculate price adjustments based on selected options
   async calculateOptionPricing(productId: string, selectedOptions: SelectedProductOptions): Promise<OptionPriceCalculation> {
     try {
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: productId },
         select: { price: true },
       })
@@ -521,20 +521,20 @@ export class ProductOptionsService {
             // Create option
             const option = await tx.productOption.create({
               data: {
-                productId: (optionData as any).productId,
-                name: (optionData as any).name,
-                displayName: (optionData as any).displayName,
-                type: (optionData as any).type,
-                isRequired: (optionData as any).isRequired || false,
-                sortOrder: (optionData as any).sortOrder || 0,
-                config: (optionData as any).config,
+                productId: (optionData as unknown).productId,
+                name: (optionData as unknown).name,
+                displayName: (optionData as unknown).displayName,
+                type: (optionData as unknown).type,
+                isRequired: (optionData as unknown).isRequired || false,
+                sortOrder: (optionData as unknown).sortOrder || 0,
+                config: (optionData as unknown).config,
               },
             })
 
             // Create option values
-            if ((optionData as any).values) {
+            if ((optionData as unknown).values) {
               await tx.productOptionValue.createMany({
-                data: (optionData as any).values.map((value: any) => ({
+                data: (optionData as unknown).values.map((value: unknown) => ({
                   optionId: option.id,
                   value: value.value,
                   displayValue: value.displayValue,
@@ -552,16 +552,16 @@ export class ProductOptionsService {
 
         case 'update':
           for (const optionData of operation.options) {
-            if ((optionData as any).id) {
+            if ((optionData as unknown).id) {
               await tx.productOption.update({
-                where: { id: (optionData as any).id },
+                where: { id: (optionData as unknown).id },
                 data: {
-                  name: (optionData as any).name,
-                  displayName: (optionData as any).displayName,
-                  type: (optionData as any).type,
-                  isRequired: (optionData as any).isRequired,
-                  sortOrder: (optionData as any).sortOrder,
-                  config: (optionData as any).config,
+                  name: (optionData as unknown).name,
+                  displayName: (optionData as unknown).displayName,
+                  type: (optionData as unknown).type,
+                  isRequired: (optionData as unknown).isRequired,
+                  sortOrder: (optionData as unknown).sortOrder,
+                  config: (optionData as unknown).config,
                 },
               })
             }
@@ -569,7 +569,7 @@ export class ProductOptionsService {
           break
 
         case 'delete': {
-          const optionIds = operation.options.map(opt => (opt as any).id).filter(Boolean)
+          const optionIds = operation.options.map(opt => (opt as unknown).id).filter(Boolean)
           if (optionIds.length > 0) {
             await tx.productOption.deleteMany({
               where: { id: { in: optionIds } },
@@ -580,10 +580,10 @@ export class ProductOptionsService {
 
         case 'reorder':
           for (const optionData of operation.options) {
-            if ((optionData as any).id) {
+            if ((optionData as unknown).id) {
               await tx.productOption.update({
-                where: { id: (optionData as any).id },
-                data: { sortOrder: (optionData as any).sortOrder },
+                where: { id: (optionData as unknown).id },
+                data: { sortOrder: (optionData as unknown).sortOrder },
               })
             }
           }
@@ -613,7 +613,7 @@ export class ProductOptionsService {
 
       await this.bulkOptionOperation({
         operation: 'create',
-        options: optionsToCreate as any,
+        options: optionsToCreate as unknown,
       })
 
       logger.info(`Applied template ${templateId} to product ${productId}`)
@@ -646,7 +646,7 @@ export class ProductOptionsService {
 
       await this.bulkOptionOperation({
         operation: 'create',
-        options: optionsToCreate as any,
+        options: optionsToCreate as unknown,
       })
 
       logger.info(`Cloned options from product ${sourceProductId} to product ${targetProductId}`)

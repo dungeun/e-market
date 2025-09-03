@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import { X, Download, FileText, CreditCard, Calendar, User, Building, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react'
@@ -35,7 +37,7 @@ interface PaymentDetail {
   failReason?: string
 }
 
-export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdate }: PaymentDetailPanelProps) {
+const PaymentDetailPanel = React.memo(function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdate }: PaymentDetailPanelProps) {
   const [payment, setPayment] = useState<PaymentDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -57,7 +59,7 @@ export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdat
         setPayment(data.payment)
       }
     } catch (error) {
-      console.error('결제 상세 정보 로드 실패:', error)
+
     } finally {
       setLoading(false)
     }
@@ -80,7 +82,7 @@ export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdat
         if (onUpdate) onUpdate()
       }
     } catch (error) {
-      console.error('결제 처리 실패:', error)
+
     } finally {
       setProcessing(false)
     }
@@ -357,5 +359,7 @@ export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdat
         </div>
       </div>
     </>
-  )
-}
+    )
+});
+
+export default PaymentDetailPanel;

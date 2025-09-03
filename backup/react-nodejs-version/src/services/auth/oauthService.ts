@@ -1,5 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { logger } from '../../utils/logger';
 import { config } from '../../config/config';
@@ -71,7 +71,7 @@ export class OAuthService {
   /**
    * 네이버 로그인 콜백 처리
    */
-  async handleNaverCallback(code: string, state?: string): Promise<{ user: any; token: string }> {
+  async handleNaverCallback(code: string, state?: string): Promise<{ user: unknown; token: string }> {
     try {
       // 1. Access Token 획득
       const tokenResponse = await axios.post('https://nid.naver.com/oauth2.0/token', null, {
@@ -121,7 +121,7 @@ export class OAuthService {
   /**
    * 카카오 로그인 콜백 처리
    */
-  async handleKakaoCallback(code: string): Promise<{ user: any; token: string }> {
+  async handleKakaoCallback(code: string): Promise<{ user: unknown; token: string }> {
     try {
       // 1. Access Token 획득
       const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', null, {
@@ -178,7 +178,7 @@ export class OAuthService {
   private async findOrCreateUser(oauthInfo: OAuthUserInfo) {
     try {
       // OAuth 계정 확인
-      let oauthAccount = await this.prisma.oAuthAccount.findUnique({
+      let oauthAccount = await this.query({
         where: {
           provider_providerId: {
             provider: oauthInfo.provider,
@@ -190,7 +190,7 @@ export class OAuthService {
 
       if (oauthAccount) {
         // 기존 사용자 정보 업데이트
-        const updatedUser = await this.prisma.user.update({
+        const updatedUser = await this.query({
           where: { id: oauthAccount.userId },
           data: {
             firstName: oauthInfo.name || oauthAccount.user.firstName,
@@ -200,7 +200,7 @@ export class OAuthService {
         });
 
         // OAuth 계정 정보 업데이트
-        await this.prisma.oAuthAccount.update({
+        await this.query({
           where: { id: oauthAccount.id },
           data: {
             accessToken: '', // 보안상 저장하지 않음
@@ -219,7 +219,7 @@ export class OAuthService {
       // 이메일로 기존 사용자 확인
       let user = null;
       if (oauthInfo.email) {
-        user = await this.prisma.user.findUnique({
+        user = await this.query({
           where: { email: oauthInfo.email }
         });
       }
@@ -228,7 +228,7 @@ export class OAuthService {
         // 새 사용자 생성
         const email = oauthInfo.email || `${oauthInfo.provider}_${oauthInfo.id}@oauth.local`;
         
-        user = await this.prisma.user.create({
+        user = await this.query({
           data: {
             email,
             firstName: oauthInfo.name,
@@ -242,7 +242,7 @@ export class OAuthService {
       }
 
       // OAuth 계정 연결
-      await this.prisma.oAuthAccount.create({
+      await this.query({
         data: {
           userId: user.id,
           provider: oauthInfo.provider,
@@ -266,7 +266,7 @@ export class OAuthService {
   /**
    * JWT 토큰 생성
    */
-  private generateToken(user: any): string {
+  private generateToken(user: unknown): string {
     return jwt.sign(
       {
         id: user.id,
@@ -285,7 +285,7 @@ export class OAuthService {
    */
   async unlinkOAuthAccount(userId: string, provider: 'naver' | 'kakao') {
     try {
-      const oauthAccount = await this.prisma.oAuthAccount.findFirst({
+      const oauthAccount = await this.query({
         where: {
           userId,
           provider
@@ -296,7 +296,7 @@ export class OAuthService {
         throw new Error('연결된 계정을 찾을 수 없습니다.');
       }
 
-      await this.prisma.oAuthAccount.delete({
+      await this.query({
         where: { id: oauthAccount.id }
       });
 
@@ -312,7 +312,7 @@ export class OAuthService {
    */
   async getLinkedAccounts(userId: string) {
     try {
-      const accounts = await this.prisma.oAuthAccount.findMany({
+      const accounts = await this.query({
         where: { userId },
         select: {
           provider: true,

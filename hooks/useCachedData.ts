@@ -15,7 +15,7 @@ interface CachedData<T> {
 }
 
 // 메모리 캐시 (페이지 간 공유)
-const memoryCache = new Map<string, { data: any; timestamp: number }>()
+const memoryCache = new Map<string, { data: unknown; timestamp: number }>()
 
 export function useCachedData<T>(
   fetcher: () => Promise<T>,
@@ -68,7 +68,7 @@ export function useCachedData<T>(
     try {
       localStorage.setItem(`cache_${key}`, JSON.stringify(cacheEntry))
     } catch (e) {
-      console.warn('Failed to save to localStorage:', e)
+
     }
   }, [key])
 

@@ -3,10 +3,8 @@
  * Elasticsearch 기반 상품 검색, 필터링, 자동완성
  */
 
-import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 
-const prisma = new PrismaClient()
 const redis = new Redis(process.env.REDIS_URL!)
 
 export interface SearchQuery {
@@ -31,7 +29,7 @@ export interface SearchFilters {
 }
 
 export interface SearchResult {
-  products: any[]
+  products: unknown[]
   total: number
   filters: SearchFilters
   suggestions: string[]
@@ -70,7 +68,7 @@ export class SearchEngineService {
     } = params
 
     // 기본 검색 조건 구성
-    const where: any = {
+    const where: unknown = {
       status: 'ACTIVE'
     }
 
@@ -116,7 +114,7 @@ export class SearchEngineService {
 
     // 상품 검색 실행
     const [products, totalCount] = await Promise.all([
-      prisma.product.findMany({
+      query({
         where,
         include: {
           category: true,
@@ -137,7 +135,7 @@ export class SearchEngineService {
         skip: (page - 1) * limit,
         take: limit
       }),
-      prisma.product.count({ where })
+      query({ where })
     ])
 
     // 검색 결과 정보 보강
@@ -192,7 +190,7 @@ export class SearchEngineService {
     }
 
     // 상품명에서 자동완성 후보 추출
-    const products = await prisma.product.findMany({
+    const products = await query({
       where: {
         status: 'ACTIVE',
         name: {
@@ -263,7 +261,7 @@ export class SearchEngineService {
     // Redis에서 검색 빈도 조회
     const searches = await redis.zrevrange('search_frequency', 0, limit - 1, 'WITHSCORES')
     
-    const result: any[] = []
+    const result: unknown[] = []
     for (let i = 0; i < searches.length; i += 2) {
       result.push({
         query: searches[i],
@@ -280,7 +278,7 @@ export class SearchEngineService {
   /**
    * 검색 필터 생성
    */
-  private async generateFilters(baseWhere: any, query?: string): Promise<SearchFilters> {
+  private async generateFilters(baseWhere: unknown, query?: string): Promise<SearchFilters> {
     // 카테고리 필터
     const categories = await prisma.product.groupBy({
       by: ['categoryId'],
@@ -290,7 +288,7 @@ export class SearchEngineService {
       }
     })
 
-    const categoryDetails = await prisma.category.findMany({
+    const categoryDetails = await query({
       where: {
         id: { in: categories.map(c => c.categoryId).filter((id): id is string => id !== null) }
       }
@@ -309,7 +307,7 @@ export class SearchEngineService {
     )
 
     // 태그 분석
-    const products = await prisma.product.findMany({
+    const products = await query({
       where: baseWhere,
       select: { tags: true }
     })
@@ -391,7 +389,7 @@ export class SearchEngineService {
   private generatePriceRanges(minPrice: number, maxPrice: number) {
     if (maxPrice - minPrice <= 0) return []
 
-    const ranges: any[] = []
+    const ranges: unknown[] = []
     const step = Math.ceil((maxPrice - minPrice) / 5)
     
     for (let i = 0; i < 5; i++) {
@@ -429,7 +427,7 @@ export class SearchEngineService {
    */
   async rebuildSearchIndex(): Promise<void> {
     // 상품별 검색 가중치 업데이트
-    const products = await prisma.product.findMany({
+    const products = await query({
       include: {
         _count: {
           select: {
@@ -452,7 +450,7 @@ export class SearchEngineService {
   /**
    * 상품 검색 가중치 계산
    */
-  private calculateSearchWeight(product: any): number {
+  private calculateSearchWeight(product: unknown): number {
     let weight = 0
     
     // 판매량 가중치 (50%)

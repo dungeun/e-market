@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { v4 as uuidv4 } from 'uuid'
@@ -16,7 +16,7 @@ async function getOrCreateCart(userId?: string) {
   
   if (userId) {
     // For logged-in users, find or create cart by userId
-    let cart = await prisma.cart.findFirst({
+    let cart = await query({
       where: { userId },
       include: {
         items: {
@@ -30,7 +30,7 @@ async function getOrCreateCart(userId?: string) {
     })
     
     if (!cart) {
-      cart = await prisma.cart.create({
+      cart = await query({
         data: { userId },
         include: {
           items: {
@@ -57,7 +57,7 @@ async function getOrCreateCart(userId?: string) {
       })
     }
     
-    let cart = await prisma.cart.findFirst({
+    let cart = await query({
       where: { sessionId: cartId },
       include: {
         items: {
@@ -71,7 +71,7 @@ async function getOrCreateCart(userId?: string) {
     })
     
     if (!cart) {
-      cart = await prisma.cart.create({
+      cart = await query({
         data: { sessionId: cartId },
         include: {
           items: {
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(cart)
   } catch (error) {
-    console.error('Error fetching cart:', error)
+
     return NextResponse.json(
       { error: 'Failed to fetch cart' },
       { status: 500 }
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const cart = await getOrCreateCart(userId)
     
     // Check if product exists
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id: validatedData.productId },
     })
     
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if item already exists in cart
-    const existingItem = await prisma.cartItem.findFirst({
+    const existingItem = await query({
       where: {
         cartId: cart.id,
         productId: validatedData.productId,
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     
     if (existingItem) {
       // Update quantity
-      await prisma.cartItem.update({
+      await query({
         where: { id: existingItem.id },
         data: {
           quantity: existingItem.quantity + validatedData.quantity,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Create new cart item
-      await prisma.cartItem.create({
+      await query({
         data: {
           cartId: cart.id,
           productId: validatedData.productId,
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Return updated cart
-    const updatedCart = await prisma.cart.findUnique({
+    const updatedCart = await query({
       where: { id: cart.id },
       include: {
         items: {
@@ -178,8 +178,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error('Error adding to cart:', error)
+
     return NextResponse.json(
       { error: 'Failed to add to cart' },
       { status: 500 }

@@ -32,7 +32,7 @@ export const verificationService = {
     try {
       const response = await api.post('/api/v1/verification/send-code', data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       return {
         success: false,
         error: error.response?.data?.error || '인증번호 발송에 실패했습니다.'
@@ -47,7 +47,7 @@ export const verificationService = {
     try {
       const response = await api.post('/api/v1/verification/verify-code', data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       return {
         success: false,
         verified: false,

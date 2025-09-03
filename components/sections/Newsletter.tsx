@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState } from 'react'
 import { CheckCircle } from 'lucide-react'
@@ -8,7 +10,7 @@ interface NewsletterProps {
   data?: any
 }
 
-export default function Newsletter({ config, data }: NewsletterProps) {
+const Newsletter = React.memo(function Newsletter({ config, data }: NewsletterProps) {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(false)
 
@@ -94,5 +96,7 @@ export default function Newsletter({ config, data }: NewsletterProps) {
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default Newsletter;

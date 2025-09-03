@@ -31,13 +31,13 @@ interface DashboardData {
     errors: { status: string; hourlyRate: number };
   };
   recentActivity: {
-    topAbusers: any[];
-    topErrorEndpoints: any[];
+    topAbusers: unknown[];
+    topErrorEndpoints: unknown[];
     recentErrors: number;
   };
   system: {
     memory: { used: number; total: number };
-    cpu: any;
+    cpu: unknown;
   };
 }
 
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
       const response = await api.get('/admin/dashboard');
       setDashboard(response.data);
       setError('');
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.response?.data?.error?.message || 'Failed to load dashboard');
       if (err.response?.status === 401) {
         navigate('/login');

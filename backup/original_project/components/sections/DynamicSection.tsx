@@ -69,7 +69,7 @@ export default function DynamicSection({ section, data }: DynamicSectionProps) {
   const Component = sectionComponents[section.type]
 
   if (!Component) {
-    console.warn(`Section component not found for type: ${section.type}`)
+
     return null
   }
 

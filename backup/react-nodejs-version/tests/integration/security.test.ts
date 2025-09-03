@@ -10,7 +10,7 @@ describe('Security Integration Tests', () => {
 
   beforeAll(async () => {
     // Create test admin user
-    const adminUser = await prisma.user.create({
+    const adminUser = await query({
       data: {
         email: 'admin@test.com',
         password: await SecurityUtils.hashPassword('AdminPass123!'),
@@ -23,7 +23,7 @@ describe('Security Integration Tests', () => {
     })
 
     // Create test regular user
-    const regularUser = await prisma.user.create({
+    const regularUser = await query({
       data: {
         email: 'user@test.com',
         password: await SecurityUtils.hashPassword('UserPass123!'),
@@ -41,7 +41,7 @@ describe('Security Integration Tests', () => {
 
     // Create test API key
     apiKey = SecurityUtils.generateAPIKey()
-    await prisma.apiClient.create({
+    await query({
       data: {
         name: 'Test API Client',
         hashedKey: SecurityUtils.hashData(apiKey),
@@ -53,8 +53,8 @@ describe('Security Integration Tests', () => {
 
   afterAll(async () => {
     // Cleanup
-    await prisma.user.deleteMany({ where: { email: { in: ['admin@test.com', 'user@test.com'] } } })
-    await prisma.apiClient.deleteMany({ where: { name: 'Test API Client' } })
+    await queryMany({ where: { email: { in: ['admin@test.com', 'user@test.com'] } } })
+    await queryMany({ where: { name: 'Test API Client' } })
   })
 
   describe('Authentication & Authorization', () => {
@@ -120,7 +120,7 @@ describe('Security Integration Tests', () => {
         .set('X-API-Key', apiKey)
         .expect(200)
 
-      const apiClient = await prisma.apiClient.findFirst({
+      const apiClient = await query({
         where: { hashedKey: SecurityUtils.hashData(apiKey) }
       })
 
@@ -175,7 +175,7 @@ describe('Security Integration Tests', () => {
       const csrfToken = SecurityUtils.generateCSRFToken()
       
       // Create session with CSRF token
-      await prisma.session.create({
+      await query({
         data: {
           userId: 'admin_id',
           token: SecurityUtils.hashData(adminToken),
@@ -203,7 +203,7 @@ describe('Security Integration Tests', () => {
   describe('Blacklist Functionality', () => {
     it('should block blacklisted IPs', async () => {
       // Add IP to blacklist
-      await prisma.blacklist.create({
+      await query({
         data: {
           type: 'IP',
           value: '::ffff:127.0.0.1', // localhost in IPv6 format
@@ -219,7 +219,7 @@ describe('Security Integration Tests', () => {
       expect(response.body.error).toBe('Access denied')
 
       // Cleanup
-      await prisma.blacklist.deleteMany({
+      await queryMany({
         where: { value: '::ffff:127.0.0.1' }
       })
     })
@@ -227,7 +227,7 @@ describe('Security Integration Tests', () => {
     it('should block blacklisted user agents', async () => {
       const badUserAgent = 'BadBot/1.0'
       
-      await prisma.blacklist.create({
+      await query({
         data: {
           type: 'USER_AGENT',
           value: badUserAgent,
@@ -244,7 +244,7 @@ describe('Security Integration Tests', () => {
       expect(response.body.error).toBe('Access denied')
 
       // Cleanup
-      await prisma.blacklist.deleteMany({
+      await queryMany({
         where: { value: badUserAgent }
       })
     })
@@ -257,7 +257,7 @@ describe('Security Integration Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200)
 
-      const logs = await prisma.auditLog.findMany({
+      const logs = await query({
         where: {
           action: 'API_ACCESS',
           path: '/api/v1/products'
@@ -279,7 +279,7 @@ describe('Security Integration Tests', () => {
         })
         .expect(401)
 
-      const logs = await prisma.auditLog.findMany({
+      const logs = await query({
         where: {
           action: 'AUTH_LOGIN_FAILED'
         }
@@ -299,7 +299,7 @@ describe('Security Integration Tests', () => {
           })
       }
 
-      const logs = await prisma.auditLog.findMany({
+      const logs = await query({
         where: {
           action: 'SECURITY_RATE_LIMIT_EXCEEDED'
         }
@@ -352,7 +352,7 @@ describe('Security Integration Tests', () => {
         expect(response.body.data.value).toBe('192.168.1.100')
 
         // Cleanup
-        await prisma.blacklist.deleteMany({
+        await queryMany({
           where: { value: '192.168.1.100' }
         })
       })
@@ -374,7 +374,7 @@ describe('Security Integration Tests', () => {
         expect(response.body.data.name).toBe('New API Client')
 
         // Cleanup
-        await prisma.apiClient.deleteMany({
+        await queryMany({
           where: { name: 'New API Client' }
         })
       })

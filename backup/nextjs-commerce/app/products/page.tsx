@@ -2,10 +2,10 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { ProductGrid } from '@/components/products/product-grid'
 import { ProductFilters } from '@/components/products/product-filters'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 async function getProducts() {
-  const products = await prisma.product.findMany({
+  const products = await query({
     where: {
       isActive: true,
     },

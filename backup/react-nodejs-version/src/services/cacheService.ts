@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { createClient, RedisClientType } from 'redis'
 import { config } from '../config/config'
 import { logger } from '../utils/logger'
@@ -205,12 +206,12 @@ export class CacheService {
    */
   static keys = {
     product: (id: string) => CacheService.generateKey('product', id),
-    productList: (params: any) => CacheService.generateKey('products', JSON.stringify(params)),
+    productList: (params: unknown) => CacheService.generateKey('products', JSON.stringify(params)),
     category: (id: string) => CacheService.generateKey('category', id),
     categoryTree: () => CacheService.generateKey('categories', 'tree'),
-    categoryProducts: (categoryId: string, params: any) =>
+    categoryProducts: (categoryId: string, params: unknown) =>
       CacheService.generateKey('category', categoryId, 'products', JSON.stringify(params)),
-    search: (query: string, params: any) =>
+    search: (query: string, params: unknown) =>
       CacheService.generateKey('search', query, JSON.stringify(params)),
     cart: (sessionId: string) => CacheService.generateKey('cart', sessionId),
     inventory: (productId: string) => CacheService.generateKey('inventory', productId),

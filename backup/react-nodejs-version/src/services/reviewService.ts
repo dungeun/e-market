@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { PrismaClient, ReviewType, Review, ReviewVote } from '@prisma/client';
 import { CreateReviewDto, UpdateReviewDto, ReviewQueryDto, ReviewStatistics, BestReviewCriteria } from '../types/review';
 import { pointService } from './points/pointService';
@@ -20,7 +21,7 @@ class ReviewService {
     // 구매 확인
     let isVerified = false;
     if (orderId) {
-      const order = await this.prisma.order.findFirst({
+      const order = await this.query({
         where: {
           id: orderId,
           userId,
@@ -41,7 +42,7 @@ class ReviewService {
     else if (images && images.length > 0) reviewType = ReviewType.PHOTO;
 
     // 리뷰 생성
-    const review = await this.prisma.review.create({
+    const review = await this.query({
       data: {
         productId,
         userId,
@@ -84,7 +85,7 @@ class ReviewService {
         `상품 리뷰 작성 (${review.product.name})`
       );
 
-      await this.prisma.review.update({
+      await this.query({
         where: { id: review.id },
         data: {
           pointsEarned: points,
@@ -132,7 +133,7 @@ class ReviewService {
     if (cached) return cached;
 
     // 필터 조건
-    const where: any = {
+    const where: unknown = {
       productId,
       isApproved: true
     };
@@ -143,7 +144,7 @@ class ReviewService {
     if (bestOnly) where.isBest = true;
 
     // 정렬 조건
-    let orderBy: any = {};
+    let orderBy: unknown = {};
     switch (sortBy) {
       case 'latest':
         orderBy = { createdAt: 'desc' };
@@ -163,7 +164,7 @@ class ReviewService {
     }
 
     const [reviews, total] = await Promise.all([
-      this.prisma.review.findMany({
+      this.query({
         where,
         orderBy,
         skip: offset,
@@ -184,7 +185,7 @@ class ReviewService {
           }
         }
       }),
-      this.prisma.review.count({ where })
+      this.query({ where })
     ]);
 
     // 이미지/비디오 파싱
@@ -256,13 +257,13 @@ class ReviewService {
     const { minRating = 4, minHelpfulCount = 5, maxCount = 3 } = criteria;
 
     // 기존 베스트 리뷰 해제
-    await this.prisma.review.updateMany({
+    await this.queryMany({
       where: { productId, isBest: true },
       data: { isBest: false }
     });
 
     // 새로운 베스트 리뷰 선정
-    const bestReviews = await this.prisma.review.findMany({
+    const bestReviews = await this.query({
       where: {
         productId,
         isApproved: true,
@@ -278,7 +279,7 @@ class ReviewService {
     });
 
     if (bestReviews.length > 0) {
-      await this.prisma.review.updateMany({
+      await this.queryMany({
         where: { id: { in: bestReviews.map(r => r.id) } },
         data: { isBest: true }
       });
@@ -293,26 +294,26 @@ class ReviewService {
   // 리뷰 도움됨/안됨 투표
   async voteReview(userId: string, reviewId: string, isHelpful: boolean) {
     // 기존 투표 확인
-    const existingVote = await this.prisma.reviewVote.findUnique({
+    const existingVote = await this.query({
       where: { reviewId_userId: { reviewId, userId } }
     });
 
     if (existingVote) {
       if (existingVote.isHelpful === isHelpful) {
         // 같은 투표면 제거
-        await this.prisma.reviewVote.delete({
+        await this.query({
           where: { id: existingVote.id }
         });
       } else {
         // 다른 투표면 업데이트
-        await this.prisma.reviewVote.update({
+        await this.query({
           where: { id: existingVote.id },
           data: { isHelpful }
         });
       }
     } else {
       // 새 투표 생성
-      await this.prisma.reviewVote.create({
+      await this.query({
         data: { reviewId, userId, isHelpful }
       });
     }
@@ -327,7 +328,7 @@ class ReviewService {
     const helpfulCount = votes.find(v => v.isHelpful)?._count.isHelpful || 0;
     const notHelpfulCount = votes.find(v => !v.isHelpful)?._count.isHelpful || 0;
 
-    await this.prisma.review.update({
+    await this.query({
       where: { id: reviewId },
       data: { helpfulCount, notHelpfulCount }
     });
@@ -343,7 +344,7 @@ class ReviewService {
       _count: { id: true }
     });
 
-    await this.prisma.product.update({
+    await this.query({
       where: { id: productId },
       data: {
         averageRating: stats._avg.rating || 0,
@@ -354,7 +355,7 @@ class ReviewService {
 
   // 리뷰 삭제
   async deleteReview(reviewId: string, userId: string, isAdmin: boolean = false) {
-    const review = await this.prisma.review.findUnique({
+    const review = await this.query({
       where: { id: reviewId },
       include: { user: true }
     });
@@ -367,7 +368,7 @@ class ReviewService {
       throw new Error('삭제 권한이 없습니다.');
     }
 
-    await this.prisma.review.delete({
+    await this.query({
       where: { id: reviewId }
     });
 

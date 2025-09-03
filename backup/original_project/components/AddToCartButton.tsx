@@ -58,7 +58,7 @@ export default function AddToCartButton({
       alert('장바구니에 추가되었습니다!')
       
     } catch (error) {
-      console.error('Error adding to cart:', error)
+
       alert('장바구니 추가에 실패했습니다.')
     } finally {
       setIsLoading(false)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { env } from '@/lib/config/env';
+import { prisma } from "@/lib/db"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
@@ -10,7 +11,7 @@ const RegisterSchema = z.object({
   name: z.string().min(2),
 })
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET || env.jwt.secret
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     const validatedData = RegisterSchema.parse(body)
     
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await query({
       where: { email: validatedData.email },
     })
     
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(validatedData.password, 10)
     
     // Create user
-    const user = await prisma.user.create({
+    const user = await query({
       data: {
         email: validatedData.email,
         password: hashedPassword,
@@ -66,8 +67,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error('Error registering user:', error)
+
     return NextResponse.json(
       { error: 'Failed to register user' },
       { status: 500 }

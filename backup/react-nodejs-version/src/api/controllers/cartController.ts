@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response } from 'express'
 import { cartService } from '../../services/cartService'
 import { sessionService } from '../../services/sessionService'
@@ -363,7 +364,7 @@ export class CartController {
       userId,
       sessionId,
       currency: cartData.currency || 'USD',
-      items: cartData.items.map((item: any) => ({
+      items: cartData.items.map((item: unknown) => ({
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,

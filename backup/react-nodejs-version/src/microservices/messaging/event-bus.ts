@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { env } from '@/lib/config/env';
 import Redis from 'ioredis';
 import { logger } from '../../utils/logger';
 
@@ -8,7 +9,7 @@ export interface DomainEvent {
   aggregateId: string;
   aggregateType: string;
   version: number;
-  data: any;
+  data: unknown;
   metadata?: {
     userId?: string;
     correlationId?: string;
@@ -29,7 +30,7 @@ export interface EventHandler {
 
 export interface MessagePattern {
   pattern: string;
-  handler: (data: any) => Promise<any>;
+  handler: (data: unknown) => Promise<unknown>;
 }
 
 export class EventBus extends EventEmitter {
@@ -39,7 +40,7 @@ export class EventBus extends EventEmitter {
   private retryQueues: Map<string, DomainEvent[]> = new Map();
   private deadLetterQueue: DomainEvent[] = [];
 
-  constructor(redisConfig?: any) {
+  constructor(redisConfig?: unknown) {
     super();
     this.redis = new Redis(redisConfig || {
       host: process.env.REDIS_HOST || 'localhost',
@@ -132,7 +133,7 @@ export class EventBus extends EventEmitter {
   /**
    * 메시지 전송 (Request-Response)
    */
-  async sendMessage(pattern: string, data: any, timeout: number = 5000): Promise<any> {
+  async sendMessage(pattern: string, data: unknown, timeout: number = 5000): Promise<unknown> {
     const correlationId = this.generateId();
     const responseChannel = `response:${correlationId}`;
 
@@ -203,7 +204,7 @@ export class EventBus extends EventEmitter {
   /**
    * 실패한 이벤트 처리
    */
-  private async handleFailedEvent(handler: EventHandler, event: DomainEvent, error: any): Promise<void> {
+  private async handleFailedEvent(handler: EventHandler, event: DomainEvent, error: unknown): Promise<void> {
     logger.error(`Event handler failed after retries: ${handler.eventType}`, error);
 
     if (handler.options?.deadLetterQueue) {

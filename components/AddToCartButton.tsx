@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState } from 'react'
 import { useCartStore } from '@/stores/cart-store'
@@ -11,7 +13,7 @@ interface AddToCartButtonProps {
   className?: string
 }
 
-export default function AddToCartButton({ 
+const AddToCartButton = React.memo(function AddToCartButton({ 
   productId, 
   disabled = false,
   variant,
@@ -58,7 +60,7 @@ export default function AddToCartButton({
       alert('장바구니에 추가되었습니다!')
       
     } catch (error) {
-      console.error('Error adding to cart:', error)
+
       alert('장바구니 추가에 실패했습니다.')
     } finally {
       setIsLoading(false)
@@ -123,5 +125,7 @@ export default function AddToCartButton({
         </button>
       </div>
     </div>
-  )
-}
+    )
+});
+
+export default AddToCartButton;

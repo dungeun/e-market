@@ -112,7 +112,7 @@ class ShippingService {
         try {
             logger_1.logger.info('Creating shipment', { orderId: data.orderId, carrier: data.carrier });
             // Get order details
-            const order = await database_1.prisma.order.findUnique({
+            const order = await database_1.query({
                 where: { id: data.orderId },
                 include: {
                     items: {
@@ -208,7 +208,7 @@ class ShippingService {
     async updateShipment(id, data) {
         try {
             logger_1.logger.info('Updating shipment', { id, updates: Object.keys(data) });
-            const existingShipment = await database_1.prisma.shipment.findUnique({
+            const existingShipment = await database_1.query({
                 where: { id },
                 include: { order: true },
             });
@@ -271,7 +271,7 @@ class ShippingService {
     // Get shipment by ID
     async getShipmentById(id) {
         try {
-            const shipment = await database_1.prisma.shipment.findUnique({
+            const shipment = await database_1.query({
                 where: { id },
                 include: {
                     order: {
@@ -300,7 +300,7 @@ class ShippingService {
         try {
             logger_1.logger.info('Tracking shipment', { trackingNumber: data.trackingNumber });
             // Find shipment in database
-            const shipment = await database_1.prisma.shipment.findFirst({
+            const shipment = await database_1.query({
                 where: { trackingNumber: data.trackingNumber },
                 include: {
                     trackingEvents: {
@@ -355,7 +355,7 @@ class ShippingService {
                 },
             };
             const [shipments, total] = await Promise.all([
-                database_1.prisma.shipment.findMany({
+                database_1.query({
                     where,
                     include: {
                         order: {
@@ -368,7 +368,7 @@ class ShippingService {
                     skip: (page - 1) * limit,
                     take: limit,
                 }),
-                database_1.prisma.shipment.count({ where }),
+                database_1.query({ where }),
             ]);
             const summaries = shipments.map(shipment => ({
                 id: shipment.id,
@@ -402,7 +402,7 @@ class ShippingService {
     async handleCarrierWebhook(carrier, data) {
         try {
             logger_1.logger.info('Handling carrier webhook', { carrier, trackingNumber: data.trackingNumber });
-            const shipment = await database_1.prisma.shipment.findFirst({
+            const shipment = await database_1.query({
                 where: {
                     trackingNumber: data.trackingNumber,
                     carrier: carrier.toUpperCase(),
@@ -447,7 +447,7 @@ class ShippingService {
         try {
             const [totalShipments, shipmentStats, statusCounts, carrierCounts, recentShipments,] = await Promise.all([
                 // Total shipments count
-                database_1.prisma.shipment.count(),
+                database_1.query(),
                 // Total and average cost
                 database_1.prisma.shipment.aggregate({
                     _sum: { cost: true },
@@ -467,7 +467,7 @@ class ShippingService {
                     _avg: { cost: true },
                 }),
                 // Recent shipments
-                database_1.prisma.shipment.findMany({
+                database_1.query({
                     include: {
                         order: {
                             select: {

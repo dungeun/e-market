@@ -1,84 +1,187 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { query } from '@/lib/db';
+import { logger } from '@/lib/logger';
+import { emitToAll } from '@/lib/socket-client';
 
+// GET: UISection 조회
 export async function GET(request: NextRequest) {
   try {
-    const sections = await prisma.uISection.findMany({
-      orderBy: {
-        order: 'asc'
-      },
-      include: {
-        texts: {
-          orderBy: {
-            key: 'asc'
-          }
-        }
-      }
-    });
+    const { searchParams } = new URL(request.url);
+    const sectionId = searchParams.get('sectionId');
+    const type = searchParams.get('type');
+    const visible = searchParams.get('visible');
 
-    return NextResponse.json({
-      sections: sections.map(section => ({
-        ...section,
-        content: section.data,
-        isActive: section.isActive
-      }))
+    // SQL 쿼리 구성
+    let sqlQuery = 'SELECT * FROM ui_sections WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+
+    if (sectionId) {
+      sqlQuery += ` AND key = $${paramIndex++}`;
+      params.push(sectionId);
+    }
+    if (type) {
+      sqlQuery += ` AND type = $${paramIndex++}`;
+      params.push(type);
+    }
+    if (visible !== null) {
+      sqlQuery += ` AND "isActive" = $${paramIndex++}`;
+      params.push(visible === 'true');
+    }
+
+    sqlQuery += ' ORDER BY "order" ASC';
+
+    const result = await query(sqlQuery, params);
+
+    const sections = result.rows.map(section => ({
+      id: section.id,
+      key: section.key,
+      title: section.title,
+      type: section.type,
+      order: section.order,
+      isActive: section.isActive,
+      visible: section.isActive,
+      data: typeof section.data === 'string' ? JSON.parse(section.data) : section.data,
+      translations: typeof section.translations === 'string' ? JSON.parse(section.translations || '{}') : section.translations,
+    }));
+
+    return NextResponse.json({ 
+      sections,
+      success: true 
     });
   } catch (error) {
-    console.error('Failed to fetch UI sections:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch UI sections' },
-      { status: 500 }
-    );
+    logger.error('Error fetching UI sections:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch UI sections',
+      success: false 
+    }, { status: 500 });
   }
 }
 
+// POST: UISection 생성
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      key,
-      title,
-      type,
-      isActive = true,
-      order = 0,
-      data,
-      props,
-      style
-    } = body;
+    const { sectionId, type, title, subtitle, content, order, visible, translations, settings } = body;
 
-    // Validate required fields
-    if (!key || !type) {
-      return NextResponse.json(
-        { error: 'key and type are required' },
-        { status: 400 }
+    // 기존 섹션 확인
+    const existingResult = await query(
+      'SELECT * FROM ui_sections WHERE key = $1',
+      [sectionId]
+    );
+
+    if (existingResult.rows.length > 0) {
+      // 업데이트
+      const updateResult = await query(
+        `UPDATE ui_sections 
+         SET type = $2, title = $3, data = $4, "order" = $5, "isActive" = $6, translations = $7, "updatedAt" = NOW()
+         WHERE key = $1
+         RETURNING *`,
+        [sectionId, type, title, JSON.stringify(content), order, visible, JSON.stringify(translations || {})]
       );
+      // Socket.io 이벤트 발생: 섹션 업데이트
+      emitToAll('ui:section:updated', {
+        type: 'update',
+        section: updateResult.rows[0]
+      });
+      
+      return NextResponse.json({ section: updateResult.rows[0] });
+    } else {
+      // 새로 생성
+      const crypto = require('crypto');
+      const id = crypto.randomUUID();
+      const createResult = await query(
+        `INSERT INTO ui_sections (id, key, type, title, data, "order", "isActive", translations, "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+         RETURNING *`,
+        [id, sectionId, type, title, JSON.stringify(content || {}), order || 0, visible !== false, JSON.stringify(translations || {})]
+      );
+      
+      // Socket.io 이벤트 발생: 섹션 생성
+      emitToAll('ui:section:updated', {
+        type: 'create',
+        section: createResult.rows[0]
+      });
+      
+      return NextResponse.json({ section: createResult.rows[0] });
+    }
+  } catch (error) {
+    logger.error('Error creating/updating UI section:', error);
+    return NextResponse.json({ error: 'Failed to save UI section' }, { status: 500 });
+  }
+}
+
+// PUT: UISection 업데이트
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, order, isActive, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Section ID required' }, { status: 400 });
     }
 
-    const section = await prisma.uISection.create({
-      data: {
-        key,
-        title,
-        type,
-        isActive,
-        order,
-        data: data || {},
-        props: props || {},
-        style: style || {}
-      }
+    // 업데이트 쿼리 구성
+    const updateFields = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (order !== undefined) {
+      updateFields.push(`"order" = $${paramIndex++}`);
+      values.push(order);
+    }
+    if (isActive !== undefined) {
+      updateFields.push(`"isActive" = $${paramIndex++}`);
+      values.push(isActive);
+    }
+    
+    updateFields.push(`"updatedAt" = NOW()`);
+    values.push(id);
+
+    const updateResult = await query(
+      `UPDATE ui_sections 
+       SET ${updateFields.join(', ')}
+       WHERE id = $${paramIndex}
+       RETURNING *`,
+      values
+    );
+
+    // Socket.io 이벤트 발생: 섹션 업데이트
+    emitToAll('ui:section:updated', {
+      type: 'update',
+      section: updateResult.rows[0]
     });
 
-    return NextResponse.json({
-      section: {
-        ...section,
-        content: section.data,
-        isActive: section.isActive
-      }
-    }, { status: 201 });
+    return NextResponse.json({ section: updateResult.rows[0] });
   } catch (error) {
-    console.error('Failed to create UI section:', error);
-    return NextResponse.json(
-      { error: 'Failed to create UI section' },
-      { status: 500 }
-    );
+    logger.error('Error updating UI section:', error);
+    return NextResponse.json({ error: 'Failed to update UI section' }, { status: 500 });
+  }
+}
+
+// DELETE: UISection 삭제
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Section ID required' }, { status: 400 });
+    }
+
+    await query('DELETE FROM ui_sections WHERE id = $1', [id]);
+
+    // Socket.io 이벤트 발생: 섹션 삭제
+    emitToAll('ui:section:updated', {
+      type: 'delete',
+      sectionId: id
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error('Error deleting UI section:', error);
+    return NextResponse.json({ error: 'Failed to delete UI section' }, { status: 500 });
   }
 }

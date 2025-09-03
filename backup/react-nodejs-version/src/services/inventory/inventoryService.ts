@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { realtimeInventoryService } from './realtimeInventoryService';
 import { cacheService } from '../cacheService';
 import { notificationService } from '../notificationService';
@@ -47,12 +47,12 @@ class InventoryService {
    * 설정 로드
    */
   private async loadSettings() {
-    const settings = await this.prisma.setting.findUnique({
+    const settings = await this.query({
       where: { key: 'inventory_settings' }
     });
 
     if (settings) {
-      this.settings = { ...this.settings, ...(settings.value as any) };
+      this.settings = { ...this.settings, ...(settings.value as unknown) };
     }
   }
 
@@ -70,7 +70,7 @@ class InventoryService {
     let newQuantity = 0;
 
     if (variantId) {
-      const variant = await this.prisma.productVariant.findUnique({
+      const variant = await this.query({
         where: { id: variantId }
       });
       
@@ -95,12 +95,12 @@ class InventoryService {
           break;
       }
 
-      await this.prisma.productVariant.update({
+      await this.query({
         where: { id: variantId },
         data: { quantity: newQuantity }
       });
     } else {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.query({
         where: { id: productId }
       });
       
@@ -125,14 +125,14 @@ class InventoryService {
           break;
       }
 
-      await this.prisma.product.update({
+      await this.query({
         where: { id: productId },
         data: { quantity: newQuantity }
       });
     }
 
     // 재고 로그 기록
-    await this.prisma.inventoryLog.create({
+    await this.query({
       data: {
         productId,
         type: 'ADJUSTMENT',
@@ -207,7 +207,7 @@ class InventoryService {
         item.quantity
       );
 
-      const product = await this.prisma.product.findUnique({
+      const product = await this.query({
         where: { id: item.productId },
         select: { allowBackorders: true }
       });
@@ -259,7 +259,7 @@ class InventoryService {
           productId: item.productId,
           variantId: item.variantId,
           quantity: item.quantity,
-          type: type as any,
+          type: type as unknown,
           userId,
           sessionId,
           duration: this.settings.reservationDuration
@@ -319,7 +319,7 @@ class InventoryService {
       }, 'system');
 
       // 재고 로그
-      await this.prisma.inventoryLog.create({
+      await this.query({
         data: {
           productId: item.productId,
           type: 'RETURN',
@@ -352,7 +352,7 @@ class InventoryService {
       limit = 50 
     } = options;
 
-    const where: any = { productId };
+    const where: unknown = { productId };
     
     if (startDate && endDate) {
       where.createdAt = { gte: startDate, lte: endDate };
@@ -363,13 +363,13 @@ class InventoryService {
     }
 
     const [logs, total] = await Promise.all([
-      this.prisma.inventoryLog.findMany({
+      this.query({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit
       }),
-      this.prisma.inventoryLog.count({ where })
+      this.query({ where })
     ]);
 
     return {
@@ -394,28 +394,28 @@ class InventoryService {
       activeReservations,
       recentMovements
     ] = await Promise.all([
-      this.prisma.product.count({
+      this.query({
         where: { trackQuantity: true }
       }),
-      this.prisma.product.count({
+      this.query({
         where: {
           trackQuantity: true,
           quantity: { lte: this.settings.lowStockThreshold, gt: 0 }
         }
       }),
-      this.prisma.product.count({
+      this.query({
         where: {
           trackQuantity: true,
           quantity: 0
         }
       }),
-      this.prisma.inventoryReservation.count({
+      this.query({
         where: {
           status: 'ACTIVE',
           expiresAt: { gt: new Date() }
         }
       }),
-      this.prisma.inventoryLog.findMany({
+      this.query({
         orderBy: { createdAt: 'desc' },
         take: 10,
         include: {
@@ -466,7 +466,7 @@ class InventoryService {
     const suggestions = [];
 
     for (const data of salesData) {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.query({
         where: { id: data.productId },
         select: { name: true, quantity: true, lowStockThreshold: true }
       });
@@ -525,7 +525,7 @@ class InventoryService {
   async updateSettings(settings: Partial<InventorySettings>, userId: string) {
     this.settings = { ...this.settings, ...settings };
 
-    await this.prisma.setting.upsert({
+    await this.query({
       where: { key: 'inventory_settings' },
       update: { value: this.settings },
       create: {
@@ -549,7 +549,7 @@ class InventoryService {
   }) {
     const where = options.productIds ? { id: { in: options.productIds } } : {};
     
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where,
       include: {
         variants: options.includeVariants,
@@ -611,12 +611,12 @@ class InventoryService {
     for (const item of data) {
       try {
         // SKU로 상품 찾기
-        const product = await this.prisma.product.findFirst({
+        const product = await this.query({
           where: { sku: item.sku }
         });
 
         if (!product) {
-          const variant = await this.prisma.productVariant.findFirst({
+          const variant = await this.query({
             where: { sku: item.sku }
           });
 
@@ -643,7 +643,7 @@ class InventoryService {
         }
 
         success++;
-      } catch (error: any) {
+      } catch (error: Error | unknown) {
         errors.push(`SKU ${item.sku}: ${error.message}`);
         failed++;
       }

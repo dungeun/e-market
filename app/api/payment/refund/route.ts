@@ -1,3 +1,6 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 결제 취소/환불 API
  */
@@ -6,8 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway } from '@/lib/services/payment/payment-gateway'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 결제 정보 조회
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id: paymentId },
       include: {
         order: {
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 권한 확인 (본인 또는 관리자) - 이메일로 유저 찾기
-    const user = await prisma.user.findUnique({
+    const user = await query({
       where: { email: session.user.email! }
     })
     
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 이미 환불된 결제인지 확인
-    const existingRefund = await prisma.refund.findFirst({
+    const existingRefund = await query({
       where: {
         paymentId,
         status: 'COMPLETED'
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
       // 주문 상태 업데이트
       const isPartialRefund = refundAmount < payment.amount
       
-      await prisma.order.update({
+      await query({
         where: { id: payment.orderId },
         data: {
           status: isPartialRefund ? 'PARTIAL_REFUND' : 'REFUNDED'
@@ -119,13 +121,13 @@ export async function POST(request: NextRequest) {
 
       // 전체 환불인 경우 재고 복구
       if (!isPartialRefund) {
-        const reservations = await prisma.inventoryReservation.findMany({
+        const reservations = await query({
           where: { orderId: payment.orderId }
         })
 
         for (const reservation of reservations) {
           // 재고 복구
-          await prisma.inventory.update({
+          await query({
             where: { 
               productId_locationId: {
                 productId: reservation.productId,
@@ -140,7 +142,7 @@ export async function POST(request: NextRequest) {
           })
 
           // 예약 취소
-          await prisma.inventoryReservation.update({
+          await query({
             where: { id: reservation.id },
             data: { status: 'CANCELLED' }
           })
@@ -150,7 +152,7 @@ export async function POST(request: NextRequest) {
       // B2B 주문인 경우 세금계산서 취소 (추후 구현)
       /*
       if (taxInvoiceCancel) {
-        const taxInvoice = await prisma.taxInvoice.findFirst({
+        const taxInvoice = await query({
           where: {
             orderId: payment.orderId,
             status: 'ISSUED'
@@ -158,7 +160,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (taxInvoice) {
-          await prisma.taxInvoice.update({
+          await query({
             where: { id: taxInvoice.id },
             data: {
               status: 'CANCELLED',
@@ -174,8 +176,8 @@ export async function POST(request: NextRequest) {
       success: response.success,
       data: response
     })
-  } catch (error: any) {
-    console.error('Refund error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to process refund' },
       { status: 500 }

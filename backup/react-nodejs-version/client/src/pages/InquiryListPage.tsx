@@ -41,7 +41,7 @@ export function InquiryListPage() {
       setInquiries(result.data);
       setPagination(result.pagination);
     } catch (error) {
-      console.error('Failed to load inquiries:', error);
+
     } finally {
       setIsLoading(false);
     }

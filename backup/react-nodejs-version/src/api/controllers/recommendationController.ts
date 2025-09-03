@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response } from 'express';
 import { recommendationService } from '../../services/recommendation/recommendationService';
 import { 
@@ -45,8 +46,8 @@ class RecommendationController {
           count: recommendations.length
         }
       });
-    } catch (error: any) {
-      console.error('Get recommendations error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '추천 조회 중 오류가 발생했습니다.' 
       });
@@ -107,8 +108,8 @@ class RecommendationController {
         success: true,
         data: { sections }
       });
-    } catch (error: any) {
-      console.error('Get home recommendations error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '홈 추천 조회 중 오류가 발생했습니다.' 
       });
@@ -144,8 +145,8 @@ class RecommendationController {
           boughtTogether
         }
       });
-    } catch (error: any) {
-      console.error('Get product recommendations error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '상품 추천 조회 중 오류가 발생했습니다.' 
       });
@@ -162,7 +163,7 @@ class RecommendationController {
 
       // 장바구니 상품 가져오기
       const cartItems = req.body.cartItems || [];
-      const cartProductIds = cartItems.map((item: any) => item.productId);
+      const cartProductIds = cartItems.map((item: unknown) => item.productId);
 
       const recommendations = await recommendationService.getRecommendations({
         userId,
@@ -171,7 +172,7 @@ class RecommendationController {
         excludeProductIds: cartProductIds,
         context: {
           cartProductIds,
-          cartTotal: cartItems.reduce((sum: number, item: any) => 
+          cartTotal: cartItems.reduce((sum: number, item: unknown) => 
             sum + (item.price * item.quantity), 0
           )
         }
@@ -184,8 +185,8 @@ class RecommendationController {
           recommendations
         }
       });
-    } catch (error: any) {
-      console.error('Get cart recommendations error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '장바구니 추천 조회 중 오류가 발생했습니다.' 
       });
@@ -223,8 +224,8 @@ class RecommendationController {
         success: true,
         message: '행동이 기록되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Track behavior error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '행동 추적 중 오류가 발생했습니다.' 
       });
@@ -258,8 +259,8 @@ class RecommendationController {
         success: true,
         message: '클릭이 기록되었습니다.'
       });
-    } catch (error: any) {
-      console.error('Track click error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '클릭 추적 중 오류가 발생했습니다.' 
       });
@@ -294,8 +295,8 @@ class RecommendationController {
           metrics
         }
       });
-    } catch (error: any) {
-      console.error('Get metrics error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '메트릭스 조회 중 오류가 발생했습니다.' 
       });

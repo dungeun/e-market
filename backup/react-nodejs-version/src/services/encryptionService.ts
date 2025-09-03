@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { SecurityUtils } from '../utils/security'
 import { logger } from '../utils/logger'
 import { prisma } from '../utils/database'
@@ -106,7 +107,7 @@ export class EncryptionService {
    */
   async encryptOrderData(orderId: string): Promise<void> {
     try {
-      const order = await prisma.order.findUnique({
+      const order = await query({
         where: { id: orderId },
         include: {
           user: true,
@@ -120,7 +121,7 @@ export class EncryptionService {
       }
 
       // Encrypt customer information
-      const updates: any = {}
+      const updates: unknown = {}
 
       if (order.customerEmail) {
         updates.customerEmail = SecurityUtils.encrypt(order.customerEmail)
@@ -131,7 +132,7 @@ export class EncryptionService {
       }
 
       // Update order with encrypted data
-      await prisma.order.update({
+      await query({
         where: { id: orderId },
         data: updates,
       })
@@ -229,9 +230,9 @@ export class EncryptionService {
   /**
    * Export user data (GDPR right to data portability)
    */
-  async exportUserData(userId: string): Promise<any> {
+  async exportUserData(userId: string): Promise<unknown> {
     try {
-      const userData = await prisma.user.findUnique({
+      const userData = await query({
         where: { id: userId },
         include: {
           addresses: true,
@@ -282,7 +283,7 @@ export class EncryptionService {
       }
 
       // Create audit log
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId,
           action: 'USER_DATA_EXPORTED',
@@ -330,7 +331,7 @@ export class EncryptionService {
   /**
    * Encrypt file/document
    */
-  async encryptFile(buffer: Buffer, metadata: Record<string, any>): Promise<{
+  async encryptFile(buffer: Buffer, metadata: Record<string, unknown>): Promise<{
     encryptedBuffer: Buffer
     encryptedMetadata: string
   }> {
@@ -373,11 +374,11 @@ export class EncryptionService {
         dataToBeDeleted,
         oldestOrder,
       ] = await Promise.all([
-        prisma.user.count(),
-        prisma.user.count({ where: { isActive: true } }),
-        prisma.user.count({ where: { isActive: false } }),
-        prisma.order.count({ where: { createdAt: { lt: cutoffDate } } }),
-        prisma.order.findFirst({ orderBy: { createdAt: 'asc' } }),
+        query(),
+        query({ where: { isActive: true } }),
+        query({ where: { isActive: false } }),
+        query({ where: { createdAt: { lt: cutoffDate } } }),
+        query({ orderBy: { createdAt: 'asc' } }),
       ])
 
       return {

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import request from 'supertest'
 import app from '../../src/index'
 import { prisma } from '../../src/utils/database'
@@ -11,18 +12,18 @@ describe('Shipping Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean up database before each test
-    await prisma.trackingEvent.deleteMany()
-    await prisma.shipment.deleteMany()
-    await prisma.orderTimeline.deleteMany()
-    await prisma.orderItem.deleteMany()
-    await prisma.order.deleteMany()
-    await prisma.productImage.deleteMany()
-    await prisma.product.deleteMany()
-    await prisma.address.deleteMany()
-    await prisma.user.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
 
     // Create test user (customer)
-    const user = await prisma.user.create({
+    const user = await query({
       data: {
         email: 'customer@test.com',
         firstName: 'John',
@@ -35,7 +36,7 @@ describe('Shipping Integration Tests', () => {
     userId = user.id
 
     // Create admin user
-    const adminUser = await prisma.user.create({
+    const adminUser = await query({
       data: {
         email: 'admin@test.com',
         firstName: 'Admin',
@@ -47,7 +48,7 @@ describe('Shipping Integration Tests', () => {
     })
 
     // Create test address
-    const address = await prisma.address.create({
+    const address = await query({
       data: {
         userId: userId,
         type: 'SHIPPING',
@@ -63,7 +64,7 @@ describe('Shipping Integration Tests', () => {
     })
 
     // Create test product
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test Product',
         slug: 'test-product',
@@ -85,7 +86,7 @@ describe('Shipping Integration Tests', () => {
     })
 
     // Create test order
-    const order = await prisma.order.create({
+    const order = await query({
       data: {
         orderNumber: 'ORD-20241205-0001',
         userId: userId,
@@ -103,7 +104,7 @@ describe('Shipping Integration Tests', () => {
     orderId = order.id
 
     // Create order item
-    await prisma.orderItem.create({
+    await query({
       data: {
         orderId: orderId,
         productId: product.id,
@@ -231,7 +232,7 @@ describe('Shipping Integration Tests', () => {
   describe('GET /api/v1/shipping/track/:trackingNumber', () => {
     beforeEach(async () => {
       // Create test shipment
-      const shipment = await prisma.shipment.create({
+      const shipment = await query({
         data: {
           orderId: orderId,
           trackingNumber: 'UPS123456789',
@@ -246,7 +247,7 @@ describe('Shipping Integration Tests', () => {
       shipmentId = shipment.id
 
       // Create tracking events
-      await prisma.trackingEvent.create({
+      await query({
         data: {
           shipmentId: shipmentId,
           status: 'SHIPPED',
@@ -345,7 +346,7 @@ describe('Shipping Integration Tests', () => {
 
   describe('PUT /api/v1/shipping/:id (Admin/Staff only)', () => {
     beforeEach(async () => {
-      const shipment = await prisma.shipment.create({
+      const shipment = await query({
         data: {
           orderId: orderId,
           trackingNumber: 'UPS123456789',
@@ -380,7 +381,7 @@ describe('Shipping Integration Tests', () => {
 
   describe('GET /api/v1/shipping/:id (Admin/Staff only)', () => {
     beforeEach(async () => {
-      const shipment = await prisma.shipment.create({
+      const shipment = await query({
         data: {
           orderId: orderId,
           trackingNumber: 'UPS123456789',
@@ -410,7 +411,7 @@ describe('Shipping Integration Tests', () => {
   describe('GET /api/v1/shipping (Admin/Staff only)', () => {
     beforeEach(async () => {
       // Create multiple test shipments
-      await prisma.shipment.createMany({
+      await queryMany({
         data: [
           {
             orderId: orderId,
@@ -455,7 +456,7 @@ describe('Shipping Integration Tests', () => {
 
       expect(response.body.success).toBe(true)
       expect(response.body.data.length).toBeGreaterThan(0)
-      response.body.data.forEach((shipment: any) => {
+      response.body.data.forEach((shipment: unknown) => {
         expect(shipment.carrier).toBe('UPS')
       })
     })
@@ -463,7 +464,7 @@ describe('Shipping Integration Tests', () => {
 
   describe('POST /api/v1/shipping/webhooks/:carrier', () => {
     beforeEach(async () => {
-      const shipment = await prisma.shipment.create({
+      const shipment = await query({
         data: {
           orderId: orderId,
           trackingNumber: 'UPS123456789',
@@ -495,7 +496,7 @@ describe('Shipping Integration Tests', () => {
       expect(response.body.message).toBe('Webhook processed successfully')
 
       // Verify tracking event was created
-      const trackingEvents = await prisma.trackingEvent.findMany({
+      const trackingEvents = await query({
         where: { shipmentId: shipmentId },
         orderBy: { timestamp: 'desc' },
       })
@@ -509,7 +510,7 @@ describe('Shipping Integration Tests', () => {
   describe('GET /api/v1/shipping/analytics/overview (Admin only)', () => {
     beforeEach(async () => {
       // Create test shipments for analytics
-      await prisma.shipment.createMany({
+      await queryMany({
         data: [
           {
             orderId: orderId,
@@ -551,7 +552,7 @@ describe('Shipping Integration Tests', () => {
 
   describe('POST /api/v1/shipping/:id/cancel (Admin/Staff only)', () => {
     beforeEach(async () => {
-      const shipment = await prisma.shipment.create({
+      const shipment = await query({
         data: {
           orderId: orderId,
           trackingNumber: 'UPS123456789',

@@ -17,7 +17,7 @@ const authMiddleware = (socket, next) => {
         // If token is provided, try to authenticate
         if (token) {
             try {
-                const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+                const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || env.jwt.secret);
                 socket.userId = decoded.userId || decoded.id;
                 socket.isAuthenticated = true;
                 logger_1.logger.debug(`Socket authenticated for user: ${socket.userId}`);

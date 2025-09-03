@@ -1,5 +1,6 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/db';
 
 export async function GET() {
   try {
@@ -21,7 +22,7 @@ export async function GET() {
     ];
 
     const translationChecks = await Promise.all(['ko', 'en', 'ja'].map(async (lang) => {
-      const translations = await prisma.languagePack.findMany({
+      const translations = await query({
         where: {
           languageCode: lang,
           key: { in: criticalKeys },
@@ -38,7 +39,7 @@ export async function GET() {
 
     // 3. Test sample translations for each language
     const sampleTranslations = await Promise.all(['ko', 'en', 'ja'].map(async (lang) => {
-      const samples = await prisma.languagePack.findMany({
+      const samples = await query({
         where: {
           languageCode: lang,
           key: { in: ['menu.campaigns', 'hero.slide1.title', 'category.beauty'] },

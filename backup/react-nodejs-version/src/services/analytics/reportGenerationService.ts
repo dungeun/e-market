@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { businessIntelligenceService } from './businessIntelligence';
 import { logger } from '../../utils/logger';
 import PDFDocument from 'pdfkit';
@@ -16,7 +15,7 @@ export interface ReportTemplate {
   description: string;
   type: ReportType;
   sections: ReportSection[];
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   recipients?: string[];
   schedule?: string; // Cron expression
   isActive: boolean;
@@ -27,7 +26,7 @@ export interface ReportSection {
   title: string;
   type: 'chart' | 'table' | 'text' | 'metrics';
   dataSource: string;
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
 }
 
 export interface GeneratedReport {
@@ -42,7 +41,7 @@ export interface GeneratedReport {
   endDate: Date;
   size: number;
   status: 'generating' | 'completed' | 'failed';
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 /**
@@ -214,7 +213,7 @@ export class ReportGenerationService {
     templateId: string,
     format: ReportFormat = 'pdf',
     customPeriod?: { startDate: Date; endDate: Date },
-    options?: Record<string, any>
+    options?: Record<string, unknown>
   ): Promise<GeneratedReport> {
     const template = this.templates.get(templateId);
     if (!template) {
@@ -293,8 +292,8 @@ export class ReportGenerationService {
     template: ReportTemplate,
     startDate: Date,
     endDate: Date
-  ): Promise<Record<string, any>> {
-    const data: Record<string, any> = {};
+  ): Promise<Record<string, unknown>> {
+    const data: Record<string, unknown> = {};
 
     for (const section of template.sections) {
       try {
@@ -334,7 +333,7 @@ export class ReportGenerationService {
    */
   private async generatePDFReport(
     template: ReportTemplate,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     filePath: string
   ): Promise<void> {
     const doc = new PDFDocument();
@@ -389,7 +388,7 @@ export class ReportGenerationService {
    */
   private async generateExcelReport(
     template: ReportTemplate,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     filePath: string
   ): Promise<void> {
     const workbook = new ExcelJS.Workbook();
@@ -419,7 +418,7 @@ export class ReportGenerationService {
    */
   private async generateCSVReport(
     template: ReportTemplate,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     filePath: string
   ): Promise<void> {
     let csvContent = `${template.name}\n생성일,${new Date().toLocaleDateString('ko-KR')}\n\n`;
@@ -443,7 +442,7 @@ export class ReportGenerationService {
    */
   private async generateJSONReport(
     template: ReportTemplate,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     filePath: string
   ): Promise<void> {
     const jsonReport = {
@@ -534,7 +533,7 @@ export class ReportGenerationService {
     };
   }
 
-  private addMetricsToPDF(doc: any, data: any, yPosition: number): number {
+  private addMetricsToPDF(doc: unknown, data: unknown, yPosition: number): number {
     doc.fontSize(12);
     
     if (data.revenue) {
@@ -550,11 +549,11 @@ export class ReportGenerationService {
     return yPosition;
   }
 
-  private addTableToPDF(doc: any, data: any, yPosition: number): number {
+  private addTableToPDF(doc: unknown, data: unknown, yPosition: number): number {
     doc.fontSize(10);
     
     if (data.topProducts) {
-      data.topProducts.slice(0, 5).forEach((product: any, index: number) => {
+      data.topProducts.slice(0, 5).forEach((product: unknown, index: number) => {
         doc.text(`${index + 1}. ${product.name} - ₩${product.revenue?.toLocaleString()}`, 50, yPosition);
         yPosition += 15;
       });
@@ -563,7 +562,7 @@ export class ReportGenerationService {
     return yPosition;
   }
 
-  private addTextToPDF(doc: any, data: any, yPosition: number): number {
+  private addTextToPDF(doc: unknown, data: unknown, yPosition: number): number {
     doc.fontSize(11);
     
     if (data.summary) {
@@ -574,7 +573,7 @@ export class ReportGenerationService {
     return yPosition;
   }
 
-  private addDataToExcelSheet(worksheet: any, data: any, type: string): void {
+  private addDataToExcelSheet(worksheet: unknown, data: unknown, type: string): void {
     switch (type) {
       case 'metrics':
         if (data.revenue) {
@@ -585,7 +584,7 @@ export class ReportGenerationService {
       case 'table':
         if (data.topProducts) {
           worksheet.addRow(['순위', '상품명', '매출']);
-          data.topProducts.forEach((product: any, index: number) => {
+          data.topProducts.forEach((product: unknown, index: number) => {
             worksheet.addRow([index + 1, product.name, product.revenue]);
           });
         }
@@ -593,7 +592,7 @@ export class ReportGenerationService {
     }
   }
 
-  private convertDataToCSV(data: any, type: string): string {
+  private convertDataToCSV(data: unknown, type: string): string {
     let csv = '';
     
     switch (type) {
@@ -606,7 +605,7 @@ export class ReportGenerationService {
       case 'table':
         if (data.topProducts) {
           csv += '순위,상품명,매출\n';
-          data.topProducts.forEach((product: any, index: number) => {
+          data.topProducts.forEach((product: unknown, index: number) => {
             csv += `${index + 1},${product.name},${product.revenue}\n`;
           });
         }

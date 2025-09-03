@@ -312,7 +312,7 @@ export class SEOService {
     rating?: number
     reviewCount?: number
   }): object {
-    const schema: any = {
+    const schema: unknown = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: product.name,

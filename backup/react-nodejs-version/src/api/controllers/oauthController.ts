@@ -47,7 +47,7 @@ export const oauthController = {
       redirectUrl.searchParams.set('provider', 'naver');
       
       res.redirect(redirectUrl.toString());
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Naver callback failed', error);
       res.redirect('/login?error=oauth_failed&message=' + encodeURIComponent(error.message));
     }
@@ -92,7 +92,7 @@ export const oauthController = {
       redirectUrl.searchParams.set('provider', 'kakao');
       
       res.redirect(redirectUrl.toString());
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Kakao callback failed', error);
       res.redirect('/login?error=oauth_failed&message=' + encodeURIComponent(error.message));
     }
@@ -126,7 +126,7 @@ export const oauthController = {
         success: true,
         message: `${provider} 계정 연결이 해제되었습니다.`
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Failed to unlink account', error);
       res.status(500).json({
         success: false,

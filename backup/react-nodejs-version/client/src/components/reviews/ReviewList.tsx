@@ -43,7 +43,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
       setReviews(response.reviews);
       setPagination(response.pagination);
     } catch (error) {
-      console.error('리뷰 로딩 실패:', error);
+
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
       // 투표 후 리뷰 목록 새로고침
       loadReviews();
     } catch (error) {
-      console.error('투표 실패:', error);
+
     }
   };
 
@@ -121,7 +121,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
         <select
           value={filters.sortBy}
-          onChange={(e) => handleFilterChange({ sortBy: e.target.value as any })}
+          onChange={(e) => handleFilterChange({ sortBy: e.target.value as unknown })}
           className="border border-gray-300 rounded-lg px-3 py-2"
         >
           <option value="latest">최신순</option>

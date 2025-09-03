@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 고급 검색 API
  */
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest) {
       inStock: searchParams.get('inStock') === 'true',
       ratings: searchParams.get('ratings') ? parseInt(searchParams.get('ratings')!) : undefined,
       tags: searchParams.get('tags') ? searchParams.get('tags')!.split(',') : undefined,
-      sortBy: (searchParams.get('sortBy') as any) || 'relevance',
+      sortBy: (searchParams.get('sortBy') as unknown) || 'relevance',
       page: searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1,
       limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 20
     }
@@ -30,8 +32,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: results
     })
-  } catch (error: any) {
-    console.error('Search error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Search failed' },
       { status: 500 }
@@ -59,8 +61,8 @@ export async function POST(request: NextRequest) {
       { error: 'Invalid action' },
       { status: 400 }
     )
-  } catch (error: any) {
-    console.error('Search index rebuild error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Index rebuild failed' },
       { status: 500 }

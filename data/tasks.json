@@ -1,0 +1,164 @@
+{
+  "tasks": [
+    {
+      "id": "1dd99a1a-4f8b-4734-be55-40e72a676000",
+      "name": "DB 스키마 수정 및 데이터 정리",
+      "description": "ui_sections 테이블에 key 필드 추가하고, 중복 hero 섹션(id: 1, 6) 제거 및 order 값 정규화로 섹션 렌더링 충돌 해결",
+      "notes": "DB 연결 정보: DATABASE_URL=postgresql://commerce:commerce123@localhost:5434/commerce_nextjs, 백업 필수 실행 전 pg_dump 수행",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2025-09-02T17:44:18.576Z",
+      "updatedAt": "2025-09-02T17:47:11.873Z",
+      "relatedFiles": [
+        {
+          "path": ".env.local",
+          "type": "REFERENCE",
+          "description": "DB 연결 정보 확인"
+        }
+      ],
+      "implementationGuide": "1. 테이블 스키마 수정: ALTER TABLE ui_sections ADD COLUMN key VARCHAR(255); 2. 데이터 정규화: UPDATE ui_sections SET key = type WHERE key IS NULL; 3. 중복 제거: DELETE FROM ui_sections WHERE id = 1 AND type = 'hero'; 4. 순서 정리: UPDATE ui_sections SET \"order\" = row_number() OVER (ORDER BY \"order\", id) WHERE \"isActive\" = true;",
+      "verificationCriteria": "psql로 스키마 확인 후 key 필드 존재, 중복 hero 섹션 없음, order 값 연속성 검증",
+      "analysisResult": "24개 섹션이 메인페이지에 표시되지 않는 핵심 문제를 해결하여 PRD Phase 4-5 Frontend Integration을 완료하고, DynamicSectionRenderer와 HomePageImproved 통합을 통해 관리자 수정사항이 실시간으로 메인페이지에 반영되는 시스템 구축",
+      "summary": "DB 스키마 수정 및 데이터 정리 작업 완료: 1) key VARCHAR(255) 필드 추가 성공, 2) 모든 레코드에 key=type 값 설정 완료 (12개→12개), 3) 중복 hero 섹션(id=1) 삭제 성공 (12개→11개), 4) 활성 섹션 order 값 1-11로 연속적으로 정규화 완료. 섹션 렌더링 충돌 해결 및 DynamicSectionRenderer 통합 준비 완료.",
+      "completedAt": "2025-09-02T17:47:11.871Z"
+    },
+    {
+      "id": "39517a91-70e5-4011-a71e-203e72f3b801",
+      "name": "HomePageImproved DynamicSectionRenderer 통합",
+      "description": "HomePageImproved.tsx에서 개별 섹션 렌더링 로직을 제거하고 DynamicSectionRenderer 컴포넌트로 교체하여 24개 섹션 모두 동적 렌더링 지원",
+      "notes": "기존 개별 렌더링 함수들은 DynamicSectionRenderer가 lazy loading으로 처리하므로 성능상 이점, 메모리 사용량 감소 예상",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "1dd99a1a-4f8b-4734-be55-40e72a676000"
+        }
+      ],
+      "createdAt": "2025-09-02T17:44:18.576Z",
+      "updatedAt": "2025-09-02T17:53:34.676Z",
+      "relatedFiles": [
+        {
+          "path": "components/HomePageImproved.tsx",
+          "type": "TO_MODIFY",
+          "description": "개별 섹션 렌더링 로직을 DynamicSectionRenderer로 교체",
+          "lineStart": 365,
+          "lineEnd": 903
+        },
+        {
+          "path": "components/DynamicSectionRenderer.tsx",
+          "type": "REFERENCE",
+          "description": "24개 섹션 컴포넌트 매핑 확인"
+        }
+      ],
+      "implementationGuide": "1. HomeSections children 객체 제거 (lines 887-897) 2. renderHeroSection, renderCategorySection 등 개별 렌더 함수 제거 (lines 365-862) 3. DynamicSectionRenderer import 및 직접 사용: <DynamicSectionRenderer className=\"space-y-12\" /> 4. useOptimizedUILocalization 훅 제거하고 DynamicSectionRenderer 내부 로직 활용",
+      "verificationCriteria": "메인페이지에서 24개 섹션 모두 표시되며, React Console에서 duplicate key 에러 없음, 개발자도구 Network탭에서 /api/ui-sections 호출 확인",
+      "analysisResult": "24개 섹션이 메인페이지에 표시되지 않는 핵심 문제를 해결하여 PRD Phase 4-5 Frontend Integration을 완료하고, DynamicSectionRenderer와 HomePageImproved 통합을 통해 관리자 수정사항이 실시간으로 메인페이지에 반영되는 시스템 구축",
+      "summary": "HomePageImproved.tsx 완전히 DynamicSectionRenderer로 통합 완료: 1) 개별 섹션 imports 제거, 2) 개별 render 함수 삭제, 3) 불필요한 상태 및 로직 정리, 4) DynamicSectionRenderer로 24개 섹션 동적 렌더링 활성화, 5) Next.js 개발서버 정상 실행 확인",
+      "completedAt": "2025-09-02T17:53:34.673Z"
+    },
+    {
+      "id": "04334ae7-36cf-48b6-a28c-7fd37b80e08a",
+      "name": "API 엔드포인트 통합",
+      "description": "/api/home/sections 엔드포인트를 /api/ui-sections로 리다이렉트하거나 통합하여 일관된 API 구조 확립",
+      "notes": "하위 호환성 유지를 위해 redirect 방식 권장, 기존 API 사용처 영향도 최소화",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "1dd99a1a-4f8b-4734-be55-40e72a676000"
+        }
+      ],
+      "createdAt": "2025-09-02T17:44:18.576Z",
+      "updatedAt": "2025-09-02T17:58:09.275Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/home/sections/route.ts",
+          "type": "TO_MODIFY",
+          "description": "ui-sections로 리다이렉트 또는 데이터 구조 통합"
+        },
+        {
+          "path": "app/api/ui-sections/route.ts",
+          "type": "REFERENCE",
+          "description": "표준 UI 섹션 API 엔드포인트"
+        }
+      ],
+      "implementationGuide": "1. app/api/home/sections/route.ts에서 NextResponse.redirect('/api/ui-sections') 추가 2. 또는 /api/ui-sections의 응답 형식을 /api/home/sections와 호환되도록 수정 3. DynamicSectionRenderer에서 사용하는 UI 섹션 데이터 구조와 언어팩 데이터 구조 통합 검토",
+      "verificationCriteria": "브라우저에서 /api/home/sections 호출 시 정상 응답 또는 올바른 리다이렉트, DynamicSectionRenderer에서 섹션 데이터 정상 로드",
+      "analysisResult": "24개 섹션이 메인페이지에 표시되지 않는 핵심 문제를 해결하여 PRD Phase 4-5 Frontend Integration을 완료하고, DynamicSectionRenderer와 HomePageImproved 통합을 통해 관리자 수정사항이 실시간으로 메인페이지에 반영되는 시스템 구축",
+      "summary": "API 엔드포인트 통합 완료: 1) /api/home/sections를 /api/ui-sections로 308 리다이렉트 설정, 2) 응답 구조 통일을 위해 success 필드 추가, 3) 개발서버 테스트로 정상 작동 확인, 4) 하위 호환성 유지하면서 일관된 API 구조 확립",
+      "completedAt": "2025-09-02T17:58:09.272Z"
+    },
+    {
+      "id": "69639165-d914-4e99-ac37-f9dc3ebeaaab",
+      "name": "Socket.io 실시간 동기화 활성화",
+      "description": "DynamicSectionRenderer에 구현된 Socket.io 이벤트 리스너가 정상 작동하도록 서버 연결 활성화 및 관리자 수정사항 실시간 반영 테스트",
+      "notes": "DynamicSectionRenderer lines 108-190에 이벤트 처리 로직 이미 구현됨, 서버 연결부만 확인 필요",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "39517a91-70e5-4011-a71e-203e72f3b801"
+        }
+      ],
+      "createdAt": "2025-09-02T17:44:18.576Z",
+      "updatedAt": "2025-09-02T18:07:44.498Z",
+      "relatedFiles": [
+        {
+          "path": "components/DynamicSectionRenderer.tsx",
+          "type": "REFERENCE",
+          "description": "Socket.io 이벤트 처리 로직 확인",
+          "lineStart": 108,
+          "lineEnd": 190
+        },
+        {
+          "path": "hooks/useSocket.ts",
+          "type": "REFERENCE",
+          "description": "Socket.io 연결 훅"
+        },
+        {
+          "path": "app/api/socket/route.ts",
+          "type": "REFERENCE",
+          "description": "서버사이드 Socket.io 설정"
+        }
+      ],
+      "implementationGuide": "1. hooks/useSocket.ts에서 Socket.io 연결 상태 확인 2. 서버 사이드 Socket.io 설정 확인 (app/api/socket/route.ts) 3. 관리자에서 섹션 수정 시 'ui:section:updated', 'ui:section:reordered' 이벤트 발생 확인 4. 개발환경에서 우상단 실시간 동기화 상태 표시 확인",
+      "verificationCriteria": "관리자에서 섹션 수정 시 메인페이지에서 새로고침 없이 실시간 반영, 개발환경 우상단에 '🔄 실시간 동기화 활성' 표시",
+      "analysisResult": "24개 섹션이 메인페이지에 표시되지 않는 핵심 문제를 해결하여 PRD Phase 4-5 Frontend Integration을 완료하고, DynamicSectionRenderer와 HomePageImproved 통합을 통해 관리자 수정사항이 실시간으로 메인페이지에 반영되는 시스템 구축",
+      "summary": "Socket.io 실시간 동기화 완료: 1) Socket.io 서버 포트 3004에서 정상 실행 확인, 2) UI 섹션 API에서 CRUD 이벤트 emit 로직 추가 (create/update/delete), 3) DynamicSectionRenderer 이벤트 리스너 타입 일치 수정, 4) PostgreSQL 데이터베이스 연결 및 ui_sections 테이블 구성 완료, 5) 섹션 순서 변경 API 구현으로 관리자-메인페이지 간 실시간 동기화 시스템 구축 완료",
+      "completedAt": "2025-09-02T18:07:44.494Z"
+    },
+    {
+      "id": "e3cdbaa7-4c3a-4284-87af-49704f768592",
+      "name": "섹션 타입 매핑 보완",
+      "description": "DynamicSectionRenderer의 24개 섹션 타입과 DB ui_sections의 type 필드 값 매핑 불일치 해결 및 누락된 섹션 타입 추가",
+      "notes": "현재 DB에 categories, popular-products, sale-products 등이 있지만 DynamicSectionRenderer에 매핑 없음, 에러 방지를 위한 fallback 컴포넌트 필요",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "1dd99a1a-4f8b-4734-be55-40e72a676000"
+        },
+        {
+          "taskId": "39517a91-70e5-4011-a71e-203e72f3b801"
+        }
+      ],
+      "createdAt": "2025-09-02T17:44:18.576Z",
+      "updatedAt": "2025-09-02T18:11:05.483Z",
+      "relatedFiles": [
+        {
+          "path": "components/DynamicSectionRenderer.tsx",
+          "type": "TO_MODIFY",
+          "description": "sectionComponents 매핑에 누락된 타입 추가",
+          "lineStart": 65,
+          "lineEnd": 97
+        },
+        {
+          "path": "components/sections/",
+          "type": "DEPENDENCY",
+          "description": "필요시 누락된 섹션 컴포넌트 구현"
+        }
+      ],
+      "implementationGuide": "1. DB에서 현재 섹션 타입 확인: categories, popular-products, sale-products 등 2. DynamicSectionRenderer sectionComponents에 backward compatibility aliases 추가 3. 누락된 섹션 컴포넌트가 있다면 /components/sections/ 디렉토리에 기본 구현 추가 4. kebab-case와 camelCase 타입명 모두 지원하도록 매핑 확장",
+      "verificationCriteria": "Console에서 'Unknown section type' 경고 없음, DB의 모든 활성 섹션이 메인페이지에 정상 표시",
+      "analysisResult": "24개 섹션이 메인페이지에 표시되지 않는 핵심 문제를 해결하여 PRD Phase 4-5 Frontend Integration을 완료하고, DynamicSectionRenderer와 HomePageImproved 통합을 통해 관리자 수정사항이 실시간으로 메인페이지에 반영되는 시스템 구축",
+      "summary": "섹션 타입 매핑 보완 완료: 1) DB에 24개 섹션 모두 추가 완료 (hero부터 categories까지), 2) DynamicSectionRenderer에 categories, popular-products, sale-products 매핑 추가, 3) kebab-case와 camelCase 자동 변환 로직 구현, 4) Unknown section type에 대한 fallback DynamicSection 구현, 5) 24개 섹션이 모두 메인페이지에 정상 표시되어 PRD Phase 4-5 Frontend Integration 완료",
+      "completedAt": "2025-09-02T18:11:05.480Z"
+    }
+  ]
+}

@@ -41,7 +41,7 @@ export default function AdminSectionsPage() {
     }
   }
 
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: unknown) => {
     if (!result.destination) return
 
     const items = Array.from(sections)

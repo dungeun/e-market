@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backups and duplicates
+/backup/
+/commerce-solution-package/
+/commerce-solution-package 2/
+/home-ui-v2-complete-backup-*/
+/orvio-template/
+*.old.tsx
+*.old.ts
+*.backup

@@ -1,7 +1,8 @@
+import type { AppError } from '@/lib/types/common';
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function GET() {
     startDate.setDate(startDate.getDate() - 6)
     startDate.setHours(0, 0, 0, 0)
 
-    const salesData: any[] = []
+    const salesData: unknown[] = []
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(startDate)
@@ -44,7 +45,7 @@ export async function GET() {
 
     return NextResponse.json({ sales: salesData })
   } catch (error) {
-    console.error('Error fetching sales data:', error)
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

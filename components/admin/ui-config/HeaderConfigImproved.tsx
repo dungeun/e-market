@@ -20,7 +20,7 @@ export function HeaderConfigImproved() {
     })
   );
 
-  const handleHeaderDragEnd = (event: any) => {
+  const handleHeaderDragEnd = (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -113,7 +113,7 @@ export function HeaderConfigImproved() {
       alert(`메뉴가 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('메뉴 추가 실패:', error);
+
       alert('메뉴 추가 중 오류가 발생했습니다.');
     }
   };
@@ -142,7 +142,7 @@ export function HeaderConfigImproved() {
 
       updateHeaderMenus(config.header.menus.filter((item) => item.id !== id));
     } catch (error) {
-      console.error('메뉴 삭제 실패:', error);
+
       alert('메뉴 삭제 중 오류가 발생했습니다.');
     }
   };

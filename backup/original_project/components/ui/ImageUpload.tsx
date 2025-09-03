@@ -112,7 +112,7 @@ export function ImageUpload({
       }
 
     } catch (error) {
-      console.error('Upload error:', error)
+
       alert(error instanceof Error ? error.message : '업로드 중 오류가 발생했습니다.')
     } finally {
       setIsUploading(false)

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { SessionService } from '../../../src/services/sessionService'
 import { prisma } from '../../../src/utils/database'
 
@@ -66,7 +67,7 @@ describe('SessionService', () => {
         currency: 'USD'
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as unknown)
 
       const session = await sessionService.getOrCreateGuestSession(
         existingSessionId,
@@ -92,7 +93,7 @@ describe('SessionService', () => {
         currency: 'USD'
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockExpiredCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockExpiredCart as unknown)
 
       const session = await sessionService.getOrCreateGuestSession(
         expiredSessionId,
@@ -120,7 +121,7 @@ describe('SessionService', () => {
         currency: 'USD'
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as unknown)
 
       const session = await sessionService.getGuestSession(sessionId)
 
@@ -153,8 +154,8 @@ describe('SessionService', () => {
         currency: 'USD'
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as any)
-      mockPrisma.cart.update.mockResolvedValue(mockCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as unknown)
+      mockPrisma.cart.update.mockResolvedValue(mockCart as unknown)
 
       const session = await sessionService.updateSessionActivity(sessionId, {
         type: 'cart_action',
@@ -225,11 +226,11 @@ describe('SessionService', () => {
         currency: 'USD'
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as unknown)
       mockPrisma.cart.update.mockResolvedValue({
         ...mockCart,
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000)
-      } as any)
+      } as unknown)
 
       const session = await sessionService.extendSession(sessionId, 24)
 
@@ -261,7 +262,7 @@ describe('SessionService', () => {
       }
 
       mockPrisma.cart.findFirst
-        .mockResolvedValueOnce(mockGuestCart as any) // Guest cart
+        .mockResolvedValueOnce(mockGuestCart as unknown) // Guest cart
         .mockResolvedValueOnce(null) // No user cart
 
       mockPrisma.cart.update.mockResolvedValue({
@@ -269,7 +270,7 @@ describe('SessionService', () => {
         userId: userId,
         sessionId: null,
         expiresAt: null
-      } as any)
+      } as unknown)
 
       const success = await sessionService.transferSessionToUser(sessionId, userId)
 
@@ -301,12 +302,12 @@ describe('SessionService', () => {
       }
 
       mockPrisma.cart.findFirst
-        .mockResolvedValueOnce(mockGuestCart as any) // Guest cart
-        .mockResolvedValueOnce(mockUserCart as any) // Existing user cart
+        .mockResolvedValueOnce(mockGuestCart as unknown) // Guest cart
+        .mockResolvedValueOnce(mockUserCart as unknown) // Existing user cart
 
-      mockPrisma.cartItem.updateMany.mockResolvedValue({ count: 2 } as any)
-      mockPrisma.cartCoupon.updateMany.mockResolvedValue({ count: 1 } as any)
-      mockPrisma.cart.delete.mockResolvedValue(mockGuestCart as any)
+      mockPrisma.cartItem.updateMany.mockResolvedValue({ count: 2 } as unknown)
+      mockPrisma.cartCoupon.updateMany.mockResolvedValue({ count: 1 } as unknown)
+      mockPrisma.cart.delete.mockResolvedValue(mockGuestCart as unknown)
 
       const success = await sessionService.transferSessionToUser(sessionId, userId)
 
@@ -335,7 +336,7 @@ describe('SessionService', () => {
 
   describe('cleanupExpiredSessions', () => {
     test('should delete expired guest carts', async () => {
-      mockPrisma.cart.deleteMany.mockResolvedValue({ count: 5 } as any)
+      mockPrisma.cart.deleteMany.mockResolvedValue({ count: 5 } as unknown)
 
       const deletedCount = await sessionService.cleanupExpiredSessions()
 
@@ -375,11 +376,11 @@ describe('SessionService', () => {
       ]
 
       mockPrisma.cart.findMany
-        .mockResolvedValueOnce(mockSessions as any) // For average duration
+        .mockResolvedValueOnce(mockSessions as unknown) // For average duration
         .mockResolvedValueOnce([
           { quantity: 10, price: 100 },
           { quantity: 5, price: 50 }
-        ] as any) // For total value calculation
+        ] as unknown) // For total value calculation
 
       const stats = await sessionService.getSessionStats(24)
 
@@ -416,8 +417,8 @@ describe('SessionService', () => {
         ]
       }
 
-      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as any)
-      mockPrisma.cart.findUnique.mockResolvedValue(mockCart as any)
+      mockPrisma.cart.findFirst.mockResolvedValue(mockCart as unknown)
+      mockPrisma.cart.findUnique.mockResolvedValue(mockCart as unknown)
 
       const info = await sessionService.getSessionInfo(sessionId)
 

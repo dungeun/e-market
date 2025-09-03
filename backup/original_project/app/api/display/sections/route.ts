@@ -1,3 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
 /**
  * 진열 섹션 관리 API
  */
@@ -6,9 +8,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { displayTemplateService } from '@/lib/services/display/display-template'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // 섹션별 상품 조회
 export async function GET(request: NextRequest) {
@@ -32,13 +31,13 @@ export async function GET(request: NextRequest) {
     
     if (templateId) {
       // 특정 템플릿으로 조회
-      template = await prisma.displayTemplate.findUnique({
+      template = await query({
         where: { id: templateId }
       })
     } else if (position) {
       // 위치별 활성 템플릿 조회
       const templates = await displayTemplateService.getActiveTemplatesForPosition(
-        position as any,
+        position as unknown,
         { userId: userId || undefined }
       )
       template = templates[0] // 최고 우선순위 템플릿
@@ -52,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 템플릿 연결된 섹션 조회
-    const sections = await prisma.displaySection.findMany({
+    const sections = await query({
       where: { templateId: template.id },
       include: {
         products: {
@@ -73,7 +72,7 @@ export async function GET(request: NextRequest) {
     // 동적 상품 선택이 필요한 경우
     if (sections.length === 0) {
       // 기본 상품 조회 로직
-      const products = await prisma.product.findMany({
+      const products = await query({
         where: { status: 'ACTIVE' },
         include: {
           category: true,
@@ -91,7 +90,7 @@ export async function GET(request: NextRequest) {
         template.id,
         products,
         {
-          sortBy: sortBy as any,
+          sortBy: sortBy as unknown,
           limit,
           personalized,
           userId: userId || undefined
@@ -112,14 +111,14 @@ export async function GET(request: NextRequest) {
     }
 
     // 기존 섹션의 상품 재배치
-    const processedSections: any[] = []
+    const processedSections: unknown[] = []
     
     for (const section of sections) {
       const arrangedProducts = await displayTemplateService.arrangeProducts(
         template.id,
         section.products,
         {
-          sortBy: sortBy as any,
+          sortBy: sortBy as unknown,
           limit,
           personalized,
           userId: userId || undefined
@@ -139,8 +138,8 @@ export async function GET(request: NextRequest) {
         sections: processedSections
       }
     })
-  } catch (error: any) {
-    console.error('Display sections error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch sections' },
       { status: 500 }
@@ -187,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     // 우선순위 설정
     if (priority !== 0) {
-      await prisma.displaySection.update({
+      await query({
         where: { id: result.section.id },
         data: { priority }
       })
@@ -198,8 +197,8 @@ export async function POST(request: NextRequest) {
       data: result,
       message: '동적 섹션이 생성되었습니다.'
     })
-  } catch (error: any) {
-    console.error('Dynamic section creation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to create dynamic section' },
       { status: 500 }
@@ -229,7 +228,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const section = await prisma.displaySection.update({
+    const section = await query({
       where: { id },
       data: {
         ...updateData,
@@ -249,8 +248,8 @@ export async function PUT(request: NextRequest) {
       data: section,
       message: '섹션이 수정되었습니다.'
     })
-  } catch (error: any) {
-    console.error('Section update error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to update section' },
       { status: 500 }

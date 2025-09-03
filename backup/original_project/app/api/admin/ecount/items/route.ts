@@ -36,8 +36,7 @@ export async function GET(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('Items fetch error:', error)
-    
+
     // 에러 발생 시에도 목업 데이터 제공 (개발용)
     const mockItems = generateMockItems()
     return NextResponse.json({
@@ -90,7 +89,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
   } catch (error) {
-    console.error('Item creation error:', error)
+
     return NextResponse.json({
       success: false,
       message: '상품 등록 중 오류가 발생했습니다.',

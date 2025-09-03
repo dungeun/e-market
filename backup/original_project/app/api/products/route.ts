@@ -1,5 +1,6 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
 
-    const where: any = {
+    const where: unknown = {
       status: 'ACTIVE',
     }
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [products, total] = await Promise.all([
-      prisma.product.findMany({
+      query({
         where,
         skip,
         take: limit,
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.product.count({ where }),
+      query({ where }),
     ])
 
     const productsWithRating = products.map(product => {
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error fetching products:', error)
+
     return NextResponse.json(
       { error: '상품을 불러오는 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
     
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: data.name,
         slug: data.slug || data.name.toLowerCase().replace(/\s+/g, '-'),
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
         metaDescription: data.metaDescription,
         metaKeywords: data.metaKeywords || [],
         images: {
-          create: data.images?.map((img: any, index: number) => ({
+          create: data.images?.map((img: unknown, index: number) => ({
             url: img.url,
             alt: img.alt,
             position: index,
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
-    console.error('Error creating product:', error)
+
     return NextResponse.json(
       { error: '상품 생성 중 오류가 발생했습니다.' },
       { status: 500 }

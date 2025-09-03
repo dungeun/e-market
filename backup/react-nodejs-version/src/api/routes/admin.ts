@@ -127,7 +127,7 @@ router.post('/rate-limits/reset', asyncHandler(async (req: Request, res: Respons
   if (all) {
     // Reset all rate limits (would need implementation)
     logger.info('All rate limits reset by admin', {
-      adminUser: (req as any).user?.id,
+      adminUser: (req as unknown).user?.id,
       ip: req.ip
     })
     
@@ -140,7 +140,7 @@ router.post('/rate-limits/reset', asyncHandler(async (req: Request, res: Respons
     
     logger.info('Rate limit reset by admin', {
       key,
-      adminUser: (req as any).user?.id,
+      adminUser: (req as unknown).user?.id,
       ip: req.ip
     })
     
@@ -192,7 +192,7 @@ router.post('/rate-limits/user-tier', asyncHandler(async (req: Request, res: Res
   logger.info('User tier updated by admin', {
     userId,
     tier,
-    adminUser: (req as any).user?.id,
+    adminUser: (req as unknown).user?.id,
     ip: req.ip
   })
 
@@ -259,7 +259,7 @@ router.post('/circuit-breakers/reset', asyncHandler(async (req: Request, res: Re
     resetAllCircuitBreakers()
     
     logger.info('All circuit breakers reset by admin', {
-      adminUser: (req as any).user?.id,
+      adminUser: (req as unknown).user?.id,
       ip: req.ip
     })
     
@@ -272,7 +272,7 @@ router.post('/circuit-breakers/reset', asyncHandler(async (req: Request, res: Re
     
     logger.info('Circuit breaker reset by admin', {
       name,
-      adminUser: (req as any).user?.id,
+      adminUser: (req as unknown).user?.id,
       ip: req.ip
     })
     
@@ -325,7 +325,7 @@ router.post('/errors/reset', asyncHandler(async (_req: Request, res: Response) =
   resetErrorMetrics()
   
   logger.info('Error metrics reset by admin', {
-    adminUser: (_req as any).user?.id,
+    adminUser: (_req as unknown).user?.id,
     ip: _req.ip
   })
 
@@ -437,7 +437,7 @@ router.post('/maintenance/enable', asyncHandler(async (req: Request, res: Respon
   // and have middleware check for maintenance mode
   
   logger.warn('Maintenance mode enabled by admin', {
-    adminUser: (req as any).user?.id,
+    adminUser: (req as unknown).user?.id,
     ip: req.ip,
     message
   })
@@ -459,7 +459,7 @@ router.post('/maintenance/enable', asyncHandler(async (req: Request, res: Respon
  */
 router.post('/maintenance/disable', asyncHandler(async (_req: Request, res: Response) => {
   logger.info('Maintenance mode disabled by admin', {
-    adminUser: (_req as any).user?.id,
+    adminUser: (_req as unknown).user?.id,
     ip: _req.ip
   })
 

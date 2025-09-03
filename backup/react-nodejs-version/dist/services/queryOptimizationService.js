@@ -137,7 +137,7 @@ class QueryOptimizationService {
         return {
             // Product listing with pagination
             productList: (limit, offset, categoryId) => {
-                const baseQuery = this.prisma.product.findMany({
+                const baseQuery = this.query({
                     where: {
                         status: 'PUBLISHED',
                         ...(categoryId && { categoryId }),
@@ -220,7 +220,7 @@ class QueryOptimizationService {
             },
             // Order with all related data (optimized joins)
             orderWithDetails: (orderId) => {
-                return this.prisma.order.findUnique({
+                return this.query({
                     where: { id: orderId },
                     include: {
                         items: {

@@ -1,70 +1,72 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
+import { NextRequest, NextResponse } from 'next/server'
+import { authService } from '@/lib/auth/services'
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth-token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
+    // Check both cookie names for compatibility
+    let accessToken = request.cookies.get('auth-token')?.value || request.cookies.get('accessToken')?.value
+    
+    // Also check Authorization header
+    if (!accessToken) {
+      const authHeader = request.headers.get('Authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        accessToken = authHeader.substring(7)
+      }
     }
 
-    // JWT 토큰 검증
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+    if (!accessToken) {
+
       return NextResponse.json(
-        { error: '유효하지 않은 토큰입니다.' },
+        { error: 'Unauthorized' },
         { status: 401 }
-      );
+      )
     }
 
-    // 사용자 조회
-    const user = await prisma.user.findUnique({
-      where: {
-        id: decoded.userId,
-      },
-      include: {
-        profile: true,
-      },
-    });
+    // Validate token
 
-    if (!user || user.status !== 'ACTIVE') {
+    const tokenData = await authService.validateToken(accessToken)
+
+    if (!tokenData) {
+
       return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
+        { error: 'Invalid token' },
+        { status: 401 }
+      )
+    }
+
+    // Get user - handle both userId and id fields for compatibility
+    const userId = tokenData.userId || tokenData.id
+
+    if (!userId) {
+
+      return NextResponse.json(
+        { error: 'Invalid token data' },
+        { status: 401 }
+      )
+    }
+    
+    const user = await authService.getUserById(userId)
+    console.log('Auth Me - User found:', user ? `${user.name} (${user.type})` : 'not found')
+    
+    if (!user) {
+
+      return NextResponse.json(
+        { error: 'User not found' },
         { status: 404 }
-      );
+      )
     }
 
-    // 사용자 정보 (비밀번호 제외)
-    const userInfo = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      type: user.type,
-      status: user.status,
-      image: user.image,
-      verified: user.verified,
-      isOnboarded: user.isOnboarded,
-      profile: user.profile,
-    };
+    return NextResponse.json({ user })
+  } catch (error: Error | unknown) {
 
-    return NextResponse.json({
-      user: userInfo,
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
     return NextResponse.json(
-      { error: '사용자 정보를 가져오는 중 오류가 발생했습니다.' },
+      { error: error.message || 'Failed to get user' },
       { status: 500 }
-    );
+    )
   }
 }

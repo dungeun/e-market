@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
 import { SecurityUtils } from '../utils/security'
@@ -30,10 +31,10 @@ export class AuditLogService {
     action: 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED' | 'PASSWORD_RESET' | 'TOKEN_REFRESH' | 'SESSION_EXPIRED',
     userId: string | null,
     req: Request,
-    metadata?: any,
+    metadata?: unknown,
   ): Promise<void> {
     try {
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId: userId || 'anonymous',
           action: `AUTH_${action}`,
@@ -70,10 +71,10 @@ export class AuditLogService {
     entityId: string,
     userId: string,
     req: Request,
-    metadata?: any,
+    metadata?: unknown,
   ): Promise<void> {
     try {
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId,
           action: `DATA_${action}`,
@@ -106,12 +107,12 @@ export class AuditLogService {
     action: 'RATE_LIMIT_EXCEEDED' | 'CSRF_VIOLATION' | 'SUSPICIOUS_ACTIVITY' | 'BLACKLIST_HIT' | 'ENCRYPTION_FAILURE',
     userId: string | null,
     req: Request,
-    metadata?: any,
+    metadata?: unknown,
   ): Promise<void> {
     try {
       const severity = this.getSecurityEventSeverity(action)
 
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId: userId || 'anonymous',
           action: `SECURITY_${action}`,
@@ -146,10 +147,10 @@ export class AuditLogService {
     paymentId: string,
     userId: string,
     req: Request,
-    metadata?: any,
+    metadata?: unknown,
   ): Promise<void> {
     try {
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId,
           action: `PAYMENT_${action}`,
@@ -189,10 +190,10 @@ export class AuditLogService {
     targetId: string,
     adminId: string,
     req: Request,
-    metadata?: any,
+    metadata?: unknown,
   ): Promise<void> {
     try {
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId: adminId,
           action: `ADMIN_${action}`,
@@ -226,16 +227,16 @@ export class AuditLogService {
    */
   async logAPIAccess(
     req: Request,
-    res: any,
+    res: unknown,
     responseTime: number,
-    error?: any,
+    error?: unknown,
   ): Promise<void> {
     try {
       const userId = (req as AuthenticatedRequest).user?.id ||
-                    (req as any).apiClient?.id ||
+                    (req as unknown).apiClient?.id ||
                     'anonymous'
 
-      await prisma.auditLog.create({
+      await query({
         data: {
           userId,
           action: 'API_ACCESS',
@@ -270,7 +271,7 @@ export class AuditLogService {
    * Check failed login patterns
    */
   private async checkFailedLoginPatterns(ipAddress: string): Promise<void> {
-    const recentFailures = await prisma.auditLog.count({
+    const recentFailures = await query({
       where: {
         action: 'AUTH_LOGIN_FAILED',
         ipAddress,
@@ -283,7 +284,7 @@ export class AuditLogService {
 
       // Auto-blacklist IP after 10 failures
       if (recentFailures >= 10) {
-        await prisma.blacklist.create({
+        await query({
           data: {
             type: 'IP',
             value: ipAddress,
@@ -300,7 +301,7 @@ export class AuditLogService {
    * Check data exfiltration patterns
    */
   private async checkDataExfiltration(userId: string, entityType: string): Promise<void> {
-    const recentExports = await prisma.auditLog.count({
+    const recentExports = await query({
       where: {
         userId,
         action: { in: ['DATA_EXPORT', 'DATA_DOWNLOAD'] },
@@ -311,7 +312,7 @@ export class AuditLogService {
     if (recentExports > 50) {
       logger.warn('Potential data exfiltration detected', { userId, exports: recentExports })
 
-      await prisma.securityAlert.create({
+      await query({
         data: {
           userId,
           alertType: 'DATA_EXFILTRATION_SUSPECTED',
@@ -331,7 +332,7 @@ export class AuditLogService {
    * Check API abuse patterns
    */
   private async checkAPIAbusePatterns(userId: string, _req: Request): Promise<void> {
-    const recentRequests = await prisma.auditLog.findMany({
+    const recentRequests = await query({
       where: {
         userId,
         action: 'API_ACCESS',
@@ -345,7 +346,7 @@ export class AuditLogService {
 
     const errorRate = recentRequests.filter(r => (r.statusCode || 0) >= 400).length / recentRequests.length
     const avgResponseTime = recentRequests.reduce((sum, r) =>
-      sum + ((r.metadata as any)?.responseTime || 0), 0,
+      sum + ((r.metadata as unknown)?.responseTime || 0), 0,
     ) / recentRequests.length
 
     if (errorRate > 0.5 || avgResponseTime > 3000) {
@@ -380,9 +381,9 @@ export class AuditLogService {
     alertType: string,
     userId: string | null,
     req: Request,
-    metadata: any,
+    metadata: unknown,
   ): Promise<void> {
-    await prisma.securityAlert.create({
+    await query({
       data: {
         userId: userId || 'system',
         alertType,
@@ -428,7 +429,7 @@ export class AuditLogService {
     startDate: Date,
     endDate: Date,
     reportType: 'PCI_DSS' | 'GDPR' | 'SECURITY',
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const baseQuery = {
         createdAt: {
@@ -437,7 +438,7 @@ export class AuditLogService {
         },
       }
 
-      const report: any = {
+      const report: unknown = {
         reportType,
         period: { startDate, endDate },
         generatedAt: new Date(),
@@ -445,21 +446,21 @@ export class AuditLogService {
 
       switch (reportType) {
       case 'PCI_DSS':
-        report.paymentAccess = await prisma.auditLog.count({
+        report.paymentAccess = await query({
           where: {
             ...baseQuery,
             action: { startsWith: 'PAYMENT_' },
           },
         })
 
-        report.encryptionFailures = await prisma.auditLog.count({
+        report.encryptionFailures = await query({
           where: {
             ...baseQuery,
             action: 'SECURITY_ENCRYPTION_FAILURE',
           },
         })
 
-        report.unauthorizedAccess = await prisma.auditLog.count({
+        report.unauthorizedAccess = await query({
           where: {
             ...baseQuery,
             action: { in: ['AUTH_LOGIN_FAILED', 'SECURITY_BLACKLIST_HIT'] },
@@ -468,21 +469,21 @@ export class AuditLogService {
         break
 
       case 'GDPR':
-        report.dataExports = await prisma.auditLog.count({
+        report.dataExports = await query({
           where: {
             ...baseQuery,
             action: 'USER_DATA_EXPORTED',
           },
         })
 
-        report.dataAnonymizations = await prisma.auditLog.count({
+        report.dataAnonymizations = await query({
           where: {
             ...baseQuery,
             action: 'USER_ANONYMIZED',
           },
         })
 
-        report.consentUpdates = await prisma.auditLog.count({
+        report.consentUpdates = await query({
           where: {
             ...baseQuery,
             action: 'CONSENT_UPDATED',
@@ -501,11 +502,11 @@ export class AuditLogService {
         })
 
         report.securityEvents = securityEvents
-        report.totalAlerts = await prisma.securityAlert.count({
+        report.totalAlerts = await query({
           where: baseQuery,
         })
 
-        report.criticalAlerts = await prisma.securityAlert.count({
+        report.criticalAlerts = await query({
           where: {
             ...baseQuery,
             severity: 'CRITICAL',
@@ -530,7 +531,7 @@ export class AuditLogService {
       const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000)
 
       // Archive logs before deletion (in production, export to cold storage)
-      const logsToDelete = await prisma.auditLog.count({
+      const logsToDelete = await query({
         where: {
           createdAt: { lt: cutoffDate },
         },
@@ -540,7 +541,7 @@ export class AuditLogService {
         logger.info(`Archiving ${logsToDelete} audit logs older than ${retentionDays} days`)
 
         // Delete old logs
-        const result = await prisma.auditLog.deleteMany({
+        const result = await queryMany({
           where: {
             createdAt: { lt: cutoffDate },
           },
@@ -570,7 +571,7 @@ export class AuditLogService {
     limit?: number
   }): Promise<any[]> {
     try {
-      const where: any = {}
+      const where: unknown = {}
 
       if (criteria.userId) where.userId = criteria.userId
       if (criteria.action) where.action = { contains: criteria.action }
@@ -584,7 +585,7 @@ export class AuditLogService {
         if (criteria.endDate) where.createdAt.lte = criteria.endDate
       }
 
-      return await prisma.auditLog.findMany({
+      return await query({
         where,
         orderBy: { createdAt: 'desc' },
         take: criteria.limit || 100,

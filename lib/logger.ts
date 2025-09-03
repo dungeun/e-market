@@ -1,17 +1,17 @@
 // Simple logger utility
 export const logger = {
-  info: (message: string, ...args: any[]) => {
-    console.log(`[INFO] ${message}`, ...args);
+  info: (message: string, ...args: unknown[]) => {
+
   },
-  error: (message: string, ...args: any[]) => {
-    console.error(`[ERROR] ${message}`, ...args);
+  error: (message: string, ...args: unknown[]) => {
+
   },
-  warn: (message: string, ...args: any[]) => {
-    console.warn(`[WARN] ${message}`, ...args);
+  warn: (message: string, ...args: unknown[]) => {
+
   },
-  debug: (message: string, ...args: any[]) => {
+  debug: (message: string, ...args: unknown[]) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[DEBUG] ${message}`, ...args);
+
     }
   }
 };

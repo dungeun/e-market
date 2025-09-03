@@ -131,7 +131,7 @@ export const usePoints = async (req: Request, res: Response) => {
       success: true,
       transaction
     });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     logger.error('Use points error:', error);
     res.status(error.message.includes('부족') ? 400 : 500).json({
       success: false,
@@ -166,7 +166,7 @@ export const adjustPoints = async (req: Request, res: Response) => {
       success: true,
       transaction
     });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     logger.error('Adjust points error:', error);
     res.status(500).json({
       success: false,

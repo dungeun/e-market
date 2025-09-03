@@ -1,3 +1,4 @@
+import type { AppError } from '@/lib/types/common';
 /**
  * 헬스 체크 API - 시스템 상태 모니터링용
  */
@@ -5,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { systemMonitor } from '@/lib/monitoring/system-monitor'
 import { PerformanceMiddleware } from '@/lib/middleware/performance-middleware'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL!)
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(healthData, { status: httpStatus })
 
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(detailedHealth, { status: httpStatus })
 
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
 /**
  * 데이터베이스 헬스 체크
  */
-async function checkDatabase(): Promise<any> {
+async function checkDatabase(): Promise<unknown> {
   try {
     const start = Date.now()
     await prisma.$queryRaw`SELECT 1`
@@ -148,7 +149,7 @@ async function checkDatabase(): Promise<any> {
       responseTime,
       connection: 'active'
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message,
@@ -160,7 +161,7 @@ async function checkDatabase(): Promise<any> {
 /**
  * Redis 헬스 체크
  */
-async function checkRedis(): Promise<any> {
+async function checkRedis(): Promise<unknown> {
   try {
     const start = Date.now()
     await redis.ping()
@@ -171,7 +172,7 @@ async function checkRedis(): Promise<any> {
       responseTime,
       connection: 'active'
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message,
@@ -183,7 +184,7 @@ async function checkRedis(): Promise<any> {
 /**
  * 시스템 헬스 체크
  */
-async function checkSystem(): Promise<any> {
+async function checkSystem(): Promise<unknown> {
   try {
     const status = await systemMonitor.getSystemStatus()
     
@@ -192,7 +193,7 @@ async function checkSystem(): Promise<any> {
              status === 'warning' ? 'degraded' : 'unhealthy',
       systemStatus: status
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message
@@ -203,7 +204,7 @@ async function checkSystem(): Promise<any> {
 /**
  * 상세 데이터베이스 헬스 체크
  */
-async function getDetailedDatabaseHealth(): Promise<any> {
+async function getDetailedDatabaseHealth(): Promise<unknown> {
   try {
     const start = Date.now()
     
@@ -223,8 +224,8 @@ async function getDetailedDatabaseHealth(): Promise<any> {
     const version = versionResult[0]?.version || 'unknown'
 
     // 테이블 카운트 (샘플)
-    const userCount = await prisma.user.count()
-    const productCount = await prisma.product.count()
+    const userCount = await query()
+    const productCount = await query()
 
     return {
       status: 'healthy',
@@ -237,7 +238,7 @@ async function getDetailedDatabaseHealth(): Promise<any> {
       },
       connection: 'active'
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message,
@@ -249,7 +250,7 @@ async function getDetailedDatabaseHealth(): Promise<any> {
 /**
  * 상세 Redis 헬스 체크
  */
-async function getDetailedRedisHealth(): Promise<any> {
+async function getDetailedRedisHealth(): Promise<unknown> {
   try {
     const start = Date.now()
     
@@ -281,7 +282,7 @@ async function getDetailedRedisHealth(): Promise<any> {
       version,
       connection: 'active'
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message,
@@ -293,7 +294,7 @@ async function getDetailedRedisHealth(): Promise<any> {
 /**
  * 스케일링 헬스 체크
  */
-async function checkScalingHealth(): Promise<any> {
+async function checkScalingHealth(): Promise<unknown> {
   try {
     // 현재 인스턴스 수 확인
     const activeInstances = await redis.scard('lb_active_instances')
@@ -315,7 +316,7 @@ async function checkScalingHealth(): Promise<any> {
       maxInstances,
       utilizationPercentage: Math.round((activeInstances / maxInstances) * 100)
     }
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return {
       status: 'unhealthy',
       error: error.message
@@ -326,7 +327,7 @@ async function checkScalingHealth(): Promise<any> {
 /**
  * Promise.allSettled 결과에서 서비스 상태 추출
  */
-function getServiceStatus(result: PromiseSettledResult<any>): any {
+function getServiceStatus(result: PromiseSettledResult<unknown>): any {
   if (result.status === 'fulfilled') {
     return result.value
   } else {
@@ -340,14 +341,14 @@ function getServiceStatus(result: PromiseSettledResult<any>): any {
 /**
  * Promise.allSettled 결과에서 서비스 데이터 추출
  */
-function getServiceData(result: PromiseSettledResult<any>): any {
+function getServiceData(result: PromiseSettledResult<unknown>): any {
   return getServiceStatus(result)
 }
 
 /**
  * 전체 시스템 상태 결정
  */
-function determineOverallStatus(services: Record<string, any>): 'healthy' | 'degraded' | 'unhealthy' {
+function determineOverallStatus(services: Record<string, unknown>): 'healthy' | 'degraded' | 'unhealthy' {
   const statuses = Object.values(services).map(service => service.status)
   
   if (statuses.includes('unhealthy')) {

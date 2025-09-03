@@ -163,7 +163,7 @@ export const circuitBreakerMiddleware = (breakerName: keyof typeof circuitBreake
     }
 
     // Store breaker in request for use in route handlers
-    (req as any).circuitBreaker = breaker
+    (req as unknown).circuitBreaker = breaker
     next()
   }
 }

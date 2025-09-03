@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { CategoryService } from '../../../src/services/categoryService';
 
 // Mock Prisma Client
@@ -17,7 +16,7 @@ const mockPrisma = {
     findMany: jest.fn(),
   },
   $transaction: jest.fn(),
-} as any;
+} as unknown;
 
 // Mock logger
 jest.mock('../../../src/utils/logger', () => ({
@@ -33,7 +32,7 @@ describe('CategoryService', () => {
   beforeEach(() => {
     categoryService = new CategoryService();
     // Replace the prisma instance in the service with our mock
-    (categoryService as any).prisma = mockPrisma;
+    (categoryService as unknown).prisma = mockPrisma;
     jest.clearAllMocks();
   });
 

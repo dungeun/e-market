@@ -13,7 +13,7 @@ export interface PaymentRequest {
   customerPhone?: string
   returnUrl: string
   cancelUrl: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface RefundRequest {
@@ -21,13 +21,13 @@ export interface RefundRequest {
   transactionId: string
   amount: number
   reason: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export abstract class PaymentGateway {
   protected config: any
 
-  constructor(config: any) {
+  constructor(config: unknown) {
     this.config = config
   }
 
@@ -35,7 +35,7 @@ export abstract class PaymentGateway {
   abstract initiatePayment(request: PaymentRequest): Promise<PaymentInitiationResponse>
 
   // Confirm/verify payment after customer returns
-  abstract confirmPayment(paymentId: string, data: any): Promise<GatewayResponse>
+  abstract confirmPayment(paymentId: string, data: unknown): Promise<GatewayResponse>
 
   // Cancel ongoing payment
   abstract cancelPayment(paymentId: string, reason: string): Promise<GatewayResponse>
@@ -47,7 +47,7 @@ export abstract class PaymentGateway {
   abstract getPaymentStatus(transactionId: string): Promise<GatewayResponse>
 
   // Verify webhook signature
-  abstract verifyWebhookSignature(payload: any, signature: string): boolean
+  abstract verifyWebhookSignature(payload: unknown, signature: string): boolean
 
   // Generate payment receipt
   abstract generateReceipt(paymentId: string, transactionId: string): Promise<PaymentReceipt>

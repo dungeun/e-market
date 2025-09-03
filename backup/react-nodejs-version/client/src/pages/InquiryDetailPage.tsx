@@ -7,7 +7,7 @@ import { InquiryStatus } from '../types/inquiry';
 export function InquiryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [inquiry, setInquiry] = useState<any>(null);
+  const [inquiry, setInquiry] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +27,7 @@ export function InquiryDetailPage() {
       const data = await inquiryService.getInquiry(id!, pwd);
       setInquiry(data);
       setShowPasswordPrompt(false);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       if (err.response?.status === 403 && !pwd) {
         // 비회원 문의인 경우 비밀번호 입력 필요
         setShowPasswordPrompt(true);
@@ -53,7 +53,7 @@ export function InquiryDetailPage() {
       // 문의 다시 로드
       await loadInquiry();
     } catch (err) {
-      console.error('Failed to create reply:', err);
+
       throw err;
     }
   };
@@ -63,7 +63,7 @@ export function InquiryDetailPage() {
       await inquiryService.updateInquiry(id!, { status });
       setInquiry({ ...inquiry, status });
     } catch (err) {
-      console.error('Failed to update status:', err);
+
     }
   };
 
@@ -73,7 +73,7 @@ export function InquiryDetailPage() {
       // 문의 다시 로드
       await loadInquiry();
     } catch (err) {
-      console.error('Failed to rate satisfaction:', err);
+
       throw err;
     }
   };

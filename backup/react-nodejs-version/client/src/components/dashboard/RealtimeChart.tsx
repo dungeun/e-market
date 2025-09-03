@@ -46,7 +46,7 @@ export const RealtimeChart: React.FC = () => {
           setChartData(data.data.sales);
         }
       } catch (error) {
-        console.error('Failed to fetch chart data:', error);
+
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ export const RealtimeChart: React.FC = () => {
       const ws = new WebSocket(`ws://${window.location.host}`);
       
       ws.onopen = () => {
-        console.log('Dashboard WebSocket connected');
+
         // 대시보드 구독
         ws.send(JSON.stringify({ type: 'subscribe:dashboard' }));
       };
@@ -76,7 +76,7 @@ export const RealtimeChart: React.FC = () => {
       };
 
       ws.onclose = () => {
-        console.log('Dashboard WebSocket disconnected');
+
         // 3초 후 재연결 시도
         setTimeout(connectWebSocket, 3000);
       };
@@ -93,7 +93,7 @@ export const RealtimeChart: React.FC = () => {
     };
   }, []);
 
-  const updateChartWithNewOrder = (orderData: any) => {
+  const updateChartWithNewOrder = (orderData: unknown) => {
     const now = new Date();
     setChartData(prev => {
       const updated = [...prev];
@@ -128,11 +128,11 @@ export const RealtimeChart: React.FC = () => {
         borderColor: 'rgba(59, 130, 246, 0.5)',
         borderWidth: 1,
         callbacks: {
-          title: (context: any) => {
+          title: (context: unknown) => {
             const date = new Date(context[0].label);
             return date.toLocaleString('ko-KR');
           },
-          label: (context: any) => {
+          label: (context: unknown) => {
             return `매출: ₩${context.raw.toLocaleString()}`;
           }
         }
@@ -145,7 +145,7 @@ export const RealtimeChart: React.FC = () => {
           display: false
         },
         ticks: {
-          callback: function(value: any, index: number) {
+          callback: function(value: unknown, index: number) {
             const data = chartData[index];
             if (!data) return '';
             
@@ -166,7 +166,7 @@ export const RealtimeChart: React.FC = () => {
           color: 'rgba(0, 0, 0, 0.05)'
         },
         ticks: {
-          callback: function(value: any) {
+          callback: function(value: unknown) {
             return '₩' + value.toLocaleString();
           }
         }
@@ -216,7 +216,7 @@ export const RealtimeChart: React.FC = () => {
         ].map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => setPeriod(key as any)}
+            onClick={() => setPeriod(key as unknown)}
             className={`px-3 py-1 text-sm rounded-md transition-colors ${
               period === key
                 ? 'bg-blue-100 text-blue-700 font-medium'

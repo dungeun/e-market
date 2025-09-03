@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Providers } from '@/providers/providers';
+import { getCachedLanguagePacks } from '@/lib/cache/language-packs';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,24 +15,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LinkPick - 인플루언서 마케팅 플랫폼",
-  description: "브랜드와 인플루언서를 연결하는 스마트한 마케팅 플랫폼",
+  title: "E-Market Korea - 해외 노동자를 위한 중고 거래 플랫폼",
+  description: "한국에서 생활하는 외국인 노동자들을 위한 필수품 중고 거래 플랫폼",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 서버 사이드에서 언어팩 미리 로드
+  const languagePacks = await getCachedLanguagePacks();
+  
   return (
     <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <LanguageProvider>
-            {children}
-          </LanguageProvider>
+        <Providers initialLanguagePacks={languagePacks}>
+          {children}
         </Providers>
       </body>
     </html>

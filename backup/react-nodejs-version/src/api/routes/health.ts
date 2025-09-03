@@ -219,7 +219,7 @@ router.get('/system', asyncHandler(async (_req: Request, res: Response) => {
     // Memory information
     memory: {
       usage: process.memoryUsage(),
-      heapStatistics: (process as any).memoryUsage?.rss ? {
+      heapStatistics: (process as unknown).memoryUsage?.rss ? {
         totalHeap: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
         usedHeap: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
         freeHeap: Math.round((process.memoryUsage().heapTotal - process.memoryUsage().heapUsed) / 1024 / 1024),
@@ -392,13 +392,13 @@ router.post('/alerts', asyncHandler(async (req: Request, res: Response) => {
   switch (severity) {
     case 'critical':
     case 'error':
-      console.error('HEALTH ALERT:', alertData)
+
       break
     case 'warning':
-      console.warn('HEALTH ALERT:', alertData)
+
       break
     default:
-      console.info('HEALTH ALERT:', alertData)
+
   }
 
   // In a real implementation, you would send this to your alerting system

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { prisma } from '../../utils/database'
@@ -111,12 +112,12 @@ export class SecurityController {
     try {
       const { resolved, severity, userId } = req.query
 
-      const where: any = {}
+      const where: unknown = {}
       if (resolved !== undefined) where.resolved = resolved === 'true'
       if (severity) where.severity = severity
       if (userId) where.userId = userId
 
-      const alerts = await prisma.securityAlert.findMany({
+      const alerts = await query({
         where,
         orderBy: { createdAt: 'desc' },
         take: 100,
@@ -138,7 +139,7 @@ export class SecurityController {
     try {
       const { id } = req.params
 
-      const alert = await prisma.securityAlert.update({
+      const alert = await query({
         where: { id },
         data: { resolved: true },
       })
@@ -261,11 +262,11 @@ export class SecurityController {
     try {
       const { type, isActive } = req.query
 
-      const where: any = {}
+      const where: unknown = {}
       if (type) where.type = type
       if (isActive !== undefined) where.isActive = isActive === 'true'
 
-      const blacklist = await prisma.blacklist.findMany({
+      const blacklist = await query({
         where,
         orderBy: { createdAt: 'desc' },
         take: 100,
@@ -287,7 +288,7 @@ export class SecurityController {
     try {
       const data = BlacklistSchema.parse(req.body)
 
-      const entry = await prisma.blacklist.create({
+      const entry = await query({
         data: {
           ...data,
           expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
@@ -319,7 +320,7 @@ export class SecurityController {
     try {
       const { id } = req.params
 
-      await prisma.blacklist.update({
+      await query({
         where: { id },
         data: { isActive: false },
       })
@@ -346,7 +347,7 @@ export class SecurityController {
    */
   async getAPIKeys(_req: Request, res: Response, next: NextFunction) {
     try {
-      const apiKeys = await prisma.apiClient.findMany({
+      const apiKeys = await query({
         select: {
           id: true,
           name: true,
@@ -380,7 +381,7 @@ export class SecurityController {
       const apiKey = SecurityUtils.generateAPIKey()
       const hashedKey = SecurityUtils.hashData(apiKey)
 
-      const client = await prisma.apiClient.create({
+      const client = await query({
         data: {
           name: data.name,
           hashedKey,
@@ -420,7 +421,7 @@ export class SecurityController {
     try {
       const { id } = req.params
 
-      await prisma.apiClient.update({
+      await query({
         where: { id },
         data: { isActive: false },
       })
@@ -449,14 +450,14 @@ export class SecurityController {
     try {
       const { userId } = req.query
 
-      const where: any = {
+      const where: unknown = {
         expiresAt: { gt: new Date() },
         revokedAt: null,
       }
 
       if (userId) where.userId = userId
 
-      const sessions = await prisma.session.findMany({
+      const sessions = await query({
         where,
         include: {
           user: {
@@ -488,7 +489,7 @@ export class SecurityController {
     try {
       const { id } = req.params
 
-      const session = await prisma.session.update({
+      const session = await query({
         where: { id },
         data: { revokedAt: new Date() },
       })
@@ -518,7 +519,7 @@ export class SecurityController {
     try {
       const { userId } = req.params
 
-      const result = await prisma.session.updateMany({
+      const result = await queryMany({
         where: {
           userId,
           revokedAt: null,
@@ -599,7 +600,7 @@ export class SecurityController {
   /**
    * Generate CSV from audit logs
    */
-  private generateCSV(logs: any[]): string {
+  private generateCSV(logs: unknown[]): string {
     const headers = ['Date', 'User ID', 'Action', 'Entity Type', 'Entity ID', 'IP Address', 'User Agent', 'Method', 'Path', 'Status Code']
     const rows = logs.map(log => [
       log.createdAt.toISOString(),

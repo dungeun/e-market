@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 검색 분석 API
  */
@@ -86,8 +88,8 @@ export async function GET(request: NextRequest) {
           data: defaultData
         })
     }
-  } catch (error: any) {
-    console.error('Search analytics error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch search analytics' },
       { status: 500 }

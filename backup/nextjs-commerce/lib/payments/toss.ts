@@ -60,7 +60,7 @@ export class TossPayments {
 
       return response.data
     } catch (error) {
-      console.error('Error creating Toss payment:', error)
+
       throw new Error('Failed to create Toss payment')
     }
   }
@@ -84,7 +84,7 @@ export class TossPayments {
 
       return response.data as TossPaymentResponse
     } catch (error) {
-      console.error('Error confirming Toss payment:', error)
+
       throw new Error('Failed to confirm Toss payment')
     }
   }
@@ -106,7 +106,7 @@ export class TossPayments {
 
       return response.data
     } catch (error) {
-      console.error('Error canceling Toss payment:', error)
+
       throw new Error('Failed to cancel Toss payment')
     }
   }
@@ -124,7 +124,7 @@ export class TossPayments {
 
       return response.data
     } catch (error) {
-      console.error('Error getting Toss payment:', error)
+
       throw new Error('Failed to get Toss payment')
     }
   }

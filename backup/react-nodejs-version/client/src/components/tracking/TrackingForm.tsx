@@ -25,7 +25,7 @@ export function TrackingForm() {
 
     try {
       await trackShipment(carrierId, trackingNumber);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.message || '배송 조회에 실패했습니다.');
     }
   };

@@ -56,7 +56,7 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
           setLanguageData(data);
         }
       } catch (error) {
-        console.error('언어팩 데이터 로드 실패:', error);
+
       }
     };
 
@@ -101,7 +101,7 @@ export function SortableMenuItemImproved({ menu, onUpdate, onDelete }: SortableM
       
       alert('메뉴 이름이 업데이트되었습니다.');
     } catch (error) {
-      console.error('메뉴 이름 업데이트 실패:', error);
+
       alert('메뉴 이름 업데이트 중 오류가 발생했습니다.');
     }
   };

@@ -57,7 +57,7 @@ export const apiVersioning = () => {
       }
 
       // Add version context to request
-      ;(req as any).apiVersion = apiContext
+      ;(req as unknown).apiVersion = apiContext
 
       // Set version headers
       res.setHeader('X-API-Version', resolvedVersion)
@@ -261,7 +261,7 @@ function compareVersions(a: string, b: string): number {
  */
 export const versionedRoute = (version: string, handler: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const apiContext = (req as any).apiVersion as ApiVersionContext
+    const apiContext = (req as unknown).apiVersion as ApiVersionContext
 
     if (!apiContext || apiContext.resolvedVersion !== version) {
       return next() // Skip this handler
@@ -276,7 +276,7 @@ export const versionedRoute = (version: string, handler: Function) => {
  */
 export const multiVersionRoute = (handlers: Record<string, Function>, fallback?: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const apiContext = (req as any).apiVersion as ApiVersionContext
+    const apiContext = (req as unknown).apiVersion as ApiVersionContext
     const version = apiContext?.resolvedVersion || config.api.defaultVersion
 
     const handler = handlers[version] || fallback
@@ -301,7 +301,7 @@ export const multiVersionRoute = (handlers: Record<string, Function>, fallback?:
  */
 export const versionMigration = (fromVersion: string, toVersion: string, migrator: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const apiContext = (req as any).apiVersion as ApiVersionContext
+    const apiContext = (req as unknown).apiVersion as ApiVersionContext
 
     if (apiContext?.resolvedVersion === fromVersion) {
       try {
@@ -340,7 +340,7 @@ export const versionAnalytics = () => {
   const versionUsage: Record<string, { count: number; lastUsed: string }> = {}
 
   return (req: Request, _res: Response, next: NextFunction) => {
-    const apiContext = (req as any).apiVersion as ApiVersionContext
+    const apiContext = (req as unknown).apiVersion as ApiVersionContext
 
     if (apiContext) {
       const version = apiContext.resolvedVersion
@@ -353,7 +353,7 @@ export const versionAnalytics = () => {
       versionUsage[version].lastUsed = new Date().toISOString()
 
       // Store analytics in request for potential logging
-      ;(req as any).versionAnalytics = { versionUsage }
+      ;(req as unknown).versionAnalytics = { versionUsage }
     }
 
     next()

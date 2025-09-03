@@ -180,7 +180,7 @@ describe('ShippingService', () => {
     }
 
     beforeEach(() => {
-      prismaMock.order.findUnique.mockResolvedValue(mockOrderData as any)
+      prismaMock.order.findUnique.mockResolvedValue(mockOrderData as unknown)
       prismaMock.$transaction.mockImplementation(async (callback) => {
         return await callback(prismaMock)
       })
@@ -200,10 +200,10 @@ describe('ShippingService', () => {
         updatedAt: new Date(),
       }
 
-      prismaMock.shipment.create.mockResolvedValue(mockCreatedShipment as any)
-      prismaMock.trackingEvent.create.mockResolvedValue({} as any)
-      prismaMock.order.update.mockResolvedValue({} as any)
-      prismaMock.orderTimeline.create.mockResolvedValue({} as any)
+      prismaMock.shipment.create.mockResolvedValue(mockCreatedShipment as unknown)
+      prismaMock.trackingEvent.create.mockResolvedValue({} as unknown)
+      prismaMock.order.update.mockResolvedValue({} as unknown)
+      prismaMock.orderTimeline.create.mockResolvedValue({} as unknown)
 
       // Mock the getShipmentById method
       const mockShipmentDetails = {
@@ -232,7 +232,7 @@ describe('ShippingService', () => {
           signature: false,
           saturdayDelivery: false,
         },
-      } as any)
+      } as unknown)
 
       const result = await shippingService.createShipment(mockShipmentData)
 
@@ -260,7 +260,7 @@ describe('ShippingService', () => {
         ...mockOrderData,
         status: 'CANCELLED',
       }
-      prismaMock.order.findUnique.mockResolvedValue(cancelledOrder as any)
+      prismaMock.order.findUnique.mockResolvedValue(cancelledOrder as unknown)
 
       await expect(shippingService.createShipment(mockShipmentData))
         .rejects.toThrow(new AppError('Cannot create shipment for cancelled or refunded order', 400))
@@ -271,7 +271,7 @@ describe('ShippingService', () => {
         ...mockOrderData,
         status: 'REFUNDED',
       }
-      prismaMock.order.findUnique.mockResolvedValue(refundedOrder as any)
+      prismaMock.order.findUnique.mockResolvedValue(refundedOrder as unknown)
 
       await expect(shippingService.createShipment(mockShipmentData))
         .rejects.toThrow(new AppError('Cannot create shipment for cancelled or refunded order', 400))
@@ -299,7 +299,7 @@ describe('ShippingService', () => {
     }
 
     beforeEach(() => {
-      prismaMock.shipment.findUnique.mockResolvedValue(mockExistingShipment as any)
+      prismaMock.shipment.findUnique.mockResolvedValue(mockExistingShipment as unknown)
       prismaMock.$transaction.mockImplementation(async (callback) => {
         return await callback(prismaMock)
       })
@@ -313,10 +313,10 @@ describe('ShippingService', () => {
         notes: 'Package delivered successfully',
       }
 
-      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as any)
-      prismaMock.trackingEvent.create.mockResolvedValue({} as any)
-      prismaMock.order.update.mockResolvedValue({} as any)
-      prismaMock.orderTimeline.create.mockResolvedValue({} as any)
+      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as unknown)
+      prismaMock.trackingEvent.create.mockResolvedValue({} as unknown)
+      prismaMock.order.update.mockResolvedValue({} as unknown)
+      prismaMock.orderTimeline.create.mockResolvedValue({} as unknown)
 
       // Mock getShipmentById
       prismaMock.shipment.findUnique.mockResolvedValueOnce({
@@ -325,7 +325,7 @@ describe('ShippingService', () => {
           orderNumber: 'ORD-20241205-0001',
         },
         metadata: {},
-      } as any)
+      } as unknown)
 
       const result = await shippingService.updateShipment('shipment-123', mockUpdateData)
 
@@ -351,8 +351,8 @@ describe('ShippingService', () => {
         status: 'IN_TRANSIT',
       }
 
-      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as any)
-      prismaMock.trackingEvent.create.mockResolvedValue({} as any)
+      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as unknown)
+      prismaMock.trackingEvent.create.mockResolvedValue({} as unknown)
 
       // Mock getShipmentById
       prismaMock.shipment.findUnique.mockResolvedValueOnce({
@@ -361,7 +361,7 @@ describe('ShippingService', () => {
           orderNumber: 'ORD-20241205-0001',
         },
         metadata: {},
-      } as any)
+      } as unknown)
 
       await shippingService.updateShipment('shipment-123', { status: 'IN_TRANSIT' })
 
@@ -381,7 +381,7 @@ describe('ShippingService', () => {
         notes: 'Updated notes',
       }
 
-      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as any)
+      prismaMock.shipment.update.mockResolvedValue(mockUpdatedShipment as unknown)
 
       // Mock getShipmentById
       prismaMock.shipment.findUnique.mockResolvedValueOnce({
@@ -390,7 +390,7 @@ describe('ShippingService', () => {
           orderNumber: 'ORD-20241205-0001',
         },
         metadata: {},
-      } as any)
+      } as unknown)
 
       await shippingService.updateShipment('shipment-123', { notes: 'Updated notes' })
 
@@ -428,7 +428,7 @@ describe('ShippingService', () => {
         },
       }
 
-      prismaMock.shipment.findUnique.mockResolvedValue(mockShipment as any)
+      prismaMock.shipment.findUnique.mockResolvedValue(mockShipment as unknown)
 
       const result = await shippingService.getShipmentById('shipment-123')
 
@@ -481,7 +481,7 @@ describe('ShippingService', () => {
         ],
       }
 
-      prismaMock.shipment.findFirst.mockResolvedValue(mockShipment as any)
+      prismaMock.shipment.findFirst.mockResolvedValue(mockShipment as unknown)
 
       const result = await shippingService.trackShipment({
         trackingNumber: 'UPS123456789',
@@ -540,7 +540,7 @@ describe('ShippingService', () => {
         },
       ]
 
-      prismaMock.shipment.findMany.mockResolvedValue(mockShipments as any)
+      prismaMock.shipment.findMany.mockResolvedValue(mockShipments as unknown)
       prismaMock.shipment.count.mockResolvedValue(2)
 
       const result = await shippingService.getShipments({
@@ -578,7 +578,7 @@ describe('ShippingService', () => {
         },
       ]
 
-      prismaMock.shipment.findMany.mockResolvedValue(mockShipments as any)
+      prismaMock.shipment.findMany.mockResolvedValue(mockShipments as unknown)
       prismaMock.shipment.count.mockResolvedValue(1)
 
       const result = await shippingService.getShipments({
@@ -602,12 +602,12 @@ describe('ShippingService', () => {
         status: 'SHIPPED',
       }
 
-      prismaMock.shipment.findFirst.mockResolvedValue(mockShipment as any)
+      prismaMock.shipment.findFirst.mockResolvedValue(mockShipment as unknown)
       prismaMock.$transaction.mockImplementation(async (callback) => {
         return await callback(prismaMock)
       })
-      prismaMock.trackingEvent.create.mockResolvedValue({} as any)
-      prismaMock.shipment.update.mockResolvedValue({} as any)
+      prismaMock.trackingEvent.create.mockResolvedValue({} as unknown)
+      prismaMock.shipment.update.mockResolvedValue({} as unknown)
 
       await shippingService.handleCarrierWebhook('UPS', {
         trackingNumber: 'UPS123456789',
@@ -680,9 +680,9 @@ describe('ShippingService', () => {
       prismaMock.shipment.count.mockResolvedValue(mockAnalyticsData[0])
       prismaMock.shipment.aggregate.mockResolvedValue(mockAnalyticsData[1])
       prismaMock.shipment.groupBy
-        .mockResolvedValueOnce(mockAnalyticsData[2] as any)
-        .mockResolvedValueOnce(mockAnalyticsData[3] as any)
-      prismaMock.shipment.findMany.mockResolvedValue(mockAnalyticsData[4] as any)
+        .mockResolvedValueOnce(mockAnalyticsData[2] as unknown)
+        .mockResolvedValueOnce(mockAnalyticsData[3] as unknown)
+      prismaMock.shipment.findMany.mockResolvedValue(mockAnalyticsData[4] as unknown)
 
       const result = await shippingService.getAnalytics()
 

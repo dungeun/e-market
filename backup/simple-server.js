@@ -70,10 +70,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`
-🚀 한국 이커머스 플랫폼이 시작되었습니다!
-📍 서버 주소: http://localhost:${PORT}
-📱 클라이언트: http://localhost:5174
-🕐 시작 시간: ${new Date().toLocaleString('ko-KR')}
+  .toLocaleString('ko-KR')}
   `);
 });

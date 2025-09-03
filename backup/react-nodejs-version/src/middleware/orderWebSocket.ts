@@ -21,7 +21,7 @@ export const orderCreatedMiddleware = async (_req: OrderEventRequest, res: Respo
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 
@@ -50,7 +50,7 @@ export const orderUpdatedMiddleware = async (req: OrderEventRequest, res: Respon
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 
@@ -85,7 +85,7 @@ export const orderCancelledMiddleware = async (req: OrderEventRequest, res: Resp
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 
@@ -115,7 +115,7 @@ export const orderShippedMiddleware = async (_req: OrderEventRequest, res: Respo
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 
@@ -150,7 +150,7 @@ export const orderDeliveredMiddleware = async (_req: OrderEventRequest, res: Res
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 
@@ -179,7 +179,7 @@ export const orderRefundedMiddleware = async (req: OrderEventRequest, res: Respo
   const originalJson = res.json
 
   // Override json method to capture response data
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     // Call original json method first
     const result = originalJson.call(this, data)
 

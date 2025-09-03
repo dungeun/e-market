@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
@@ -60,7 +62,7 @@ interface CampaignDetailPanelProps {
   onStatusChange?: () => void
 }
 
-export default function CampaignDetailPanel({ 
+const CampaignDetailPanel = React.memo(function CampaignDetailPanel({ 
   campaignId, 
   isOpen, 
   onClose,
@@ -93,7 +95,7 @@ export default function CampaignDetailPanel({
         setError('캠페인 정보를 불러올 수 없습니다.')
       }
     } catch (error) {
-      console.error('캠페인 상세 조회 실패:', error)
+
       setError('오류가 발생했습니다.')
     } finally {
       setLoading(false)
@@ -117,7 +119,7 @@ export default function CampaignDetailPanel({
         alert('결제 상태 변경에 실패했습니다.')
       }
     } catch (error) {
-      console.error('결제 상태 변경 실패:', error)
+
       alert('결제 상태 변경 중 오류가 발생했습니다.')
     }
   }
@@ -137,7 +139,7 @@ export default function CampaignDetailPanel({
         alert('상태 변경에 실패했습니다.')
       }
     } catch (error) {
-      console.error('상태 변경 실패:', error)
+
       alert('상태 변경 중 오류가 발생했습니다.')
     }
   }
@@ -158,7 +160,7 @@ export default function CampaignDetailPanel({
         alert('수수료율 변경에 실패했습니다.')
       }
     } catch (error) {
-      console.error('수수료율 변경 실패:', error)
+
       alert('수수료율 변경 중 오류가 발생했습니다.')
     }
   }
@@ -422,5 +424,7 @@ export default function CampaignDetailPanel({
         </div>
       </div>
     </div>
-  )
-}
+    )
+});
+
+export default CampaignDetailPanel;

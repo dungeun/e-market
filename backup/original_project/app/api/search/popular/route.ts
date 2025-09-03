@@ -1,3 +1,4 @@
+import type { AppError } from '@/lib/types/common';
 /**
  * 인기 검색어 API
  */
@@ -16,8 +17,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: popularSearches
     })
-  } catch (error: any) {
-    console.error('Popular searches error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch popular searches' },
       { status: 500 }

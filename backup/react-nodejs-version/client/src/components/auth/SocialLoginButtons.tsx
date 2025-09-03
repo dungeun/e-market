@@ -1,4 +1,5 @@
 import React from 'react';
+import { env } from '@/lib/config/env';
 
 interface SocialLoginButtonsProps {
   onLogin?: (provider: 'naver' | 'kakao') => void;
@@ -10,7 +11,7 @@ export function SocialLoginButtons({ onLogin }: SocialLoginButtonsProps) {
       onLogin(provider);
     } else {
       // 직접 OAuth 엔드포인트로 리다이렉트
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const baseUrl = import.meta.env.VITE_API_URL || env.appUrl;
       window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
     }
   };

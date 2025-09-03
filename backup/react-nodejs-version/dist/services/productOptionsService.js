@@ -52,7 +52,7 @@ class ProductOptionsService {
     // Get product option by ID with values
     async getProductOptionById(optionId) {
         try {
-            const option = await database_1.prisma.productOption.findUnique({
+            const option = await database_1.query({
                 where: { id: optionId },
                 include: {
                     values: {
@@ -96,7 +96,7 @@ class ProductOptionsService {
     // Get all options for a product
     async getProductOptions(productId) {
         try {
-            const options = await database_1.prisma.productOption.findMany({
+            const options = await database_1.query({
                 where: {
                     productId,
                     isActive: true,
@@ -141,7 +141,7 @@ class ProductOptionsService {
     // Update product option
     async updateProductOption(optionId, data) {
         try {
-            await database_1.prisma.productOption.update({
+            await database_1.query({
                 where: { id: optionId },
                 data: {
                     name: data.name,
@@ -164,7 +164,7 @@ class ProductOptionsService {
     // Delete product option
     async deleteProductOption(optionId) {
         try {
-            await database_1.prisma.productOption.delete({
+            await database_1.query({
                 where: { id: optionId },
             });
             logger_1.logger.info(`Deleted product option: ${optionId}`);
@@ -177,7 +177,7 @@ class ProductOptionsService {
     // Add option value to existing option
     async addOptionValue(optionId, valueData) {
         try {
-            await database_1.prisma.productOptionValue.create({
+            await database_1.query({
                 data: {
                     optionId,
                     value: valueData.value,
@@ -201,7 +201,7 @@ class ProductOptionsService {
     // Update option value
     async updateOptionValue(valueId, valueData) {
         try {
-            await database_1.prisma.productOptionValue.update({
+            await database_1.query({
                 where: { id: valueId },
                 data: {
                     value: valueData.value,
@@ -225,7 +225,7 @@ class ProductOptionsService {
     // Delete option value
     async deleteOptionValue(valueId) {
         try {
-            await database_1.prisma.productOptionValue.delete({
+            await database_1.query({
                 where: { id: valueId },
             });
             logger_1.logger.info(`Deleted option value: ${valueId}`);
@@ -238,7 +238,7 @@ class ProductOptionsService {
     // Get product with all options and values
     async getProductWithOptions(productId) {
         try {
-            const product = await database_1.prisma.product.findUnique({
+            const product = await database_1.query({
                 where: { id: productId },
                 include: {
                     images: {
@@ -415,7 +415,7 @@ class ProductOptionsService {
     // Calculate price adjustments based on selected options
     async calculateOptionPricing(productId, selectedOptions) {
         try {
-            const product = await database_1.prisma.product.findUnique({
+            const product = await database_1.query({
                 where: { id: productId },
                 select: { price: true },
             });

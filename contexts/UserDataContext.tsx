@@ -96,7 +96,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Failed to fetch profile')
       }
     } catch (err) {
-      console.error('Error fetching profile:', err)
+
       setError(err instanceof Error ? err.message : 'Failed to fetch profile')
       
       // 에러 시 로컬 스토리지 캐시 사용

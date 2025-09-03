@@ -33,7 +33,8 @@ import {
   FileText,
   Tag,
   User,
-  Globe
+  Globe,
+  Languages
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
@@ -74,9 +75,14 @@ const sidebarItems = [
         icon: Settings,
       },
       {
-        title: '사이트 설정',
-        href: '/admin/site-settings',
-        icon: Globe,
+        title: '팝업 알림 관리',
+        href: '/admin/popup-alerts',
+        icon: Megaphone,
+      },
+      {
+        title: '언어팩 관리',
+        href: '/admin/language-packs',
+        icon: Languages,
       },
     ],
   },
@@ -255,8 +261,11 @@ export default function AdminLayout({
                 <h1 className="text-lg font-semibold">
                   {pathname === '/admin' && '대시보드'}
                   {pathname === '/admin/ui-config' && 'UI 섹션 설정'}
+                  {pathname === '/admin/popup-alerts' && '팝업 알림 관리'}
+                  {pathname === '/admin/language-packs' && '언어팩 관리'}
                   {pathname === '/admin/site-settings' && '사이트 설정'}
                   {pathname === '/admin/products' && '상품 관리'}
+                  {pathname === '/admin/products/create' && '중고상품 등록'}
                   {pathname === '/admin/orders' && '주문 관리'}
                   {pathname === '/admin/customers' && '고객 관리'}
                   {pathname === '/admin/campaigns' && '캠페인 관리'}

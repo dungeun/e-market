@@ -13,7 +13,7 @@ interface SeasonalCollectionProps {
     layout?: string
     limit?: number
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function SeasonalCollection({ config, products }: SeasonalCollectionProps) {

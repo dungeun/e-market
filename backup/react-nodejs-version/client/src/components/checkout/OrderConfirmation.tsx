@@ -21,7 +21,7 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ order }) =
 
   const handleDownloadInvoice = () => {
     // In a real app, this would download a PDF invoice
-    console.log('Downloading invoice for order:', order.orderNumber)
+
   }
 
   return (

@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Star, Heart, ArrowRight, Clock } from 'lucide-react';
@@ -20,18 +22,31 @@ interface RecommendedItem {
 }
 
 interface RecommendedSectionProps {
+  data?: unknown;
   sectionId?: string;
   className?: string;
 }
 
-export default function RecommendedSection({ sectionId = 'recommended', className = '' }: RecommendedSectionProps) {
+const RecommendedSection = React.memo(function RecommendedSection({ data, sectionId = 'recommended', className = '' }: RecommendedSectionProps) {
   const [recommendations, setRecommendations] = useState<RecommendedItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!data);
   const [isVisible, setIsVisible] = useState(true);
+  const [title, setTitle] = useState('추천 상품');
+  const [subtitle, setSubtitle] = useState('선별된 인기 상품을 만나보세요');
 
   useEffect(() => {
-    loadRecommendedData();
-  }, [sectionId]);
+    if (data) {
+      // JSON 데이터가 있는 경우 직접 사용
+      setRecommendations(data.items || []);
+      setTitle(data.title || '추천 상품');
+      setSubtitle(data.subtitle || '선별된 인기 상품을 만나보세요');
+      setLoading(false);
+      setIsVisible(true);
+    } else {
+      // Fallback: API 호출 (하위 호환성)
+      loadRecommendedData();
+    }
+  }, [data, sectionId]);
 
   const loadRecommendedData = async () => {
     try {
@@ -39,14 +54,14 @@ export default function RecommendedSection({ sectionId = 'recommended', classNam
       const response = await fetch(`/api/ui-sections/${sectionId}`);
       
       if (response.ok) {
-        const data = await response.json();
-        if (data.section) {
-          setRecommendations(data.section.content?.items || []);
-          setIsVisible(data.section.isActive !== false);
+        const apiData = await response.json();
+        if (apiData.section) {
+          setRecommendations(apiData.section.content?.items || []);
+          setIsVisible(apiData.section.isActive !== false);
         }
       }
     } catch (error) {
-      console.error('Error loading recommended section:', error);
+
     } finally {
       setLoading(false);
     }
@@ -80,14 +95,12 @@ export default function RecommendedSection({ sectionId = 'recommended', classNam
   return (
     <section className={`w-full py-12 bg-gray-50 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">추천 상품</h2>
-            <p className="text-gray-600">선별된 인기 상품을 만나보세요</p>
-          </div>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{title}</h2>
+          <p className="text-gray-600 mb-4">{subtitle}</p>
           <Link
             href="/products/recommended"
-            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+            className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
           >
             더 보기
             <ArrowRight className="w-4 h-4" />
@@ -104,11 +117,17 @@ export default function RecommendedSection({ sectionId = 'recommended', classNam
               <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                 {/* 이미지 */}
                 <div className="relative w-full h-48 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                  {item.image && item.image !== "" ? (
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  )}
                   
                   {/* 배지 */}
                   <div className="absolute top-2 left-2 flex gap-2">
@@ -191,4 +210,5 @@ export default function RecommendedSection({ sectionId = 'recommended', classNam
       </div>
     </section>
   );
-}
+});
+export default RecommendedSection;

@@ -1,5 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { PaymentService } from '../../../src/services/paymentService'
-import { PrismaClient } from '@prisma/client'
 import { PaymentGatewayFactory } from '../../../src/services/payment/paymentGatewayFactory'
 
 // Mock Prisma Client
@@ -41,7 +41,7 @@ const mockPrisma = {
     create: jest.fn(),
   },
   $transaction: jest.fn(),
-} as any
+} as unknown
 
 // Mock PaymentGatewayFactory
 jest.mock('../../../src/services/payment/paymentGatewayFactory')
@@ -254,7 +254,7 @@ describe('PaymentService', () => {
       mockPrisma.$transaction.mockResolvedValue(updatedPayment)
 
       // Mock getPaymentWithOrder method
-      jest.spyOn(paymentService as any, 'getPaymentWithOrder').mockResolvedValue({
+      jest.spyOn(paymentService as unknown, 'getPaymentWithOrder').mockResolvedValue({
         ...updatedPayment,
         order: mockPayment.order,
       })
@@ -284,7 +284,7 @@ describe('PaymentService', () => {
       mockGateway.confirmPayment.mockResolvedValue(mockGatewayResponse)
       mockPrisma.$transaction.mockResolvedValue(updatedPayment)
 
-      jest.spyOn(paymentService as any, 'getPaymentWithOrder').mockResolvedValue({
+      jest.spyOn(paymentService as unknown, 'getPaymentWithOrder').mockResolvedValue({
         ...updatedPayment,
         order: mockPayment.order,
       })
@@ -345,7 +345,7 @@ describe('PaymentService', () => {
       mockGateway.cancelPayment.mockResolvedValue(mockGatewayResponse)
       mockPrisma.$transaction.mockResolvedValue(cancelledPayment)
 
-      jest.spyOn(paymentService as any, 'getPaymentWithOrder').mockResolvedValue({
+      jest.spyOn(paymentService as unknown, 'getPaymentWithOrder').mockResolvedValue({
         ...cancelledPayment,
         order: { id: 'order-1' },
       })
@@ -415,7 +415,7 @@ describe('PaymentService', () => {
       mockGateway.refundPayment.mockResolvedValue(mockGatewayResponse)
       mockPrisma.$transaction.mockResolvedValue(refundedPayment)
 
-      jest.spyOn(paymentService as any, 'getPaymentWithOrder').mockResolvedValue({
+      jest.spyOn(paymentService as unknown, 'getPaymentWithOrder').mockResolvedValue({
         ...refundedPayment,
         order: { id: 'order-1' },
       })
@@ -457,7 +457,7 @@ describe('PaymentService', () => {
       mockGateway.refundPayment.mockResolvedValue(mockGatewayResponse)
       mockPrisma.$transaction.mockResolvedValue(refundedPayment)
 
-      jest.spyOn(paymentService as any, 'getPaymentWithOrder').mockResolvedValue({
+      jest.spyOn(paymentService as unknown, 'getPaymentWithOrder').mockResolvedValue({
         ...refundedPayment,
         order: { id: 'order-1' },
       })
@@ -545,10 +545,10 @@ describe('PaymentService', () => {
       const queryInput = {
         page: 1,
         limit: 10,
-        status: 'COMPLETED' as any,
+        status: 'COMPLETED' as unknown,
         gateway: 'STRIPE',
         sortBy: 'createdAt',
-        sortOrder: 'desc' as any,
+        sortOrder: 'desc' as unknown,
       }
 
       mockPrisma.payment.findMany.mockResolvedValue(mockPayments)
@@ -566,7 +566,7 @@ describe('PaymentService', () => {
 
   describe('savePaymentMethod', () => {
     const savePaymentMethodInput = {
-      type: 'CREDIT_CARD' as any,
+      type: 'CREDIT_CARD' as unknown,
       provider: 'STRIPE',
       token: 'pm_1234567890',
       last4: '4242',

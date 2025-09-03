@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { RecommendationResult } from '../../types/recommendation';
 import { cacheService } from '../cacheService';
 import * as natural from 'natural';
@@ -50,7 +50,7 @@ export class ContentBasedFilteringService {
         .map(item => ({
           productId: item.productId,
           score: item.score,
-          algorithm: 'CONTENT_BASED' as any,
+          algorithm: 'CONTENT_BASED' as unknown,
           reason: item.reason
         }));
 
@@ -59,7 +59,7 @@ export class ContentBasedFilteringService {
 
       return recommendations;
     } catch (error) {
-      console.error('Content-based filtering error:', error);
+
       return [];
     }
   }
@@ -97,7 +97,7 @@ export class ContentBasedFilteringService {
 
       return topRecommendations;
     } catch (error) {
-      console.error('User content-based filtering error:', error);
+
       return [];
     }
   }
@@ -105,8 +105,8 @@ export class ContentBasedFilteringService {
   /**
    * 상품 특성 추출
    */
-  private async getProductFeatures(productId: string): Promise<any> {
-    const product = await this.prisma.product.findUnique({
+  private async getProductFeatures(productId: string): Promise<unknown> {
+    const product = await this.query({
       where: { id: productId },
       include: {
         category: true,
@@ -144,7 +144,7 @@ export class ContentBasedFilteringService {
     let currentId = categoryId;
 
     while (currentId) {
-      const category = await this.prisma.category.findUnique({
+      const category = await this.query({
         where: { id: currentId },
         select: { name: true, parentId: true }
       });
@@ -161,8 +161,8 @@ export class ContentBasedFilteringService {
   /**
    * 속성 추출
    */
-  private extractAttributes(attributes: any[]): Record<string, any> {
-    const result: Record<string, any> = {};
+  private extractAttributes(attributes: unknown[]): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
     
     attributes.forEach(attr => {
       result[attr.name] = attr.value;
@@ -174,7 +174,7 @@ export class ContentBasedFilteringService {
   /**
    * 가격 범위 결정
    */
-  private getPriceRange(price: any): string {
+  private getPriceRange(price: unknown): string {
     const priceNum = parseFloat(price?.toString() || '0');
     
     if (priceNum < 10000) return 'budget';
@@ -186,12 +186,12 @@ export class ContentBasedFilteringService {
   /**
    * 텍스트 특성 추출 (TF-IDF)
    */
-  private extractTextFeatures(product: any): number[] {
+  private extractTextFeatures(product: unknown): number[] {
     const text = [
       product.name,
       product.description,
       product.shortDescription,
-      ...(product.tags?.map((t: any) => t.tag.name) || [])
+      ...(product.tags?.map((t: unknown) => t.tag.name) || [])
     ].filter(Boolean).join(' ');
 
     // 한국어 형태소 분석 (간단한 버전)
@@ -209,11 +209,11 @@ export class ContentBasedFilteringService {
    * 유사한 상품 찾기
    */
   private async findSimilarProducts(
-    targetProduct: any,
+    targetProduct: unknown,
     excludeProductIds: string[]
   ): Promise<Array<{ productId: string; score: number; reason: string }>> {
     // 같은 카테고리의 상품들 가져오기
-    const candidateProducts = await this.prisma.product.findMany({
+    const candidateProducts = await this.query({
       where: {
         id: { notIn: excludeProductIds },
         status: 'PUBLISHED',
@@ -260,7 +260,7 @@ export class ContentBasedFilteringService {
   /**
    * 두 상품 간 유사도 계산
    */
-  private calculateSimilarity(productA: any, productB: any): number {
+  private calculateSimilarity(productA: unknown, productB: unknown): number {
     let totalScore = 0;
 
     // 카테고리 유사도
@@ -319,7 +319,7 @@ export class ContentBasedFilteringService {
   /**
    * Jaccard 유사도 계산
    */
-  private calculateJaccardSimilarity(setA: Set<any>, setB: Set<any>): number {
+  private calculateJaccardSimilarity(setA: Set<unknown>, setB: Set<unknown>): number {
     const intersection = new Set([...setA].filter(x => setB.has(x)));
     const union = new Set([...setA, ...setB]);
     
@@ -330,8 +330,8 @@ export class ContentBasedFilteringService {
    * 속성 유사도 계산
    */
   private calculateAttributeSimilarity(
-    attrA: Record<string, any>,
-    attrB: Record<string, any>
+    attrA: Record<string, unknown>,
+    attrB: Record<string, unknown>
   ): number {
     const allKeys = new Set([...Object.keys(attrA), ...Object.keys(attrB)]);
     let matchCount = 0;
@@ -370,9 +370,9 @@ export class ContentBasedFilteringService {
   /**
    * 사용자 프로파일 생성
    */
-  private async buildUserProfile(userId: string): Promise<any> {
+  private async buildUserProfile(userId: string): Promise<unknown> {
     // 사용자가 상호작용한 상품들
-    const userBehaviors = await this.prisma.userBehavior.findMany({
+    const userBehaviors = await this.query({
       where: { 
         userId,
         action: { in: ['PURCHASE', 'ADD_TO_CART', 'WISHLIST_ADD', 'REVIEW'] }
@@ -445,7 +445,7 @@ export class ContentBasedFilteringService {
    * 프로파일에 맞는 상품 찾기
    */
   private async findProductsMatchingProfile(
-    profile: any,
+    profile: unknown,
     excludeProductIds: string[]
   ): Promise<RecommendationResult[]> {
     // 선호 카테고리의 상품들
@@ -454,7 +454,7 @@ export class ContentBasedFilteringService {
       .slice(0, 5)
       .map(([categoryId]) => categoryId);
 
-    const candidateProducts = await this.prisma.product.findMany({
+    const candidateProducts = await this.query({
       where: {
         id: { notIn: excludeProductIds },
         status: 'PUBLISHED',
@@ -493,7 +493,7 @@ export class ContentBasedFilteringService {
         recommendations.push({
           productId: product.id,
           score: score / 10, // 정규화
-          algorithm: 'CONTENT_BASED' as any,
+          algorithm: 'CONTENT_BASED' as unknown,
           reason: '사용자 선호도 기반'
         });
       }
@@ -505,7 +505,7 @@ export class ContentBasedFilteringService {
   /**
    * 추천 이유 생성
    */
-  private generateReason(productA: any, productB: any): string {
+  private generateReason(productA: unknown, productB: unknown): string {
     const reasons: string[] = [];
 
     if (productA.category?.id === productB.category?.id) {
@@ -534,7 +534,7 @@ export class ContentBasedFilteringService {
     similarProductId: string,
     similarity: number
   ): Promise<void> {
-    await this.prisma.productSimilarity.upsert({
+    await this.query({
       where: {
         productId_similarProductId_algorithm: {
           productId,

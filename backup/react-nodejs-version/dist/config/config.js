@@ -55,7 +55,7 @@ const configSchema = zod_1.z.object({
     }),
     // CORS
     cors: zod_1.z.object({
-        origin: zod_1.z.string().default('http://localhost:3000'),
+        origin: zod_1.z.string().default(env.appUrl),
         credentials: zod_1.z.boolean().default(true),
     }),
     // File Upload
@@ -194,7 +194,7 @@ const rawConfig = {
         },
     },
     cors: {
-        origin: process.env['CORS_ORIGIN'] || 'http://localhost:3000',
+        origin: process.env['CORS_ORIGIN'] || env.appUrl,
         credentials: process.env['CORS_CREDENTIALS'] === 'true',
     },
     upload: {

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import { cartEventHandler } from '../socket/handlers/cartEventHandler'
 import { CartEvent } from '../types/cart'
@@ -15,7 +16,7 @@ export const cartWebSocketMiddleware = (eventType: CartEvent['type']) => {
     const originalJson = res.json
 
     // Override json method to capture response data
-    res.json = function(data: any) {
+    res.json = function(data: unknown) {
       // Call original json method first
       const result = originalJson.call(this, data)
 
@@ -89,7 +90,7 @@ export const stockWarningMiddleware = async (req: Request, res: Response, next: 
   const originalJson = res.json
 
   // Override json method to capture stock validation errors
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     const result = originalJson.call(this, data)
 
     // Check for stock-related errors
@@ -129,7 +130,7 @@ export const cartExpirationMiddleware = async (_req: Request, res: Response, nex
   const originalJson = res.json
 
   // Override json method to capture expiration errors
-  res.json = function(data: any) {
+  res.json = function(data: unknown) {
     const result = originalJson.call(this, data)
 
     // Check for cart expiration errors

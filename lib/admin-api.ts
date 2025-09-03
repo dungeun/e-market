@@ -28,10 +28,9 @@ function getAuthToken(): string | null {
 // 관리자 API 요청을 위한 fetch 래퍼
 export async function adminFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAuthToken();
-  
-  console.log('[adminFetch] Token found:', !!token);
+
   if (token) {
-    console.log('[adminFetch] Token prefix:', token.substring(0, 20) + '...');
+    
   }
   
   const headers = new Headers(options.headers);
@@ -58,14 +57,14 @@ export const adminApi = {
   get: (url: string, options?: RequestInit) => 
     adminFetch(url, { ...options, method: 'GET' }),
   
-  post: (url: string, data?: any, options?: RequestInit) => 
+  post: (url: string, data?: unknown, options?: RequestInit) => 
     adminFetch(url, { 
       ...options, 
       method: 'POST', 
       body: data ? JSON.stringify(data) : undefined 
     }),
   
-  put: (url: string, data?: any, options?: RequestInit) => 
+  put: (url: string, data?: unknown, options?: RequestInit) => 
     adminFetch(url, { 
       ...options, 
       method: 'PUT', 
@@ -75,7 +74,7 @@ export const adminApi = {
   delete: (url: string, options?: RequestInit) => 
     adminFetch(url, { ...options, method: 'DELETE' }),
   
-  patch: (url: string, data?: any, options?: RequestInit) => 
+  patch: (url: string, data?: unknown, options?: RequestInit) => 
     adminFetch(url, { 
       ...options, 
       method: 'PATCH', 

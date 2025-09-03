@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { env } from '@/lib/config/env';
 import { tossPayments } from '@/lib/payments/toss'
 import { z } from 'zod'
 
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = CreateTossPaymentSchema.parse(body)
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || env.appUrl
 
     const payment = await tossPayments.createPayment({
       ...validatedData,
@@ -32,7 +33,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('Error creating Toss payment:', error)
     return NextResponse.json(
       { error: 'Failed to create Toss payment' },
       { status: 500 }

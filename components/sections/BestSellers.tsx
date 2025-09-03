@@ -1,10 +1,12 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import ProductCard from './ProductCard'
 import { Trophy, TrendingUp } from 'lucide-react'
 
 interface BestSellersProps {
-  config: {
+  config?: {
     title?: string
     subtitle?: string
     period?: 'day' | 'week' | 'month' | 'all'
@@ -13,12 +15,13 @@ interface BestSellersProps {
     showSalesCount?: boolean
     categoryFilter?: string | null
   }
-  products: any[]
+  products?: unknown[]
+  data?: unknown
 }
 
-export default function BestSellers({ config, products }: BestSellersProps) {
+const BestSellers = React.memo(function BestSellers({ config = {}, products = [], data }: BestSellersProps) {
   const getPeriodText = () => {
-    switch (config.period) {
+    switch (config?.period) {
       case 'day': return '오늘'
       case 'week': return '이번 주'
       case 'month': return '이번 달'
@@ -27,21 +30,21 @@ export default function BestSellers({ config, products }: BestSellersProps) {
   }
 
   return (
-    <section className="py-12 px-4 bg-black">
+    <section className="py-12 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Trophy className="w-8 h-8 text-red-500" />
             <div>
-              {config.title && (
-                <h2 className="text-3xl font-bold text-white">
-                  {config.title}
+              {config?.title && (
+                <h2 className="text-3xl font-bold text-gray-900">
+                  {config?.title}
                 </h2>
               )}
-              {config.subtitle && (
-                <p className="text-gray-300">
-                  {config.subtitle}
+              {config?.subtitle && (
+                <p className="text-gray-600">
+                  {config?.subtitle}
                 </p>
               )}
             </div>
@@ -50,7 +53,7 @@ export default function BestSellers({ config, products }: BestSellersProps) {
           {/* 기간 선택 */}
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-300">
+            <span className="text-sm text-gray-600">
               {getPeriodText()} 베스트
             </span>
           </div>
@@ -58,12 +61,12 @@ export default function BestSellers({ config, products }: BestSellersProps) {
 
         {/* 상품 리스트 */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-          {products.slice(0, config.limit || 10).map((product, index) => (
+          {products.slice(0, config?.limit || 10).map((product, index) => (
             <ProductCard
               key={product.id}
               product={product}
-              showRanking={config.showRanking ? index + 1 : undefined}
-              showSalesCount={config.showSalesCount}
+              showRanking={config?.showRanking ? index + 1 : undefined}
+              showSalesCount={config?.showSalesCount}
             />
           ))}
         </div>
@@ -71,7 +74,7 @@ export default function BestSellers({ config, products }: BestSellersProps) {
         {/* 더보기 */}
         <div className="text-center mt-8">
           <a
-            href={`/best-sellers?period=${config.period}`}
+            href={`/best-sellers?period=${config?.period}`}
             className="inline-block px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
           >
             베스트셀러 전체보기
@@ -79,5 +82,7 @@ export default function BestSellers({ config, products }: BestSellersProps) {
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default BestSellers;

@@ -33,7 +33,15 @@ import {
   Lock,
   Key,
   Server,
-  HardDrive
+  HardDrive,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Search,
+  Code
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -42,12 +50,18 @@ export default function SettingsPage() {
     general: {
       siteName: 'Commerce Store',
       siteUrl: 'https://commerce.example.com',
+      logo: '/logo.png',
+      favicon: '/favicon.ico',
+      description: '최고의 온라인 쇼핑 경험을 제공합니다.',
+      keywords: '온라인쇼핑, 이커머스, 전자상거래',
       adminEmail: 'admin@example.com',
       timezone: 'Asia/Seoul',
       language: 'ko',
       currency: 'KRW',
       dateFormat: 'YYYY-MM-DD',
-      timeFormat: '24h'
+      timeFormat: '24h',
+      maintenanceMode: false,
+      maintenanceMessage: '시스템 점검 중입니다. 잠시 후 다시 시도해주세요.'
     },
     store: {
       storeName: 'Commerce Store',
@@ -56,7 +70,11 @@ export default function SettingsPage() {
       storeAddress: '서울시 강남구 테헤란로 123',
       businessNumber: '123-45-67890',
       ceoName: '홍길동',
-      onlineBusinessNumber: '2024-서울강남-1234'
+      onlineBusinessNumber: '2024-서울강남-1234',
+      facebook: 'https://facebook.com/commercestore',
+      instagram: 'https://instagram.com/commercestore',
+      twitter: 'https://twitter.com/commercestore',
+      youtube: 'https://youtube.com/commercestore'
     },
     shipping: {
       freeShippingThreshold: 50000,
@@ -110,6 +128,13 @@ export default function SettingsPage() {
       backupTime: '03:00',
       backupRetention: 30,
       backupLocation: 'cloud'
+    },
+    seo: {
+      enableSitemap: true,
+      enableRobots: true,
+      googleAnalytics: 'G-XXXXXXXXXX',
+      naverWebmaster: '',
+      googleSearchConsole: ''
     }
   })
 
@@ -131,13 +156,14 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid grid-cols-8 w-full">
+        <TabsList className="grid grid-cols-9 w-full">
           <TabsTrigger value="general">일반</TabsTrigger>
           <TabsTrigger value="store">스토어</TabsTrigger>
           <TabsTrigger value="shipping">배송</TabsTrigger>
           <TabsTrigger value="payment">결제</TabsTrigger>
           <TabsTrigger value="inventory">재고</TabsTrigger>
           <TabsTrigger value="email">이메일</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="security">보안</TabsTrigger>
           <TabsTrigger value="backup">백업</TabsTrigger>
         </TabsList>
@@ -218,6 +244,43 @@ export default function SettingsPage() {
                   </Select>
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">사이트 설명</Label>
+                <Textarea
+                  id="description"
+                  value={settings.general.description}
+                  onChange={(e) => setSettings({...settings, general: {...settings.general, description: e.target.value}})}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="keywords">검색 키워드</Label>
+                <Input
+                  id="keywords"
+                  value={settings.general.keywords}
+                  onChange={(e) => setSettings({...settings, general: {...settings.general, keywords: e.target.value}})}
+                  placeholder="쉼표로 구분하여 입력"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="maintenance"
+                  checked={settings.general.maintenanceMode}
+                  onCheckedChange={(checked) => setSettings({...settings, general: {...settings.general, maintenanceMode: checked}})}
+                />
+                <Label htmlFor="maintenance">유지보수 모드</Label>
+              </div>
+              {settings.general.maintenanceMode && (
+                <div className="space-y-2">
+                  <Label htmlFor="maintenanceMessage">유지보수 메시지</Label>
+                  <Textarea
+                    id="maintenanceMessage"
+                    value={settings.general.maintenanceMessage}
+                    onChange={(e) => setSettings({...settings, general: {...settings.general, maintenanceMessage: e.target.value}})}
+                    rows={2}
+                  />
+                </div>
+              )}
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => handleReset('일반')}>
                   <RefreshCw className="mr-2 h-4 w-4" />
@@ -301,6 +364,43 @@ export default function SettingsPage() {
                   onChange={(e) => setSettings({...settings, store: {...settings.store, storeAddress: e.target.value}})}
                   rows={2}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>소셜 미디어</Label>
+                <div className="space-y-2">
+                  <div className="flex">
+                    <Facebook className="mr-2 h-4 w-4 mt-2.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Facebook URL"
+                      value={settings.store.facebook}
+                      onChange={(e) => setSettings({...settings, store: {...settings.store, facebook: e.target.value}})}
+                    />
+                  </div>
+                  <div className="flex">
+                    <Instagram className="mr-2 h-4 w-4 mt-2.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Instagram URL"
+                      value={settings.store.instagram}
+                      onChange={(e) => setSettings({...settings, store: {...settings.store, instagram: e.target.value}})}
+                    />
+                  </div>
+                  <div className="flex">
+                    <Twitter className="mr-2 h-4 w-4 mt-2.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Twitter URL"
+                      value={settings.store.twitter}
+                      onChange={(e) => setSettings({...settings, store: {...settings.store, twitter: e.target.value}})}
+                    />
+                  </div>
+                  <div className="flex">
+                    <Youtube className="mr-2 h-4 w-4 mt-2.5 text-muted-foreground" />
+                    <Input
+                      placeholder="YouTube URL"
+                      value={settings.store.youtube}
+                      onChange={(e) => setSettings({...settings, store: {...settings.store, youtube: e.target.value}})}
+                    />
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => handleReset('스토어')}>
@@ -734,6 +834,83 @@ export default function SettingsPage() {
                   즉시 백업
                 </Button>
                 <Button onClick={() => handleSave('백업')}>
+                  <Save className="mr-2 h-4 w-4" />
+                  저장
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="seo">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                SEO 설정
+              </CardTitle>
+              <CardDescription>검색 엔진 최적화와 웹마스터 도구를 설정합니다.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="enableSitemap">사이트맵 생성</Label>
+                    <p className="text-sm text-muted-foreground">검색 엔진을 위한 사이트맵을 자동 생성합니다</p>
+                  </div>
+                  <Switch
+                    id="enableSitemap"
+                    checked={settings.seo.enableSitemap}
+                    onCheckedChange={(checked) => setSettings({...settings, seo: {...settings.seo, enableSitemap: checked}})}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="enableRobots">robots.txt 사용</Label>
+                    <p className="text-sm text-muted-foreground">검색 엔진 크롤링 규칙을 설정합니다</p>
+                  </div>
+                  <Switch
+                    id="enableRobots"
+                    checked={settings.seo.enableRobots}
+                    onCheckedChange={(checked) => setSettings({...settings, seo: {...settings.seo, enableRobots: checked}})}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-1">
+                <div className="space-y-2">
+                  <Label htmlFor="googleAnalytics">Google Analytics</Label>
+                  <Input
+                    id="googleAnalytics"
+                    value={settings.seo.googleAnalytics}
+                    onChange={(e) => setSettings({...settings, seo: {...settings.seo, googleAnalytics: e.target.value}})}
+                    placeholder="G-XXXXXXXXXX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="googleSearchConsole">Google Search Console</Label>
+                  <Input
+                    id="googleSearchConsole"
+                    value={settings.seo.googleSearchConsole}
+                    onChange={(e) => setSettings({...settings, seo: {...settings.seo, googleSearchConsole: e.target.value}})}
+                    placeholder="인증 코드"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="naverWebmaster">네이버 웹마스터도구</Label>
+                  <Input
+                    id="naverWebmaster"
+                    value={settings.seo.naverWebmaster}
+                    onChange={(e) => setSettings({...settings, seo: {...settings.seo, naverWebmaster: e.target.value}})}
+                    placeholder="인증 코드"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => handleReset('SEO')}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  초기화
+                </Button>
+                <Button onClick={() => handleSave('SEO')}>
                   <Save className="mr-2 h-4 w-4" />
                   저장
                 </Button>

@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState } from 'react'
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react'
@@ -19,7 +21,7 @@ interface VideoShowcaseProps {
   }
 }
 
-export default function VideoShowcase({ config }: VideoShowcaseProps) {
+const VideoShowcase = React.memo(function VideoShowcase({ config }: VideoShowcaseProps) {
   const [playingVideo, setPlayingVideo] = useState<number | null>(null)
   const [mutedStates, setMutedStates] = useState<{ [key: number]: boolean }>({})
 
@@ -34,25 +36,25 @@ export default function VideoShowcase({ config }: VideoShowcaseProps) {
     }))
   }
 
-  if (!config.videos || config.videos.length === 0) return null
+  if (!config?.videos || config?.videos.length === 0) return null
 
   return (
     <section className="py-12 px-4 bg-black">
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
-        {config.title && (
+        {config?.title && (
           <h2 className="text-3xl font-bold text-white text-center mb-8">
-            {config.title}
+            {config?.title}
           </h2>
         )}
 
         {/* 비디오 그리드 */}
         <div className={`grid gap-6 ${
-          config.layout === 'grid' 
+          config?.layout === 'grid' 
             ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
             : 'grid-cols-1'
         }`}>
-          {config.videos.map((video) => (
+          {config?.videos.map((video) => (
             <div key={video.id} className="relative group">
               <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
                 {/* 썸네일 */}
@@ -69,7 +71,7 @@ export default function VideoShowcase({ config }: VideoShowcaseProps) {
                   <video
                     src={video.videoUrl}
                     autoPlay
-                    muted={mutedStates[video.id] ?? config.muted}
+                    muted={mutedStates[video.id] ?? config?.muted}
                     loop
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -95,7 +97,7 @@ export default function VideoShowcase({ config }: VideoShowcaseProps) {
                     onClick={() => toggleMute(video.id)}
                     className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-colors"
                   >
-                    {mutedStates[video.id] ?? config.muted ? (
+                    {mutedStates[video.id] ?? config?.muted ? (
                       <VolumeX className="w-5 h-5 text-white" />
                     ) : (
                       <Volume2 className="w-5 h-5 text-white" />
@@ -113,5 +115,7 @@ export default function VideoShowcase({ config }: VideoShowcaseProps) {
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default VideoShowcase;

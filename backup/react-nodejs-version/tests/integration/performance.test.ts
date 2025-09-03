@@ -18,8 +18,8 @@ describe('Performance Tests', () => {
 
   afterAll(async () => {
     // Clean up
-    await prisma.product.deleteMany()
-    await prisma.category.deleteMany()
+    await queryMany()
+    await queryMany()
     await cacheService.disconnect()
     await prisma.$disconnect()
   })
@@ -39,7 +39,7 @@ describe('Performance Tests', () => {
     })
 
     it('should return product detail within 50ms', async () => {
-      const product = await prisma.product.findFirst()
+      const product = await query()
       const start = Date.now()
       
       const response = await request(app)
@@ -91,7 +91,7 @@ describe('Performance Tests', () => {
     })
 
     it('should invalidate cache after product update', async () => {
-      const product = await prisma.product.findFirst()
+      const product = await query()
       
       // First request to cache the product
       await request(app)
@@ -136,7 +136,7 @@ describe('Performance Tests', () => {
     })
 
     it('should handle mixed read/write operations', async () => {
-      const product = await prisma.product.findFirst()
+      const product = await query()
       
       const requests = [
         ...Array(50).fill(null).map(() => 
@@ -251,7 +251,7 @@ async function seedTestData() {
   // Create categories
   const categories = await Promise.all(
     Array(5).fill(null).map((_, i) => 
-      prisma.category.create({
+      query({
         data: {
           name: `Test Category ${i + 1}`,
           slug: `test-category-${i + 1}`,
@@ -265,7 +265,7 @@ async function seedTestData() {
   // Create products
   await Promise.all(
     Array(100).fill(null).map((_, i) => 
-      prisma.product.create({
+      query({
         data: {
           name: `Test Product ${i + 1}`,
           slug: `test-product-${i + 1}`,

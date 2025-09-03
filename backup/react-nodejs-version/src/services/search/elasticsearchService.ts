@@ -1,5 +1,4 @@
 // Mock implementation - Elasticsearch removed
-import { PrismaClient } from '@prisma/client';
 import { cacheService } from '../cacheService';
 
 interface SearchQuery {
@@ -7,7 +6,7 @@ interface SearchQuery {
   filters?: {
     categories?: string[];
     priceRange?: { min?: number; max?: number };
-    attributes?: Record<string, any>;
+    attributes?: Record<string, unknown>;
     inStock?: boolean;
     tags?: string[];
     rating?: number;
@@ -22,9 +21,9 @@ interface SearchQuery {
 }
 
 interface SearchResult {
-  products: any[];
+  products: unknown[];
   total: number;
-  facets: Record<string, any>;
+  facets: Record<string, unknown>;
   suggestions: string[];
   took: number;
 }
@@ -49,7 +48,7 @@ export class ElasticsearchService {
    */
   private async initializeIndex() {
     // Mock implementation - no Elasticsearch operations
-    console.log('Mock: Index initialization completed');
+
   }
 
   /**
@@ -57,7 +56,7 @@ export class ElasticsearchService {
    */
   private async createIndex() {
     // Mock implementation - no actual index creation
-    console.log('Mock: Index created with Korean analyzer settings');
+
   }
 
   /**
@@ -65,7 +64,7 @@ export class ElasticsearchService {
    */
   async indexProduct(productId: string) {
     try {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.query({
         where: { id: productId },
         include: {
           category: true,
@@ -79,14 +78,13 @@ export class ElasticsearchService {
       if (!product) return;
 
       // Mock implementation - just log the indexing action
-      console.log(`Mock: Product ${productId} indexed successfully`);
-      
+
       // Clear cache for this product
       await cacheService.delete(`product:${productId}`);
       
       return true;
     } catch (error) {
-      console.error(`Mock: Failed to index product ${productId}:`, error);
+
       return false;
     }
   }
@@ -106,7 +104,7 @@ export class ElasticsearchService {
 
     try {
       // Build Prisma where conditions
-      const where: any = {
+      const where: unknown = {
         status: 'PUBLISHED'
       };
 
@@ -141,10 +139,10 @@ export class ElasticsearchService {
       }
 
       // Get total count
-      const total = await this.prisma.product.count({ where });
+      const total = await this.query({ where });
 
       // Build order by
-      const orderBy: any = {};
+      const orderBy: unknown = {};
       if (sort) {
         orderBy[sort.field] = sort.order;
       } else {
@@ -152,7 +150,7 @@ export class ElasticsearchService {
       }
 
       // Fetch products
-      const products = await this.prisma.product.findMany({
+      const products = await this.query({
         where,
         skip,
         take: limit,
@@ -179,10 +177,10 @@ export class ElasticsearchService {
       }));
 
       // Generate mock facets
-      const mockFacets: any = {};
+      const mockFacets: unknown = {};
       
       if (facets.includes('categories')) {
-        const categories = await this.prisma.category.findMany({
+        const categories = await this.query({
           select: { id: true, name: true }
         });
         mockFacets.categories = {
@@ -221,7 +219,7 @@ export class ElasticsearchService {
 
       return result;
     } catch (error) {
-      console.error('Search error:', error);
+
       return {
         products: [],
         total: 0,
@@ -252,7 +250,7 @@ export class ElasticsearchService {
   async autocomplete(query: string, limit: number = 10): Promise<string[]> {
     try {
       // Simple autocomplete using Prisma
-      const products = await this.prisma.product.findMany({
+      const products = await this.query({
         where: {
           status: 'PUBLISHED',
           name: {
@@ -281,7 +279,7 @@ export class ElasticsearchService {
 
       return results.slice(0, limit);
     } catch (error) {
-      console.error('Autocomplete error:', error);
+
       return [];
     }
   }
@@ -300,7 +298,7 @@ export class ElasticsearchService {
   async getRelatedSearches(query: string): Promise<string[]> {
     try {
       // Find products matching the query
-      const products = await this.prisma.product.findMany({
+      const products = await this.query({
         where: {
           status: 'PUBLISHED',
           OR: [
@@ -335,7 +333,7 @@ export class ElasticsearchService {
 
       return [...Array.from(tagSet), ...relatedTerms].slice(0, 10);
     } catch (error) {
-      console.error('Related searches error:', error);
+
       return [];
     }
   }
@@ -345,21 +343,18 @@ export class ElasticsearchService {
    */
   async reindexAll() {
     try {
-      const products = await this.prisma.product.findMany({
+      const products = await this.query({
         where: { status: 'PUBLISHED' },
         select: { id: true }
       });
-
-      console.log(`Mock: Reindexing ${products.length} products...`);
 
       // Clear all search-related caches
       await cacheService.deletePattern('search:*');
       await cacheService.deletePattern('product:*');
 
-      console.log('Mock: Reindexing completed successfully');
       return true;
     } catch (error) {
-      console.error('Mock: Reindexing failed:', error);
+
       return false;
     }
   }
@@ -374,7 +369,7 @@ export class ElasticsearchService {
     let currentId = categoryId;
 
     while (currentId) {
-      const category = await this.prisma.category.findUnique({
+      const category = await this.query({
         where: { id: currentId },
         select: { name: true, parentId: true }
       });
@@ -391,7 +386,7 @@ export class ElasticsearchService {
   /**
    * 기본 검색 (Mock)
    */
-  async search(query: string, options?: any): Promise<any> {
+  async search(query: string, options?: unknown): Promise<unknown> {
     // Delegate to searchProducts with default options
     return this.searchProducts({
       query,
@@ -420,15 +415,15 @@ export class ElasticsearchService {
   /**
    * 상품 인덱스 업데이트 (Mock)
    */
-  async updateProductIndex(productId: string, updates: any) {
+  async updateProductIndex(productId: string, updates: unknown) {
     try {
       // Mock implementation - just clear cache
       await cacheService.delete(`product:${productId}`);
       await cacheService.deletePattern('search:*');
-      console.log(`Mock: Product ${productId} index updated`);
+
       return true;
     } catch (error) {
-      console.error(`Mock: Failed to update product index ${productId}:`, error);
+
       return false;
     }
   }
@@ -445,8 +440,7 @@ export class ElasticsearchService {
    */
   async bulkIndexProducts(productIds: string[]) {
     try {
-      console.log(`Mock: Bulk indexing ${productIds.length} products...`);
-      
+
       // Clear relevant caches
       await cacheService.deletePattern('search:*');
       
@@ -458,20 +452,18 @@ export class ElasticsearchService {
           await this.indexProduct(productId);
           successCount++;
         } catch (error) {
-          console.error(`Mock: Failed to index product ${productId}:`, error);
+
           failCount++;
         }
       }
 
-      console.log(`Mock: Bulk indexing completed. Success: ${successCount}, Failed: ${failCount}`);
-      
       return {
         total: productIds.length,
         success: successCount,
         failed: failCount
       };
     } catch (error) {
-      console.error('Mock: Bulk indexing failed:', error);
+
       return {
         total: productIds.length,
         success: 0,
@@ -487,10 +479,10 @@ export class ElasticsearchService {
     try {
       // Clear cache for this product
       await cacheService.delete(`product:${productId}`);
-      console.log(`Mock: Product ${productId} removed from index`);
+
       return true;
     } catch (error) {
-      console.error(`Mock: Failed to delete product ${productId}:`, error);
+
       return false;
     }
   }
@@ -500,7 +492,7 @@ export class ElasticsearchService {
    */
   async getIndexStats() {
     try {
-      const productCount = await this.prisma.product.count({
+      const productCount = await this.query({
         where: { status: 'PUBLISHED' }
       });
 
@@ -510,7 +502,7 @@ export class ElasticsearchService {
         health: 'green' // Always return healthy status
       };
     } catch (error) {
-      console.error('Mock: Failed to get index stats:', error);
+
       return {
         documentCount: 0,
         sizeInBytes: 0,

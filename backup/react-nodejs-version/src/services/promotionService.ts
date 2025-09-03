@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { 
   CreatePromotionDto, 
   UpdatePromotionDto,
@@ -21,7 +21,7 @@ class PromotionService {
 
   // 프로모션 생성
   async createPromotion(createPromotionDto: CreatePromotionDto) {
-    const promotion = await this.prisma.promotion.create({
+    const promotion = await this.query({
       data: createPromotionDto
     });
 
@@ -36,7 +36,7 @@ class PromotionService {
 
   // 프로모션 수정
   async updatePromotion(promotionId: string, updateData: UpdatePromotionDto) {
-    const promotion = await this.prisma.promotion.update({
+    const promotion = await this.query({
       where: { id: promotionId },
       data: updateData
     });
@@ -72,7 +72,7 @@ class PromotionService {
 
     // 활성 프로모션 조회
     const now = new Date();
-    const activePromotions = await this.prisma.promotion.findMany({
+    const activePromotions = await this.query({
       where: {
         isActive: true,
         startDate: { lte: now },
@@ -85,7 +85,7 @@ class PromotionService {
     });
 
     // 사용자 정보 조회
-    const user = await this.prisma.user.findUnique({
+    const user = await this.query({
       where: { id: userId },
       include: {
         orders: {
@@ -146,7 +146,7 @@ class PromotionService {
   // 프로모션 조건 확인
   private checkConditions(
     conditions: PromotionConditions,
-    orderData: any,
+    orderData: unknown,
     user: any
   ): boolean {
     // 최소 주문 금액
@@ -155,7 +155,7 @@ class PromotionService {
     }
 
     // 상품 수량
-    const totalQuantity = orderData.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+    const totalQuantity = orderData.items.reduce((sum: number, item: unknown) => sum + item.quantity, 0);
     if (conditions.minQuantity && totalQuantity < conditions.minQuantity) {
       return false;
     }
@@ -175,7 +175,7 @@ class PromotionService {
 
     // 상품/카테고리 조건
     if (conditions.productIds?.length > 0 || conditions.categoryIds?.length > 0) {
-      const hasMatchingItem = orderData.items.some((item: any) => 
+      const hasMatchingItem = orderData.items.some((item: unknown) => 
         conditions.productIds?.includes(item.productId) ||
         conditions.categoryIds?.includes(item.categoryId)
       );
@@ -226,7 +226,7 @@ class PromotionService {
     orderData: any
   ): {
     discountAmount: number;
-    freeProducts?: any[];
+    freeProducts?: unknown[];
     message?: string;
   } {
     let discountAmount = 0;
@@ -300,11 +300,11 @@ class PromotionService {
     promotions: Array<{
       promotionId: string;
       discountAmount: number;
-      details?: any;
+      details?: unknown;
     }>
   ) {
     for (const promo of promotions) {
-      await this.prisma.promotionApplication.create({
+      await this.query({
         data: {
           promotionId: promo.promotionId,
           orderId,
@@ -315,7 +315,7 @@ class PromotionService {
       });
 
       // 사용 횟수 증가
-      await this.prisma.promotion.update({
+      await this.query({
         where: { id: promo.promotionId },
         data: {
           usageCount: { increment: 1 }
@@ -344,7 +344,7 @@ class PromotionService {
     const offset = (page - 1) * limit;
     const now = new Date();
 
-    const where: any = {
+    const where: unknown = {
       isActive
     };
 
@@ -355,7 +355,7 @@ class PromotionService {
     where.endDate = { gte: now };
 
     const [promotions, total] = await Promise.all([
-      this.prisma.promotion.findMany({
+      this.query({
         where,
         skip: offset,
         take: limit,
@@ -364,7 +364,7 @@ class PromotionService {
           { createdAt: 'desc' }
         ]
       }),
-      this.prisma.promotion.count({ where })
+      this.query({ where })
     ]);
 
     // 타겟 필터링
@@ -405,10 +405,10 @@ class PromotionService {
   // 프로모션 통계
   async getPromotionStatistics(promotionId: string): Promise<PromotionStatistics> {
     const [promotion, applications] = await Promise.all([
-      this.prisma.promotion.findUnique({
+      this.query({
         where: { id: promotionId }
       }),
-      this.prisma.promotionApplication.findMany({
+      this.query({
         where: { promotionId },
         include: {
           order: {
@@ -517,7 +517,7 @@ class PromotionService {
   }
 
   // 사용자 그룹 판단
-  private getUserGroup(user: any): string {
+  private getUserGroup(user: unknown): string {
     const orderCount = user.orders?.length || 0;
     const lastOrderDate = user.orders?.[0]?.createdAt;
     
@@ -535,9 +535,9 @@ class PromotionService {
   }
 
   // 커스텀 규칙 평가
-  private evaluateCustomRule(rule: any, orderData: any, user: any): boolean {
+  private evaluateCustomRule(rule: unknown, orderData: unknown, user: unknown): boolean {
     const { field, operator, value } = rule;
-    let fieldValue: any;
+    let fieldValue: unknown;
 
     // 필드 값 추출
     switch (field) {
@@ -576,7 +576,7 @@ class PromotionService {
   }
 
   // 번들 할인 계산
-  private calculateBundleDiscount(bundleProducts: any[], orderItems: any[]): number {
+  private calculateBundleDiscount(bundleProducts: unknown[], orderItems: unknown[]): number {
     let discount = 0;
 
     for (const bundle of bundleProducts) {
@@ -597,7 +597,7 @@ class PromotionService {
 
   // 프로모션 삭제
   async deletePromotion(promotionId: string) {
-    const promotion = await this.prisma.promotion.findUnique({
+    const promotion = await this.query({
       where: { id: promotionId },
       include: { applications: true }
     });
@@ -610,7 +610,7 @@ class PromotionService {
       throw new Error('사용 이력이 있는 프로모션은 삭제할 수 없습니다.');
     }
 
-    await this.prisma.promotion.delete({
+    await this.query({
       where: { id: promotionId }
     });
 

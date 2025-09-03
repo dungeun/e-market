@@ -91,7 +91,7 @@ class SecurityController {
                 where.severity = severity;
             if (userId)
                 where.userId = userId;
-            const alerts = await database_1.prisma.securityAlert.findMany({
+            const alerts = await database_1.query({
                 where,
                 orderBy: { createdAt: 'desc' },
                 take: 100,
@@ -111,7 +111,7 @@ class SecurityController {
     async resolveSecurityAlert(req, res, next) {
         try {
             const { id } = req.params;
-            const alert = await database_1.prisma.securityAlert.update({
+            const alert = await database_1.query({
                 where: { id },
                 data: { resolved: true },
             });
@@ -200,7 +200,7 @@ class SecurityController {
                 where.type = type;
             if (isActive !== undefined)
                 where.isActive = isActive === 'true';
-            const blacklist = await database_1.prisma.blacklist.findMany({
+            const blacklist = await database_1.query({
                 where,
                 orderBy: { createdAt: 'desc' },
                 take: 100,
@@ -220,7 +220,7 @@ class SecurityController {
     async addToBlacklist(req, res, next) {
         try {
             const data = BlacklistSchema.parse(req.body);
-            const entry = await database_1.prisma.blacklist.create({
+            const entry = await database_1.query({
                 data: {
                     ...data,
                     expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
@@ -242,7 +242,7 @@ class SecurityController {
     async removeFromBlacklist(req, res, next) {
         try {
             const { id } = req.params;
-            await database_1.prisma.blacklist.update({
+            await database_1.query({
                 where: { id },
                 data: { isActive: false },
             });
@@ -261,7 +261,7 @@ class SecurityController {
      */
     async getAPIKeys(_req, res, next) {
         try {
-            const apiKeys = await database_1.prisma.apiClient.findMany({
+            const apiKeys = await database_1.query({
                 select: {
                     id: true,
                     name: true,
@@ -292,7 +292,7 @@ class SecurityController {
             // Generate API key
             const apiKey = security_1.SecurityUtils.generateAPIKey();
             const hashedKey = security_1.SecurityUtils.hashData(apiKey);
-            const client = await database_1.prisma.apiClient.create({
+            const client = await database_1.query({
                 data: {
                     name: data.name,
                     hashedKey,
@@ -322,7 +322,7 @@ class SecurityController {
     async revokeAPIKey(req, res, next) {
         try {
             const { id } = req.params;
-            await database_1.prisma.apiClient.update({
+            await database_1.query({
                 where: { id },
                 data: { isActive: false },
             });
@@ -348,7 +348,7 @@ class SecurityController {
             };
             if (userId)
                 where.userId = userId;
-            const sessions = await database_1.prisma.session.findMany({
+            const sessions = await database_1.query({
                 where,
                 include: {
                     user: {
@@ -378,7 +378,7 @@ class SecurityController {
     async terminateSession(req, res, next) {
         try {
             const { id } = req.params;
-            const session = await database_1.prisma.session.update({
+            const session = await database_1.query({
                 where: { id },
                 data: { revokedAt: new Date() },
             });
@@ -398,7 +398,7 @@ class SecurityController {
     async terminateUserSessions(req, res, next) {
         try {
             const { userId } = req.params;
-            const result = await database_1.prisma.session.updateMany({
+            const result = await database_1.queryMany({
                 where: {
                     userId,
                     revokedAt: null,

@@ -1,3 +1,6 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 실시간 재고 관리 API
  */
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: status
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to get inventory status' },
       { status: 500 }
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { reservationId }
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to reserve inventory' },
       { status: 500 }
@@ -107,7 +110,7 @@ export async function PUT(request: NextRequest) {
       success: true,
       message: `Reservation ${action}ed successfully`
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to update reservation' },
       { status: 500 }
@@ -144,7 +147,7 @@ export async function PATCH(request: NextRequest) {
       success: true,
       message: `${updates.length} products updated successfully`
     })
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to update inventory' },
       { status: 500 }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { logger } from '../utils/logger';
 import { cacheService } from '../services/cacheService';
 
@@ -17,8 +17,8 @@ export interface TransactionData {
   amount: number;
   currency: string;
   paymentMethod: string;
-  billingAddress?: any;
-  shippingAddress?: any;
+  billingAddress?: unknown;
+  shippingAddress?: unknown;
   items: Array<{
     productId: string;
     quantity: number;
@@ -34,7 +34,7 @@ export interface UserBehaviorPattern {
   preferredPaymentMethods: string[];
   commonIPs: string[];
   commonDevices: string[];
-  shippingAddresses: any[];
+  shippingAddresses: unknown[];
   riskScore: number;
   lastUpdated: Date;
 }
@@ -543,7 +543,7 @@ export class FraudDetectionService {
     return false;
   }
 
-  private async getIPGeolocation(ip: string): Promise<any> {
+  private async getIPGeolocation(ip: string): Promise<unknown> {
     // IP 지리적 위치 조회
     return { country: 'KR', city: 'Seoul', lat: 37.5665, lng: 126.9780 };
   }
@@ -563,7 +563,7 @@ export class FraudDetectionService {
     return null;
   }
 
-  private compareAddresses(billing: any, shipping: any): number {
+  private compareAddresses(billing: unknown, shipping: unknown): number {
     // 주소 비교 로직
     return 0;
   }
@@ -598,7 +598,7 @@ export class FraudDetectionService {
     return [];
   }
 
-  private calculateDistance(loc1: any, loc2: any): number {
+  private calculateDistance(loc1: unknown, loc2: unknown): number {
     // 두 지점 간 거리 계산 (Haversine formula)
     const R = 6371; // Earth's radius in km
     const dLat = (loc2.lat - loc1.lat) * Math.PI / 180;

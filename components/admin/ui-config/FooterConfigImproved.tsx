@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useState } from 'react';
 import { useUIConfigStore } from '@/lib/stores/ui-config.store';
 
@@ -79,7 +81,7 @@ export function FooterConfigImproved() {
       alert(`컬럼이 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('컬럼 추가 실패:', error);
+
       alert('컬럼 추가 중 오류가 발생했습니다.');
     }
   };
@@ -136,7 +138,7 @@ export function FooterConfigImproved() {
       alert(`메뉴가 추가되었습니다.\n한국어: ${languagePackData.ko}\n영어: ${languagePackData.en}\n일본어: ${languagePackData.ja}`);
 
     } catch (error) {
-      console.error('메뉴 추가 실패:', error);
+
       alert('메뉴 추가 중 오류가 발생했습니다.');
     }
   };
@@ -176,7 +178,7 @@ export function FooterConfigImproved() {
       updateFooter({ ...config.footer, columns: updatedColumns });
 
     } catch (error) {
-      console.error('컬럼 삭제 실패:', error);
+
       alert('컬럼 삭제 중 오류가 발생했습니다.');
     }
   };
@@ -205,12 +207,12 @@ export function FooterConfigImproved() {
       updateFooter({ ...config.footer, columns: updatedColumns });
 
     } catch (error) {
-      console.error('메뉴 삭제 실패:', error);
+
       alert('메뉴 삭제 중 오류가 발생했습니다.');
     }
   };
 
-  const handleUpdateItem = (columnIndex: number, itemIndex: number, updates: any) => {
+  const handleUpdateItem = (columnIndex: number, itemIndex: number, updates: unknown) => {
     const updatedColumns = [...config.footer.columns];
     updatedColumns[columnIndex].items[itemIndex] = {
       ...updatedColumns[columnIndex].items[itemIndex],

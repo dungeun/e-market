@@ -438,7 +438,7 @@ export class MasterController extends EventEmitter {
   /**
    * 시스템 헬스 업데이트
    */
-  private updateSystemHealth(metrics: any): void {
+  private updateSystemHealth(metrics: unknown): void {
     // 성능 메트릭 기반으로 헬스 상태 업데이트
     this.systemHealth.metrics.cpuUsage = metrics.cpu.usage;
     this.systemHealth.metrics.memoryUsage = metrics.memory.usage;
@@ -451,7 +451,7 @@ export class MasterController extends EventEmitter {
    */
   private getDefaultConfiguration(): SystemConfiguration {
     return {
-      environment: (process.env.NODE_ENV as any) || 'development',
+      environment: (process.env.NODE_ENV as unknown) || 'development',
       region: process.env.AWS_REGION || 'ap-northeast-2',
       version: process.env.APP_VERSION || '1.0.0',
       features: {

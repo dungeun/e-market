@@ -47,8 +47,8 @@ export class KakaoAlimtalkService {
         success: response.data.success,
         messageId: response.data.messageId,
       }
-    } catch (error: any) {
-      console.error('Kakao Alimtalk send error:', error.response?.data)
+    } catch (error: Error | unknown) {
+
       return {
         success: false,
         error: error.response?.data?.message || '알림톡 발송 중 오류가 발생했습니다.',

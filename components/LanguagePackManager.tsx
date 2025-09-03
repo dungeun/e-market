@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Globe, RefreshCw, Search } from 'lucide-react';
 import { adminApi } from '@/lib/admin-api';
@@ -15,7 +17,7 @@ interface LanguagePack {
   isEditable: boolean;
 }
 
-export default function LanguagePackManager() {
+const LanguagePackManager = React.memo(function LanguagePackManager() {
   const [languagePacks, setLanguagePacks] = useState<LanguagePack[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -38,7 +40,7 @@ export default function LanguagePackManager() {
         setLanguagePacks(data);
       }
     } catch (error) {
-      console.error('언어팩 로드 실패:', error);
+
     } finally {
       setLoading(false);
     }
@@ -65,7 +67,7 @@ export default function LanguagePackManager() {
         throw new Error('초기화 실패');
       }
     } catch (error) {
-      console.error('언어팩 초기화 실패:', error);
+
       alert('언어팩 초기화에 실패했습니다.');
     } finally {
       setIsInitializing(false);
@@ -86,7 +88,7 @@ export default function LanguagePackManager() {
         throw new Error('삭제 실패');
       }
     } catch (error) {
-      console.error('언어팩 삭제 실패:', error);
+
       alert('언어팩 삭제에 실패했습니다.');
     }
   };
@@ -242,8 +244,7 @@ export default function LanguagePackManager() {
       )}
     </div>
   );
-}
-
+});
 // 언어팩 생성/수정 모달
 function LanguagePackModal({
   pack,
@@ -285,7 +286,7 @@ function LanguagePackModal({
         alert(error.error || '저장에 실패했습니다.');
       }
     } catch (error) {
-      console.error('언어팩 저장 실패:', error);
+
       alert('언어팩 저장에 실패했습니다.');
     } finally {
       setLoading(false);
@@ -433,4 +434,5 @@ function LanguagePackModal({
       </div>
     </div>
   );
-}
+});
+export default LanguagePackManager;

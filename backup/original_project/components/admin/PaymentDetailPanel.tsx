@@ -57,7 +57,7 @@ export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdat
         setPayment(data.payment)
       }
     } catch (error) {
-      console.error('결제 상세 정보 로드 실패:', error)
+
     } finally {
       setLoading(false)
     }
@@ -80,7 +80,7 @@ export default function PaymentDetailPanel({ paymentId, isOpen, onClose, onUpdat
         if (onUpdate) onUpdate()
       }
     } catch (error) {
-      console.error('결제 처리 실패:', error)
+
     } finally {
       setProcessing(false)
     }

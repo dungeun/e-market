@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import { env } from '@/lib/config/env';
 
 // Redis 클라이언트 생성
 export const redis = new Redis({
@@ -16,11 +17,11 @@ export const redis = new Redis({
 })
 
 redis.on('error', (err) => {
-  console.error('Redis Client Error:', err)
+
 })
 
 redis.on('connect', () => {
-  console.log('Redis Connected')
+
 })
 
 // 헬스 체크
@@ -29,7 +30,7 @@ export async function checkRedisConnection(): Promise<boolean> {
     await redis.ping()
     return true
   } catch (error) {
-    console.error('Redis connection check failed:', error)
+
     return false
   }
 }

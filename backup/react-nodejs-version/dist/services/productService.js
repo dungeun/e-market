@@ -10,14 +10,14 @@ class ProductService {
     async createProduct(data) {
         try {
             // Get existing slugs to ensure uniqueness
-            const existingProducts = await database_1.prisma.product.findMany({
+            const existingProducts = await database_1.query({
                 select: { slug: true },
             });
             const existingSlugs = existingProducts.map(p => p.slug);
             // Get category name for SEO
             let categoryName;
             if (data.categoryId) {
-                const category = await database_1.prisma.category.findUnique({
+                const category = await database_1.query({
                     where: { id: data.categoryId },
                     select: { name: true },
                 });
@@ -41,14 +41,14 @@ class ProductService {
                 throw new error_1.AppError(`SEO validation failed: ${validation.errors.join(', ')}`, 400);
             }
             // Check if slug already exists
-            const existingProduct = await database_1.prisma.product.findUnique({
+            const existingProduct = await database_1.query({
                 where: { slug },
             });
             if (existingProduct) {
                 throw new error_1.AppError('Product with this slug already exists', 409);
             }
             // Check if SKU already exists
-            const existingSku = await database_1.prisma.product.findUnique({
+            const existingSku = await database_1.query({
                 where: { sku: data.sku },
             });
             if (existingSku) {
@@ -56,7 +56,7 @@ class ProductService {
             }
             // Verify category exists if provided
             if (data.categoryId) {
-                const category = await database_1.prisma.category.findUnique({
+                const category = await database_1.query({
                     where: { id: data.categoryId },
                 });
                 if (!category) {
@@ -183,7 +183,7 @@ class ProductService {
     }
     // Get product by ID with all relations
     async getProductById(id) {
-        const product = await database_1.prisma.product.findUnique({
+        const product = await database_1.query({
             where: { id },
             include: {
                 category: {
@@ -253,7 +253,7 @@ class ProductService {
         orderBy[sortBy] = sortOrder;
         const skip = (page - 1) * limit;
         const [products, total] = await Promise.all([
-            database_1.prisma.product.findMany({
+            database_1.query({
                 where,
                 skip,
                 take: limit,
@@ -285,7 +285,7 @@ class ProductService {
                     },
                 },
             }),
-            database_1.prisma.product.count({ where }),
+            database_1.query({ where }),
         ]);
         return {
             products,
@@ -301,7 +301,7 @@ class ProductService {
     async updateProduct(id, data) {
         try {
             // Check if product exists
-            const existingProduct = await database_1.prisma.product.findUnique({
+            const existingProduct = await database_1.query({
                 where: { id },
             });
             if (!existingProduct) {
@@ -309,7 +309,7 @@ class ProductService {
             }
             // Check slug uniqueness if updating
             if (data.slug && data.slug !== existingProduct.slug) {
-                const slugExists = await database_1.prisma.product.findUnique({
+                const slugExists = await database_1.query({
                     where: { slug: data.slug },
                 });
                 if (slugExists) {
@@ -318,7 +318,7 @@ class ProductService {
             }
             // Check SKU uniqueness if updating
             if (data.sku && data.sku !== existingProduct.sku) {
-                const skuExists = await database_1.prisma.product.findUnique({
+                const skuExists = await database_1.query({
                     where: { sku: data.sku },
                 });
                 if (skuExists) {
@@ -327,7 +327,7 @@ class ProductService {
             }
             // Verify category exists if provided
             if (data.categoryId) {
-                const category = await database_1.prisma.category.findUnique({
+                const category = await database_1.query({
                     where: { id: data.categoryId },
                 });
                 if (!category) {
@@ -421,20 +421,20 @@ class ProductService {
     }
     // Delete product
     async deleteProduct(id) {
-        const product = await database_1.prisma.product.findUnique({
+        const product = await database_1.query({
             where: { id },
         });
         if (!product) {
             throw new error_1.AppError('Product not found', 404);
         }
-        await database_1.prisma.product.delete({
+        await database_1.query({
             where: { id },
         });
         logger_1.logger.info(`Product deleted: ${id}`);
     }
     // Inventory management
     async adjustInventory(data) {
-        const product = await database_1.prisma.product.findUnique({
+        const product = await database_1.query({
             where: { id: data.productId },
         });
         if (!product) {
@@ -468,7 +468,7 @@ class ProductService {
     }
     // Get low stock products
     async getLowStockProducts() {
-        return database_1.prisma.product.findMany({
+        return database_1.query({
             where: {
                 trackQuantity: true,
                 quantity: {
@@ -484,7 +484,7 @@ class ProductService {
     }
     // Get product by slug
     async getProductBySlug(slug) {
-        const product = await database_1.prisma.product.findUnique({
+        const product = await database_1.query({
             where: { slug },
             include: {
                 category: {
@@ -522,14 +522,14 @@ class ProductService {
     async generateSEOPreview(productData) {
         try {
             // Get existing slugs
-            const existingProducts = await database_1.prisma.product.findMany({
+            const existingProducts = await database_1.query({
                 select: { slug: true },
             });
             const existingSlugs = existingProducts.map(p => p.slug);
             // Get category name
             let categoryName;
             if (productData.categoryId) {
-                const category = await database_1.prisma.category.findUnique({
+                const category = await database_1.query({
                     where: { id: productData.categoryId },
                     select: { name: true },
                 });
@@ -562,7 +562,7 @@ class ProductService {
             .trim();
     }
     async logInventoryChange(data) {
-        await database_1.prisma.inventoryLog.create({
+        await database_1.query({
             data: {
                 productId: data.productId,
                 type: data.type,

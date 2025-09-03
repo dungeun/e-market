@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -76,7 +78,6 @@ function EditModal({ category, parentCategory, onClose, onSave, isNew }: EditMod
               />
             </div>
 
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 색상
@@ -147,7 +148,7 @@ function MainCategoryItem({ category, onReload }: { category: Category; onReload
         onReload()
       }
     } catch (error) {
-      console.error('Error adding subcategory:', error)
+
     }
   }
 
@@ -164,7 +165,7 @@ function MainCategoryItem({ category, onReload }: { category: Category; onReload
         onReload()
       }
     } catch (error) {
-      console.error('Error updating subcategory:', error)
+
     }
   }
 
@@ -185,7 +186,7 @@ function MainCategoryItem({ category, onReload }: { category: Category; onReload
         alert(error.error || '삭제 실패')
       }
     } catch (error) {
-      console.error('Error deleting subcategory:', error)
+
     }
   }
 
@@ -201,7 +202,7 @@ function MainCategoryItem({ category, onReload }: { category: Category; onReload
         onReload()
       }
     } catch (error) {
-      console.error('Error toggling active:', error)
+
     }
   }
 
@@ -334,15 +335,15 @@ export function CategoryConfigTab() {
         // 대분류 카테고리만 필터링하고 children 포함
         const mainCategories = data.categories
           .filter((cat: Category) => cat.level === 1)
-          .map((cat: any) => ({
+          .map((cat: unknown) => ({
             ...cat,
-            children: data.categories.filter((child: any) => child.parentId === cat.id)
+            children: data.categories.filter((child: unknown) => child.parentId === cat.id)
           }))
           .sort((a: Category, b: Category) => (a.menuOrder || 999) - (b.menuOrder || 999))
         setCategories(mainCategories)
       }
     } catch (error) {
-      console.error('Error fetching categories:', error)
+
     } finally {
       setLoading(false)
     }

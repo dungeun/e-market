@@ -2,10 +2,8 @@
  * 검색 분석 서비스
  */
 
-import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 
-const prisma = new PrismaClient()
 const redis = new Redis(process.env.REDIS_URL!)
 
 export interface SearchAnalytics {
@@ -58,7 +56,7 @@ export class SearchAnalyticsService {
    * 검색어 트렌드 분석
    */
   async getQueryTrends(query: string, days = 30) {
-    const trends: any[] = []
+    const trends: unknown[] = []
     const now = new Date()
     
     for (let i = days; i >= 0; i--) {
@@ -112,7 +110,7 @@ export class SearchAnalyticsService {
    * 검색 개선 제안
    */
   async getSearchImprovementSuggestions() {
-    const suggestions: any[] = []
+    const suggestions: unknown[] = []
 
     // 결과 없는 검색어 분석
     const zeroResults = await this.getZeroResultQueries(7)
@@ -173,7 +171,7 @@ export class SearchAnalyticsService {
 
   private async getPopularQueries(days: number) {
     const queries = await redis.zrevrange('search_frequency', 0, 19, 'WITHSCORES')
-    const result: any[] = []
+    const result: unknown[] = []
     
     for (let i = 0; i < queries.length; i += 2) {
       const query = queries[i]
@@ -192,7 +190,7 @@ export class SearchAnalyticsService {
 
   private async getZeroResultQueries(days: number) {
     const queries = await redis.zrevrange('zero_result_queries', 0, 9, 'WITHSCORES')
-    const result: any[] = []
+    const result: unknown[] = []
     
     for (let i = 0; i < queries.length; i += 2) {
       result.push({
@@ -226,11 +224,11 @@ export class SearchAnalyticsService {
 
   private async getCategoryPerformance(days: number) {
     // 카테고리별 검색 성과 분석
-    const categories = await prisma.category.findMany({
+    const categories = await query({
       select: { id: true, name: true }
     })
 
-    const performance: any[] = []
+    const performance: unknown[] = []
     for (const category of categories) {
       const searches = parseInt(await redis.get(`category_searches:${category.id}`) || '0')
       const conversions = parseInt(await redis.get(`category_conversions:${category.id}`) || '0')

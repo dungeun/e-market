@@ -1,7 +1,6 @@
 import cron from 'node-cron'
 import { MetricsService } from './metricsService'
 import logger from '../utils/logger'
-import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 
 export class MonitoringService {
@@ -89,7 +88,7 @@ export class MonitoringService {
         SELECT count(*) as connection_count 
         FROM pg_stat_activity 
         WHERE state = 'active'
-      ` as any[]
+      ` as unknown[]
 
       const connectionCount = parseInt(result[0]?.connection_count || '0')
       MetricsService.setDatabaseConnections(connectionCount)
@@ -148,7 +147,7 @@ export class MonitoringService {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const todayOrders = await this.prisma.order.count({
+      const todayOrders = await this.query({
         where: {
           createdAt: {
             gte: today,
@@ -183,7 +182,7 @@ export class MonitoringService {
    */
   private async updateInventoryMetrics(): Promise<void> {
     try {
-      const products = await this.prisma.product.findMany({
+      const products = await this.query({
         select: {
           id: true,
           name: true,
@@ -311,7 +310,7 @@ export class MonitoringService {
   /**
    * Store daily report
    */
-  private async storeDailyReport(report: any): Promise<void> {
+  private async storeDailyReport(report: unknown): Promise<void> {
     try {
       await this.redis.setex(
         `daily_report:${report.date}`,
@@ -347,7 +346,7 @@ export class MonitoringService {
   /**
    * Get monitoring statistics
    */
-  public async getMonitoringStats(): Promise<any> {
+  public async getMonitoringStats(): Promise<unknown> {
     try {
       const stats = {
         activeUsers: await this.redis.scard('active_users'),
@@ -371,7 +370,7 @@ export class MonitoringService {
         SELECT count(*) as connection_count 
         FROM pg_stat_activity 
         WHERE state = 'active'
-      ` as any[]
+      ` as unknown[]
       return parseInt(result[0]?.connection_count || '0')
     } catch (error) {
       return 0

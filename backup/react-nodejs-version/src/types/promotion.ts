@@ -12,7 +12,7 @@ export interface CreatePromotionDto {
   endDate: Date;
   isActive?: boolean;
   isExclusive?: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface UpdatePromotionDto {
@@ -28,7 +28,7 @@ export interface UpdatePromotionDto {
   endDate?: Date;
   isActive?: boolean;
   isExclusive?: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export enum PromotionType {
@@ -57,7 +57,7 @@ export interface PromotionConditions {
   customRules?: Array<{
     field: string;
     operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'contains';
-    value: any;
+    value: unknown;
   }>;
 }
 
@@ -79,7 +79,7 @@ export interface PromotionActions {
   }>;
   freeShipping?: boolean;
   pointMultiplier?: number;
-  customActions?: any;
+  customActions?: unknown;
 }
 
 export interface PromotionEvaluationResult {
@@ -89,7 +89,7 @@ export interface PromotionEvaluationResult {
     name: string;
     type: PromotionType;
     discountAmount: number;
-    freeProducts?: any[];
+    freeProducts?: unknown[];
     message?: string;
   }>;
   totalDiscount: number;

@@ -68,7 +68,7 @@ export default function SignupPage() {
       router.push('/')
       
     } catch (error) {
-      console.error('Signup error:', error)
+
       toast.error(error instanceof Error ? error.message : '회원가입에 실패했습니다')
     } finally {
       setIsLoading(false)

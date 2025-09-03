@@ -1,7 +1,5 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // POST - 세금계산서 발행
 export async function POST(
@@ -12,7 +10,7 @@ export async function POST(
     const { id: invoiceId } = await params
 
     // 세금계산서 조회
-    const invoice = await prisma.taxInvoice.findUnique({
+    const invoice = await query({
       where: { id: invoiceId },
       include: { items: true }
     })
@@ -36,7 +34,7 @@ export async function POST(
     
     if (popbillResult.success) {
       // 발행 성공 시 DB 업데이트
-      const updatedInvoice = await prisma.taxInvoice.update({
+      const updatedInvoice = await query({
         where: { id: invoiceId },
         data: {
           status: 'ISSUED',
@@ -58,7 +56,7 @@ export async function POST(
       )
     }
   } catch (error) {
-    console.error('Tax invoice issue error:', error)
+
     return NextResponse.json(
       { error: '세금계산서 발행 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -67,7 +65,7 @@ export async function POST(
 }
 
 // Popbill API 호출 함수 (실제 구현 필요)
-async function issueToPopbill(invoice: any) {
+async function issueToPopbill(invoice: unknown) {
   try {
     // Popbill SDK 또는 API 호출
     // 실제 구현에서는 Popbill 라이브러리 사용
@@ -96,7 +94,7 @@ async function issueToPopbill(invoice: any) {
       totalAmount: invoice.totalAmount.toString(),
       
       // 품목 정보
-      detailList: invoice.items.map((item: any, index: number) => ({
+      detailList: invoice.items.map((item: unknown, index: number) => ({
         serialNum: index + 1,
         purchaseDT: item.itemDate.toISOString().split('T')[0],
         itemName: item.itemName,
@@ -120,7 +118,7 @@ async function issueToPopbill(invoice: any) {
       invoiceNum: invoice.invoiceNumber
     }
   } catch (error) {
-    console.error('Popbill API Error:', error)
+
     return {
       success: false,
       message: '국세청 전송 실패'

@@ -1,3 +1,4 @@
+import type { AppError } from '@/lib/types/common';
 /**
  * AI 추천 시스템 API
  */
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     
     const userId = session?.user?.id || searchParams.get('userId')
-    const type = (searchParams.get('type') as any) || 'hybrid'
+    const type = (searchParams.get('type') as unknown) || 'hybrid'
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
     const includeViewed = searchParams.get('includeViewed') === 'true'
     const categoryFilter = searchParams.get('categories')?.split(',')
@@ -47,8 +48,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: recommendations
     })
-  } catch (error: any) {
-    console.error('Recommendations error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to get recommendations' },
       { status: 500 }
@@ -90,8 +91,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Event tracked successfully'
     })
-  } catch (error: any) {
-    console.error('Recommendation tracking error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to track recommendation' },
       { status: 500 }

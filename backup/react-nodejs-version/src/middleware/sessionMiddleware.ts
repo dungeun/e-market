@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import { sessionService } from '../services/sessionService'
 import { logger } from '../utils/logger'
@@ -53,8 +54,8 @@ export function sessionMiddleware(options: SessionOptions = {}) {
       }
 
       // Check if user is authenticated (has userId in JWT or similar)
-      const isAuthenticated = !!(req as any).user?.id || !!(req as any).userId
-      const userId = (req as any).user?.id || (req as any).userId
+      const isAuthenticated = !!(req as unknown).user?.id || !!(req as unknown).userId
+      const userId = (req as unknown).user?.id || (req as unknown).userId
 
       if (isAuthenticated) {
         // User is authenticated, set session info

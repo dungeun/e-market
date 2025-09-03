@@ -5,7 +5,7 @@ import { InquiryStatus } from '../../types/inquiry';
 import { useAuthStore } from '../../stores/authStore';
 
 interface InquiryDetailProps {
-  inquiry: any;
+  inquiry: unknown;
   onReply?: (content: string) => Promise<void>;
   onStatusChange?: (status: InquiryStatus) => Promise<void>;
   onSatisfactionRate?: (rating: number, note?: string) => Promise<void>;
@@ -33,7 +33,7 @@ export function InquiryDetail({ inquiry, onReply, onStatusChange, onSatisfaction
       await onReply(replyContent);
       setReplyContent('');
     } catch (error) {
-      console.error('Failed to submit reply:', error);
+
     } finally {
       setIsReplying(false);
     }
@@ -46,7 +46,7 @@ export function InquiryDetail({ inquiry, onReply, onStatusChange, onSatisfaction
       await onSatisfactionRate(satisfaction.rating, satisfaction.note);
       setShowSatisfaction(false);
     } catch (error) {
-      console.error('Failed to submit satisfaction:', error);
+
     }
   };
 
@@ -138,7 +138,7 @@ export function InquiryDetail({ inquiry, onReply, onStatusChange, onSatisfaction
       {inquiry.replies && inquiry.replies.length > 0 && (
         <div className="space-y-4 mb-6">
           <h2 className="text-lg font-semibold">답변</h2>
-          {inquiry.replies.map((reply: any) => (
+          {inquiry.replies.map((reply: unknown) => (
             <div key={reply.id} className="bg-blue-50 rounded-lg p-6">
               <div className="flex justify-between items-start mb-3">
                 <div>

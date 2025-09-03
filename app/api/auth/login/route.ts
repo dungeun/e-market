@@ -1,124 +1,134 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import type { User, RequestContext } from '@/lib/types/common';
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
+import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
+const bcrypt = require('bcryptjs')
+import jwt from 'jsonwebtoken'
+import { cookies } from 'next/headers'
+import { JWT_SECRET } from '@/lib/auth/constants'
+import { logger } from '@/lib/utils/logger'
+import { authRateLimiter } from '@/lib/security/rate-limiter'
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
+  // Rate limiting check (disabled in development for testing)
+  if (process.env.NODE_ENV === 'production') {
+    const rateLimitResponse = await authRateLimiter.check(request)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+  }
+
   try {
-    const { email, password } = await request.json();
+    
+    let body;
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      logger.error('JSON parsing error:', parseError)
+      return NextResponse.json(
+        { error: 'Invalid JSON format' },
+        { status: 400 }
+      )
+    }
+    
+    const { email, password } = body
+    
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: '이메일과 비밀번호를 입력해주세요.' },
+        { error: 'Email and password are required' },
         { status: 400 }
-      );
+      )
     }
 
-    // 사용자 조회
-    const user = await prisma.user.findUnique({
-      where: {
-        email: email.toLowerCase(),
-      },
-      include: {
-        profile: true,
-      },
-    });
+    // 데이터베이스에서 사용자 찾기
+    const userResult = await query(`
+      SELECT u.*, u.role
+      FROM users u
+      WHERE u.email = $1
+    `, [email])
+    const user = userResult.rows[0]
 
-    if (!user || !user.password) {
+    if (!user) {
       return NextResponse.json(
-        { error: '등록되지 않은 이메일이거나 잘못된 비밀번호입니다.' },
+        { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }
-      );
+      )
     }
 
     // 비밀번호 확인
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return NextResponse.json(
-        { error: '등록되지 않은 이메일이거나 잘못된 비밀번호입니다.' },
+        { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }
-      );
+      )
     }
 
-    // 계정 상태 확인
+    // 상태 확인
     if (user.status !== 'ACTIVE') {
-      let errorMessage = '계정에 문제가 있습니다.';
-      switch (user.status) {
-        case 'INACTIVE':
-          errorMessage = '비활성화된 계정입니다. 고객센터에 문의하세요.';
-          break;
-        case 'SUSPENDED':
-          errorMessage = '정지된 계정입니다. 고객센터에 문의하세요.';
-          break;
-        case 'DELETED':
-          errorMessage = '삭제된 계정입니다.';
-          break;
-      }
-      
       return NextResponse.json(
-        { error: errorMessage },
+        { error: '계정이 비활성화되었습니다. 관리자에게 문의하세요.' },
         { status: 403 }
-      );
+      )
     }
 
     // 마지막 로그인 시간 업데이트
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        lastLoginAt: new Date(),
-      },
-    });
+    await query(`
+      UPDATE users 
+      SET last_login_at = NOW(), updated_at = NOW()
+      WHERE id = $1
+    `, [user.id])
 
     // JWT 토큰 생성
     const token = jwt.sign(
       {
-        userId: user.id,
+        id: user.id,
+        userId: user.id, // 호환성을 위해 추가
         email: user.email,
-        role: user.role,
         type: user.type,
+        role: user.role, // role 필드 추가
+        name: user.name
       },
       JWT_SECRET,
       { expiresIn: '7d' }
-    );
+    )
 
-    // 사용자 정보 (비밀번호 제외)
-    const userInfo = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      type: user.type,
-      status: user.status,
-      image: user.image,
-      verified: user.verified,
-      isOnboarded: user.isOnboarded,
-      profile: user.profile,
+    // 응답 생성
+    const response = NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        type: user.type,
+        verified: user.email_verified,
+        profile: null
+      },
+      token,
+      accessToken: token // Add this for backward compatibility with useAuth hook
+    })
+
+    // 쿠키 보안 설정 (환경에 따라 적절히 설정)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction, // 프로덕션에서는 HTTPS 강제
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: '/'
     };
 
-    // 쿠키에 토큰 설정
-    const response = NextResponse.json({
-      success: true,
-      message: '로그인에 성공했습니다.',
-      user: userInfo,
-    });
+    response.cookies.set('auth-token', token, cookieOptions);
+    response.cookies.set('accessToken', token, cookieOptions); // 호환성 유지
 
-    response.cookies.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60, // 7일
-      path: '/',
-    });
+    return response
 
-    return response;
-  } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json(
-      { error: '로그인 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+  } catch (error: Error | unknown) {
+    const { handleApiError } = await import('@/lib/utils/api-error');
+    return handleApiError(error, { endpoint: 'login' });
   }
 }

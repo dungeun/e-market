@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { SecurityUtils } from '../../../src/utils/security'
 import { encryptionService } from '../../../src/services/encryptionService'
 import { paymentSecurityService } from '../../../src/services/paymentSecurityService'
@@ -273,7 +274,7 @@ describe('Security Services', () => {
           headers: { 'user-agent': 'Mozilla/5.0' },
           method: 'POST',
           originalUrl: '/api/v1/auth/login'
-        } as any
+        } as unknown
         
         await expect(
           auditLogService.logAuthEvent('LOGIN', 'user123', req)
@@ -286,7 +287,7 @@ describe('Security Services', () => {
           headers: { 'user-agent': 'Mozilla/5.0' },
           method: 'GET',
           originalUrl: '/api/v1/users'
-        } as any
+        } as unknown
         
         await expect(
           auditLogService.logSecurityEvent('RATE_LIMIT_EXCEEDED', null, req)

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import { RateLimiterRedis, RateLimiterMemory } from 'rate-limiter-flexible'
 import Redis from 'ioredis'
@@ -189,7 +190,7 @@ export const dynamicRateLimiter = (limiterType: keyof typeof rateLimiters = 'api
       await trackRequestMetrics(key, false)
 
       next()
-    } catch (rateLimiterRes: any) {
+    } catch (rateLimiterRes: unknown) {
       rateLimitMetrics.blockedRequests++
 
       // Log rate limit violation with enhanced details
@@ -362,7 +363,7 @@ export const logRequestBehavior = async (req: Request) => {
 async function addToBlacklist(ip: string) {
   try {
     const prisma = await getPrisma()
-    await prisma.blacklist.create({
+    await query({
       data: {
         type: 'IP',
         value: ip,
@@ -381,13 +382,13 @@ async function addToBlacklist(ip: string) {
  */
 function getUserTier(req: Request): string {
   // Check if user has a specific tier
-  if ((req as any).user?.tier) {
-    return (req as any).user.tier
+  if ((req as unknown).user?.tier) {
+    return (req as unknown).user.tier
   }
 
   // Check if API client has a tier
-  if ((req as any).apiClient?.tier) {
-    return (req as any).apiClient.tier
+  if ((req as unknown).apiClient?.tier) {
+    return (req as unknown).apiClient.tier
   }
 
   // Default to basic tier
@@ -420,13 +421,13 @@ async function trackRequestMetrics(key: string, isBlocked: boolean): Promise<voi
  */
 function getKey(req: Request): string {
   // Use authenticated user ID if available
-  if ((req as any).user?.id) {
-    return `user:${(req as any).user.id}`
+  if ((req as unknown).user?.id) {
+    return `user:${(req as unknown).user.id}`
   }
 
   // Use API key if available
-  if ((req as any).apiClient?.id) {
-    return `api:${(req as any).apiClient.id}`
+  if ((req as unknown).apiClient?.id) {
+    return `api:${(req as unknown).apiClient.id}`
   }
 
   // Fall back to IP address
@@ -443,7 +444,7 @@ export const blacklistCheck = async (
 ) => {
   try {
     const prisma = await getPrisma()
-    const blacklisted = await prisma.blacklist.findFirst({
+    const blacklisted = await query({
       where: {
         AND: [
           {
@@ -583,18 +584,18 @@ export const updateUserTier = async (userId: string, tier: keyof typeof USER_TIE
 /**
  * Get rate limit status for a key
  */
-export const getRateLimitStatus = async (key: string): Promise<any> => {
+export const getRateLimitStatus = async (key: string): Promise<unknown> => {
   try {
     if (!redisClient) return null
 
-    const status: any = {}
+    const status: unknown = {}
 
     // Check all rate limiter types
     for (const [type, limiter] of Object.entries(rateLimiters)) {
       try {
         const res = await limiter.get(key)
         status[type] = {
-          totalHits: res ? (res.remainingPoints ? ((res as any).points || 100) - res.remainingPoints : 0) : 0,
+          totalHits: res ? (res.remainingPoints ? ((res as unknown).points || 100) - res.remainingPoints : 0) : 0,
           remainingPoints: res?.remainingPoints,
           msBeforeNext: res?.msBeforeNext,
           isBlocked: !res || res.remainingPoints === 0,
@@ -630,7 +631,7 @@ export const whitelistMiddleware = (req: Request, _res: Response, next: NextFunc
   const userAgent = req.headers['user-agent'] || ''
 
   if (trustedIPs.includes(req.ip || '') || trustedUserAgents.some(ua => userAgent.includes(ua))) {
-    (req as any).skipRateLimit = true
+    (req as unknown).skipRateLimit = true
     logger.debug('Request whitelisted, skipping rate limit', {
       ip: req.ip,
       userAgent,
@@ -648,7 +649,7 @@ export const smartAdaptiveRateLimiter = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Skip if whitelisted
-      if ((req as any).skipRateLimit) {
+      if ((req as unknown).skipRateLimit) {
         return next()
       }
 

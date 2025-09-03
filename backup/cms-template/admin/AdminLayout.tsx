@@ -19,14 +19,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (!authLoading) {
-      console.log('AdminLayout - User:', user)
-      console.log('AdminLayout - User Type:', user?.type)
-      console.log('AdminLayout - Is Authenticated:', isAuthenticated)
-      
+
       if (!isAuthenticated || (user?.type !== 'ADMIN' && user?.type !== 'admin')) {
-        console.log('AdminLayout - 관리자 권한이 없습니다. 로그인 페이지로 이동합니다.')
-        console.log('현재 사용자:', user)
-        
+
         router.push('/login?error=admin_required&message=관리자 권한이 필요합니다')
       }
       setIsLoading(false)

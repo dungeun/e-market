@@ -19,7 +19,7 @@ class OrderService {
         // Get today's order count
         const startOfDay = new Date(date.setHours(0, 0, 0, 0));
         const endOfDay = new Date(date.setHours(23, 59, 59, 999));
-        const orderCount = await database_1.prisma.order.count({
+        const orderCount = await database_1.query({
             where: {
                 createdAt: {
                     gte: startOfDay,
@@ -45,9 +45,9 @@ class OrderService {
             }
             // Get addresses
             const [shippingAddress, billingAddress] = await Promise.all([
-                database_1.prisma.address.findUnique({ where: { id: data.shippingAddressId } }),
+                database_1.query({ where: { id: data.shippingAddressId } }),
                 data.billingAddressId
-                    ? database_1.prisma.address.findUnique({ where: { id: data.billingAddressId } })
+                    ? database_1.query({ where: { id: data.billingAddressId } })
                     : null,
             ]);
             if (!shippingAddress) {
@@ -222,7 +222,7 @@ class OrderService {
     }
     // Get order by order number
     async getOrderByNumber(orderNumber) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { orderNumber },
         });
         if (!order) {
@@ -250,13 +250,13 @@ class OrderService {
         }
         const skip = (page - 1) * limit;
         const [orders, total] = await Promise.all([
-            database_1.prisma.order.findMany({
+            database_1.query({
                 where,
                 skip,
                 take: limit,
                 orderBy: { [sortBy]: sortOrder },
             }),
-            database_1.prisma.order.count({ where }),
+            database_1.query({ where }),
         ]);
         const ordersWithDetails = await Promise.all(orders.map(order => this.getOrderWithDetails(order.id)));
         return {
@@ -296,13 +296,13 @@ class OrderService {
         }
         const skip = (page - 1) * limit;
         const [orders, total] = await Promise.all([
-            database_1.prisma.order.findMany({
+            database_1.query({
                 where,
                 skip,
                 take: limit,
                 orderBy: { [sortBy]: sortOrder },
             }),
-            database_1.prisma.order.count({ where }),
+            database_1.query({ where }),
         ]);
         const ordersWithDetails = await Promise.all(orders.map(order => this.getOrderWithDetails(order.id)));
         return {
@@ -317,7 +317,7 @@ class OrderService {
     }
     // Update order
     async updateOrder(id, data) {
-        const existingOrder = await database_1.prisma.order.findUnique({
+        const existingOrder = await database_1.query({
             where: { id },
         });
         if (!existingOrder) {
@@ -352,7 +352,7 @@ class OrderService {
     }
     // Cancel order
     async cancelOrder(id, data) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { id },
             include: {
                 items: {
@@ -428,7 +428,7 @@ class OrderService {
     }
     // Process refund
     async processRefund(id, data) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { id },
             include: {
                 payments: true,
@@ -483,7 +483,7 @@ class OrderService {
     }
     // Update shipping information
     async updateShipping(id, data) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { id },
         });
         if (!order) {
@@ -513,7 +513,7 @@ class OrderService {
     }
     // Mark order as delivered
     async markAsDelivered(id) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { id },
         });
         if (!order) {
@@ -544,7 +544,7 @@ class OrderService {
     // Get order timeline
     async getOrderTimeline(orderId) {
         // Use order status history as timeline for now
-        const timeline = await database_1.prisma.orderStatusHistory.findMany({
+        const timeline = await database_1.query({
             where: { orderId },
             orderBy: { createdAt: 'desc' },
         });
@@ -562,7 +562,7 @@ class OrderService {
         const where = userId ? { userId } : {};
         // Get total orders and revenue
         const [totalOrders, orderStats] = await Promise.all([
-            database_1.prisma.order.count({ where }),
+            database_1.query({ where }),
             database_1.prisma.order.aggregate({
                 where,
                 _sum: {
@@ -585,7 +585,7 @@ class OrderService {
             },
         });
         // Get recent orders
-        const recentOrders = await database_1.prisma.order.findMany({
+        const recentOrders = await database_1.query({
             where,
             take: 10,
             orderBy: { createdAt: 'desc' },
@@ -635,7 +635,7 @@ class OrderService {
     }
     // Private helper methods
     async getOrderWithDetails(orderId) {
-        const order = await database_1.prisma.order.findUnique({
+        const order = await database_1.query({
             where: { id: orderId },
             include: {
                 items: {

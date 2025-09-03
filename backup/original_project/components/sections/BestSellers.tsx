@@ -13,7 +13,7 @@ interface BestSellersProps {
     showSalesCount?: boolean
     categoryFilter?: string | null
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function BestSellers({ config, products }: BestSellersProps) {

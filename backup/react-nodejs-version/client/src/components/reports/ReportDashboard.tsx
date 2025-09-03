@@ -13,7 +13,7 @@ import { ReportGenerator } from './ReportGenerator';
 
 interface DashboardSummary {
   totalReports: number;
-  recentReports: any[];
+  recentReports: unknown[];
   reportsByType: Record<string, number>;
   reportsByFormat: Record<string, number>;
   totalSize: number;
@@ -40,7 +40,7 @@ export const ReportDashboard: React.FC = () => {
         setSummary(data.data);
       }
     } catch (error) {
-      console.error('Failed to load dashboard summary:', error);
+
     } finally {
       setLoading(false);
     }

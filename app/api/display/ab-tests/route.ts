@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 진열 A/B 테스트 관리 API
  */
@@ -6,8 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { displayTemplateService } from '@/lib/services/display/display-template'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // A/B 테스트 목록 조회
 export async function GET(request: NextRequest) {
@@ -25,11 +26,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const position = searchParams.get('position')
 
-    const where: any = {}
+    const where: unknown = {}
     if (status) where.status = status
     if (position) where.position = position
 
-    const tests = await prisma.displayABTest.findMany({
+    const tests = await query({
       where,
       include: {
         variants: {
@@ -44,10 +45,10 @@ export async function GET(request: NextRequest) {
     })
 
     // 성능 데이터 추가
-    const testsWithPerformance: any[] = []
+    const testsWithPerformance: unknown[] = []
     
     for (const test of tests) {
-      const testPerformance: any = {
+      const testPerformance: unknown = {
         ...test,
         variants: []
       }
@@ -74,8 +75,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: testsWithPerformance
     })
-  } catch (error: any) {
-    console.error('A/B tests fetch error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch A/B tests' },
       { status: 500 }
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 가중치 합계 확인
-    const totalWeight = variants.reduce((sum: number, v: any) => sum + v.weight, 0)
+    const totalWeight = variants.reduce((sum: number, v: unknown) => sum + v.weight, 0)
     if (Math.abs(totalWeight - 100) > 0.01) {
       return NextResponse.json(
         { error: 'Variant weights must sum to 100' },
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
     })
 
     // 추가 메타데이터 저장
-    await prisma.displayABTest.update({
+    await query({
       where: { id: test.id },
       data: {
         metadata: {
@@ -147,8 +148,8 @@ export async function POST(request: NextRequest) {
       data: test,
       message: 'A/B 테스트가 생성되었습니다.'
     })
-  } catch (error: any) {
-    console.error('A/B test creation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to create A/B test' },
       { status: 500 }
@@ -186,7 +187,7 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const updateData: any = { status }
+    const updateData: unknown = { status }
 
     if (status === 'COMPLETED') {
       updateData.endDate = new Date()
@@ -195,21 +196,21 @@ export async function PATCH(request: NextRequest) {
         updateData.winnerVariantId = winnerVariantId
         
         // 승리한 변형을 활성 템플릿으로 설정
-        const winnerVariant = await prisma.displayABTestVariant.findUnique({
+        const winnerVariant = await query({
           where: { id: winnerVariantId },
           include: { template: true }
         })
 
         if (winnerVariant) {
           // 다른 모든 변형 비활성화
-          const test = await prisma.displayABTest.findUnique({
+          const test = await query({
             where: { id: testId },
             include: { variants: true }
           })
 
           if (test) {
             for (const variant of test.variants) {
-              await prisma.displayTemplate.update({
+              await query({
                 where: { id: variant.templateId },
                 data: { 
                   isActive: variant.id === winnerVariantId,
@@ -222,7 +223,7 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    const test = await prisma.displayABTest.update({
+    const test = await query({
       where: { id: testId },
       data: updateData,
       include: {
@@ -239,8 +240,8 @@ export async function PATCH(request: NextRequest) {
       data: test,
       message: `A/B 테스트가 ${status === 'COMPLETED' ? '완료' : '업데이트'}되었습니다.`
     })
-  } catch (error: any) {
-    console.error('A/B test update error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to update A/B test' },
       { status: 500 }
@@ -262,7 +263,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 활성 A/B 테스트 조회
-    const activeTests = await prisma.displayABTest.findMany({
+    const activeTests = await query({
       where: {
         position,
         status: 'ACTIVE',
@@ -294,7 +295,7 @@ export async function PUT(request: NextRequest) {
     // 기존 할당 확인
     const identifier = userId || sessionId
     if (identifier) {
-      const existingAssignment = await prisma.aBTestAssignment.findFirst({
+      const existingAssignment = await query({
         where: {
           testId: test.id,
           OR: [
@@ -327,7 +328,7 @@ export async function PUT(request: NextRequest) {
     const selectedVariant = selectVariantByWeight(test.variants)
     
     if (identifier) {
-      await prisma.aBTestAssignment.create({
+      await query({
         data: {
           testId: test.id,
           variantId: selectedVariant.id,
@@ -345,8 +346,8 @@ export async function PUT(request: NextRequest) {
         testId: test.id
       }
     })
-  } catch (error: any) {
-    console.error('A/B test assignment error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to assign A/B test variant' },
       { status: 500 }
@@ -355,7 +356,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // 가중치 기반 변형 선택
-function selectVariantByWeight(variants: any[]): any {
+function selectVariantByWeight(variants: unknown[]): any {
   const totalWeight = variants.reduce((sum, v) => sum + v.weight, 0)
   const random = Math.random() * totalWeight
   

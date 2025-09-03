@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { Mail, User, Phone, MapPin, Building } from 'lucide-react'
 
 interface CheckoutFormProps {
-  form: UseFormReturn<any>
+  form: UseFormReturn<unknown>
   onNext: () => void
   isProcessing: boolean
 }

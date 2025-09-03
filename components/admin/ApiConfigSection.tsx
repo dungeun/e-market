@@ -101,7 +101,7 @@ export function ApiConfigSection() {
         setEditingConfigs(editing)
       }
     } catch (error) {
-      console.error('Failed to load API configs:', error)
+
     } finally {
       setLoading(false)
     }
@@ -142,7 +142,7 @@ export function ApiConfigSection() {
         throw new Error('Failed to save')
       }
     } catch (error) {
-      console.error('Save error:', error)
+
       alert('API 설정 저장에 실패했습니다.')
     } finally {
       setSaving(null)
@@ -169,7 +169,7 @@ export function ApiConfigSection() {
         alert('API 설정이 삭제되었습니다.')
       }
     } catch (error) {
-      console.error('Delete error:', error)
+
       alert('API 설정 삭제에 실패했습니다.')
     }
   }
@@ -211,7 +211,7 @@ export function ApiConfigSection() {
     setNewService('')
   }
 
-  const updateConfig = (service: string, field: string, value: any) => {
+  const updateConfig = (service: string, field: string, value: unknown) => {
     setEditingConfigs({
       ...editingConfigs,
       [service]: {

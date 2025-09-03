@@ -271,7 +271,7 @@ describe('SEOService', () => {
         reviewCount: 10
       }
 
-      const schema = seoService.generateProductSchema(product) as any
+      const schema = seoService.generateProductSchema(product) as unknown
       
       expect(schema.description).toBe('A great test product')
       expect(schema.brand.name).toBe('Test Brand')
@@ -289,7 +289,7 @@ describe('SEOService', () => {
         { name: 'Headphones', url: '/electronics/headphones' }
       ]
 
-      const schema = seoService.generateBreadcrumbSchema(breadcrumbs) as any
+      const schema = seoService.generateBreadcrumbSchema(breadcrumbs) as unknown
       
       expect(schema['@context']).toBe('https://schema.org')
       expect(schema['@type']).toBe('BreadcrumbList')

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { api } from './api';
 
 export interface RecommendationRequest {
@@ -7,7 +8,7 @@ export interface RecommendationRequest {
   offset?: number;
   categoryId?: string;
   excludeProductIds?: string[];
-  context?: any;
+  context?: unknown;
 }
 
 export interface RecommendationResult {
@@ -15,14 +16,14 @@ export interface RecommendationResult {
   score: number;
   reason?: string;
   algorithm: string;
-  product?: any;
+  product?: unknown;
 }
 
 export interface TrackingData {
   productId: string;
   action: string;
   duration?: number;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface ClickData {
@@ -114,7 +115,7 @@ class RecommendationService {
     algorithm?: string;
     startDate?: string;
     endDate?: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value) queryParams.append(key, value);
@@ -135,9 +136,9 @@ class RecommendationService {
   }
 
   // 실시간 추천 WebSocket 연결
-  connectRealtimeRecommendations(userId: string, onRecommendation: (data: any) => void) {
+  connectRealtimeRecommendations(userId: string, onRecommendation: (data: unknown) => void) {
     // Socket.IO 연결 로직
-    const socket = (window as any).io?.('/recommendations', {
+    const socket = (window as unknown).io?.('/recommendations', {
       auth: { userId }
     });
 
@@ -162,7 +163,7 @@ class RecommendationService {
   }
 
   // 장바구니 추가 추적 헬퍼
-  async trackAddToCart(productId: string, metadata?: any): Promise<void> {
+  async trackAddToCart(productId: string, metadata?: unknown): Promise<void> {
     await this.trackBehavior({
       productId,
       action: 'ADD_TO_CART',

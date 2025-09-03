@@ -5,14 +5,14 @@ import { prisma } from '../../src/utils/database'
 describe('Product Integration Tests', () => {
   beforeEach(async () => {
     // Clean up database before each test
-    await prisma.productTag.deleteMany()
-    await prisma.productAttribute.deleteMany()
-    await prisma.productImage.deleteMany()
-    await prisma.productVariant.deleteMany()
-    await prisma.inventoryLog.deleteMany()
-    await prisma.product.deleteMany()
-    await prisma.tag.deleteMany()
-    await prisma.category.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
   })
 
   afterAll(async () => {
@@ -52,7 +52,7 @@ describe('Product Integration Tests', () => {
 
     it('should create a product with category', async () => {
       // First create a category
-      const category = await prisma.category.create({
+      const category = await query({
         data: {
           name: 'Electronics',
           slug: 'electronics',
@@ -131,7 +131,7 @@ describe('Product Integration Tests', () => {
   describe('GET /api/v1/products', () => {
     beforeEach(async () => {
       // Create test products
-      await prisma.product.createMany({
+      await queryMany({
         data: [
           {
             name: 'Product 1',
@@ -185,7 +185,7 @@ describe('Product Integration Tests', () => {
         .expect(200)
 
       expect(response.body.data).toHaveLength(2)
-      expect(response.body.data.every((p: any) => p.status === 'PUBLISHED')).toBe(true)
+      expect(response.body.data.every((p: unknown) => p.status === 'PUBLISHED')).toBe(true)
     })
 
     it('should search products by name', async () => {
@@ -211,7 +211,7 @@ describe('Product Integration Tests', () => {
         .get('/api/v1/products?sortBy=price&sortOrder=asc')
         .expect(200)
 
-      const prices = response.body.data.map((p: any) => p.price)
+      const prices = response.body.data.map((p: unknown) => p.price)
       expect(prices).toEqual([...prices].sort((a, b) => a - b))
     })
 
@@ -229,7 +229,7 @@ describe('Product Integration Tests', () => {
     let productId: string
 
     beforeEach(async () => {
-      const product = await prisma.product.create({
+      const product = await query({
         data: {
           name: 'Test Product',
           slug: 'test-product',
@@ -275,7 +275,7 @@ describe('Product Integration Tests', () => {
     let productId: string
 
     beforeEach(async () => {
-      const product = await prisma.product.create({
+      const product = await query({
         data: {
           name: 'Original Product',
           slug: 'original-product',
@@ -322,7 +322,7 @@ describe('Product Integration Tests', () => {
     let productId: string
 
     beforeEach(async () => {
-      const product = await prisma.product.create({
+      const product = await query({
         data: {
           name: 'Product to Delete',
           slug: 'product-to-delete',
@@ -344,7 +344,7 @@ describe('Product Integration Tests', () => {
       expect(response.body.message).toBe('Product deleted successfully')
 
       // Verify product is deleted
-      const deletedProduct = await prisma.product.findUnique({
+      const deletedProduct = await query({
         where: { id: productId },
       })
       expect(deletedProduct).toBeNull()
@@ -364,7 +364,7 @@ describe('Product Integration Tests', () => {
     let productId: string
 
     beforeEach(async () => {
-      const product = await prisma.product.create({
+      const product = await query({
         data: {
           name: 'Inventory Product',
           slug: 'inventory-product',
@@ -396,13 +396,13 @@ describe('Product Integration Tests', () => {
       expect(response.body.message).toBe('Inventory adjusted successfully')
 
       // Verify inventory was updated
-      const updatedProduct = await prisma.product.findUnique({
+      const updatedProduct = await query({
         where: { id: productId },
       })
       expect(updatedProduct?.quantity).toBe(15)
 
       // Verify inventory log was created
-      const inventoryLog = await prisma.inventoryLog.findFirst({
+      const inventoryLog = await query({
         where: { productId },
       })
       expect(inventoryLog).toBeDefined()
@@ -430,7 +430,7 @@ describe('Product Integration Tests', () => {
 
   describe('GET /api/v1/products/low-stock', () => {
     beforeEach(async () => {
-      await prisma.product.createMany({
+      await queryMany({
         data: [
           {
             name: 'Low Stock Product',

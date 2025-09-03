@@ -1,6 +1,7 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // GET - 법인 입금 내역 조회
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search')
 
-    const where: any = {}
+    const where: unknown = {}
 
     if (status && status !== 'ALL') {
       where.matchingStatus = status
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [payments, total] = await Promise.all([
-      prisma.corporatePayment.findMany({
+      query({
         where,
         include: {
           matchedOrder: true
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit
       }),
-      prisma.corporatePayment.count({ where })
+      query({ where })
     ])
 
     // 응답 형태 변환
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Corporate payments fetch error:', error)
+
     return NextResponse.json(
       { error: '입금 내역 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     // 중복 체크
-    const existingPayment = await prisma.corporatePayment.findUnique({
+    const existingPayment = await query({
       where: { bankTransactionId }
     })
 
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       transactionDate
     })
 
-    const payment = await prisma.corporatePayment.create({
+    const payment = await query({
       data: {
         bankCode,
         accountNumber,
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(payment, { status: 201 })
   } catch (error) {
-    console.error('Corporate payment creation error:', error)
+
     return NextResponse.json(
       { error: '입금 내역 등록 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -165,7 +166,7 @@ async function attemptAutoMatch(paymentData: {
     // const thirtyDaysAgo = new Date()
     // thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    // const candidates = await prisma.order.findMany({
+    // const candidates = await query({
     //   where: {
     //     paymentStatus: 'PENDING',
     //     totalAmount: amount,
@@ -177,7 +178,7 @@ async function attemptAutoMatch(paymentData: {
     //   take: 10
     // })
 
-    const candidates: any[] = []
+    const candidates: unknown[] = []
 
     if (candidates.length === 0) {
       return { orderId: null, score: 0 }
@@ -187,7 +188,7 @@ async function attemptAutoMatch(paymentData: {
     // Currently returning no match until Order schema is fixed
     return { orderId: null, score: 0 }
   } catch (error) {
-    console.error('Auto match error:', error)
+
     return { orderId: null, score: 0 }
   }
 }

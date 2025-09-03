@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { CartService } from '../../../src/services/cartService'
 import { prisma } from '../../../src/utils/database'
 import { AppError } from '../../../src/middleware/error'
@@ -99,7 +100,7 @@ describe('CartService', () => {
       })
 
       // Mock getCartWithDetails call
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
 
       const result = await cartService.createCart(mockCartData)
 
@@ -137,8 +138,8 @@ describe('CartService', () => {
       })
 
       // Mock addItemToCart method
-      jest.spyOn(cartService as any, 'addItemToCart').mockResolvedValue(undefined)
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue({
+      jest.spyOn(cartService as unknown, 'addItemToCart').mockResolvedValue(undefined)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue({
         ...mockCreatedCart,
         items: [{ productId: 'product-1', quantity: 2 }],
         totals: { itemCount: 2 },
@@ -159,13 +160,13 @@ describe('CartService', () => {
         expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
       }
 
-      ;(prisma.cart.findFirst as jest.Mock).mockResolvedValue(mockCart)
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockCart)
 
       const result = await cartService.getCartByUserOrSession(undefined, 'test-session-123')
 
       expect(result).toEqual(mockCart)
-      expect(prisma.cart.findFirst).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: {
           OR: [{ sessionId: 'test-session-123' }],
           expiresAt: { gt: expect.any(Date) },
@@ -181,13 +182,13 @@ describe('CartService', () => {
         expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
       }
 
-      ;(prisma.cart.findFirst as jest.Mock).mockResolvedValue(mockCart)
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockCart)
 
       const result = await cartService.getCartByUserOrSession('user-123')
 
       expect(result).toEqual(mockCart)
-      expect(prisma.cart.findFirst).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: {
           OR: [{ userId: 'user-123' }],
           expiresAt: { gt: expect.any(Date) },
@@ -197,7 +198,7 @@ describe('CartService', () => {
     })
 
     it('should return null if cart not found', async () => {
-      ;(prisma.cart.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       const result = await cartService.getCartByUserOrSession(undefined, 'non-existent')
 
@@ -245,8 +246,8 @@ describe('CartService', () => {
       })
 
       // Mock private method
-      jest.spyOn(cartService as any, 'performAddItemToCart').mockResolvedValue(undefined)
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
+      jest.spyOn(cartService as unknown, 'performAddItemToCart').mockResolvedValue(undefined)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
 
       const result = await cartService.addItemToCart(cartId, itemData)
 
@@ -284,7 +285,7 @@ describe('CartService', () => {
       }
 
       // Mock the performAddItemToCart private method
-      jest.spyOn(cartService as any, 'performAddItemToCart').mockImplementation(async (tx, cartId, data) => {
+      jest.spyOn(cartService as unknown, 'performAddItemToCart').mockImplementation(async (tx, cartId, data) => {
         // Mock finding existing cart
         tx.cart.findUnique = jest.fn().mockResolvedValue(mockCart)
         
@@ -305,7 +306,7 @@ describe('CartService', () => {
         await callback(prisma)
       })
 
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockCartWithDetails)
 
       const result = await cartService.addItemToCart(cartId, itemData)
 
@@ -342,8 +343,8 @@ describe('CartService', () => {
         totals: { itemCount: 5 },
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
-      ;(prisma.cartItem.findFirst as jest.Mock).mockResolvedValue(mockCartItem)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCartItem)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         await callback({
           cartItem: {
@@ -355,7 +356,7 @@ describe('CartService', () => {
         })
       })
 
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockUpdatedCart)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockUpdatedCart)
 
       const result = await cartService.updateCartItem(cartId, itemId, updateData)
 
@@ -364,7 +365,7 @@ describe('CartService', () => {
     })
 
     it('should throw error if cart not found', async () => {
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       await expect(cartService.updateCartItem(cartId, itemId, updateData)).rejects.toThrow(
         new AppError('Cart not found', 404)
@@ -377,8 +378,8 @@ describe('CartService', () => {
         expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
-      ;(prisma.cartItem.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       await expect(cartService.updateCartItem(cartId, itemId, updateData)).rejects.toThrow(
         new AppError('Cart item not found', 404)
@@ -403,8 +404,8 @@ describe('CartService', () => {
         variant: null,
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
-      ;(prisma.cartItem.findFirst as jest.Mock).mockResolvedValue(mockCartItem)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCartItem)
 
       await expect(cartService.updateCartItem(cartId, itemId, updateData)).rejects.toThrow(
         new AppError('Insufficient stock for requested quantity', 400)
@@ -433,8 +434,8 @@ describe('CartService', () => {
         totals: { itemCount: 0 },
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
-      ;(prisma.cartItem.findFirst as jest.Mock).mockResolvedValue(mockCartItem)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCartItem)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         await callback({
           cartItem: {
@@ -446,7 +447,7 @@ describe('CartService', () => {
         })
       })
 
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockUpdatedCart)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockUpdatedCart)
 
       const result = await cartService.removeCartItem(cartId, itemId)
 
@@ -460,8 +461,8 @@ describe('CartService', () => {
         expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
-      ;(prisma.cartItem.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(null)
 
       await expect(cartService.removeCartItem(cartId, itemId)).rejects.toThrow(
         new AppError('Cart item not found', 404)
@@ -492,7 +493,7 @@ describe('CartService', () => {
         },
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         await callback({
           cartItem: {
@@ -507,7 +508,7 @@ describe('CartService', () => {
         })
       })
 
-      jest.spyOn(cartService as any, 'getCartWithDetails').mockResolvedValue(mockClearedCart)
+      jest.spyOn(cartService as unknown, 'getCartWithDetails').mockResolvedValue(mockClearedCart)
 
       const result = await cartService.clearCart(cartId)
 
@@ -536,7 +537,7 @@ describe('CartService', () => {
         ],
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
 
       const result = await cartService.validateCartStock(cartId)
 
@@ -561,7 +562,7 @@ describe('CartService', () => {
         ],
       }
 
-      ;(prisma.cart.findUnique as jest.Mock).mockResolvedValue(mockCart)
+      ;(query as jest.Mock).mockResolvedValue(mockCart)
 
       const result = await cartService.validateCartStock(cartId)
 
@@ -579,12 +580,12 @@ describe('CartService', () => {
     it('should delete expired carts', async () => {
       const mockDeleteResult = { count: 5 }
 
-      ;(prisma.cart.deleteMany as jest.Mock).mockResolvedValue(mockDeleteResult)
+      ;(queryMany as jest.Mock).mockResolvedValue(mockDeleteResult)
 
       const result = await cartService.cleanupExpiredCarts()
 
       expect(result).toBe(5)
-      expect(prisma.cart.deleteMany).toHaveBeenCalledWith({
+      expect(queryMany).toHaveBeenCalledWith({
         where: {
           expiresAt: {
             lt: expect.any(Date),

@@ -1,12 +1,12 @@
+import type { User, RequestContext } from '@/lib/types/common';
 /**
  * AI 추천 엔진 서비스
  * 협업 필터링, 컨텐츠 기반 필터링, 하이브리드 추천
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/lib/db'
 import Redis from 'ioredis'
 
-const prisma = new PrismaClient()
 const redis = new Redis(process.env.REDIS_URL!)
 
 export interface RecommendationOptions {
@@ -19,7 +19,7 @@ export interface RecommendationOptions {
 }
 
 export interface RecommendationResult {
-  products: any[]
+  products: unknown[]
   algorithm: string
   confidence: number
   reason?: string
@@ -85,7 +85,7 @@ export class RecommendationEngineService {
     }
 
     // 현재 상품 정보 조회
-    const currentProduct = await prisma.product.findUnique({
+    const currentProduct = await query({
       where: { id: productId },
       include: { category: true }
     })
@@ -147,7 +147,7 @@ export class RecommendationEngineService {
       .slice(0, limit)
 
     // 상품 정보 조회
-    const recommendedProducts = await prisma.product.findMany({
+    const recommendedProducts = await query({
       where: {
         id: { in: sortedProducts.map(([id]) => id) },
         status: 'ACTIVE'
@@ -208,7 +208,7 @@ export class RecommendationEngineService {
     const { limit = 10 } = options
 
     // 사용자의 구매/평점 이력 조회
-    const userHistory = await prisma.order.findMany({
+    const userHistory = await query({
       where: {
         userId,
         status: { in: ['DELIVERED', 'PAYMENT_COMPLETED'] }
@@ -239,7 +239,7 @@ export class RecommendationEngineService {
     const recommendations = new Map<string, number>()
 
     for (const { userId: similarUserId, similarity } of similarUsers) {
-      const similarUserOrders = await prisma.order.findMany({
+      const similarUserOrders = await query({
         where: {
           userId: similarUserId,
           status: { in: ['DELIVERED', 'PAYMENT_COMPLETED'] }
@@ -297,7 +297,7 @@ export class RecommendationEngineService {
     }
 
     // 선호도 기반 상품 검색
-    const where: any = {
+    const where: unknown = {
       status: 'ACTIVE'
     }
 
@@ -324,7 +324,7 @@ export class RecommendationEngineService {
       where.id = { notIn: userPreferences.purchasedProductIds }
     }
 
-    const products = await prisma.product.findMany({
+    const products = await query({
       where,
       include: {
         images: true,
@@ -382,7 +382,7 @@ export class RecommendationEngineService {
     ])
 
     // 점수 기반 병합
-    const productScores = new Map<string, { product: any; score: number }>()
+    const productScores = new Map<string, { product: unknown; score: number }>()
 
     // 협업 필터링 결과 (가중치 60%)
     collaborative.products.forEach((product, index) => {
@@ -423,14 +423,14 @@ export class RecommendationEngineService {
   private async getTrendingProducts(options: RecommendationOptions): Promise<RecommendationResult> {
     const { limit = 10, categoryFilter } = options
 
-    const where: any = { status: 'ACTIVE' }
+    const where: unknown = { status: 'ACTIVE' }
     
     if (categoryFilter && categoryFilter.length > 0) {
       where.categoryId = { in: categoryFilter }
     }
 
     // 최근 30일 베스트셀러
-    const products = await prisma.product.findMany({
+    const products = await query({
       where,
       include: {
         images: true,
@@ -488,7 +488,7 @@ export class RecommendationEngineService {
    */
   private async findSimilarUsers(userId: string, userProductIds: Set<string>) {
     // 간단한 자카드 유사도 계산
-    const otherUsers = await prisma.order.findMany({
+    const otherUsers = await query({
       where: {
         userId: { not: userId },
         status: { in: ['DELIVERED', 'PAYMENT_COMPLETED'] }
@@ -501,7 +501,7 @@ export class RecommendationEngineService {
       distinct: ['userId']
     })
 
-    const similarities: any[] = []
+    const similarities: unknown[] = []
 
     for (const order of otherUsers) {
       const otherUserProducts = new Set(order.items.map(item => item.productId))
@@ -527,7 +527,7 @@ export class RecommendationEngineService {
    * 사용자 선호도 분석
    */
   private async analyzeUserPreferences(userId: string) {
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       where: {
         userId,
         status: { in: ['DELIVERED', 'PAYMENT_COMPLETED'] }
@@ -603,7 +603,7 @@ export class RecommendationEngineService {
    * 함께 구매한 상품 조회
    */
   private async getFrequentlyBoughtTogether(productId: string) {
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       where: {
         items: {
           some: { productId }
@@ -642,7 +642,7 @@ export class RecommendationEngineService {
    * 같은 카테고리 인기 상품
    */
   private async getSameCategoryProducts(categoryId: string, limit: number) {
-    return prisma.product.findMany({
+    return query({
       where: {
         categoryId,
         status: 'ACTIVE'
@@ -659,7 +659,7 @@ export class RecommendationEngineService {
    * 비슷한 태그 상품
    */
   private async getSimilarTagProducts(tags: string[], limit: number) {
-    return prisma.product.findMany({
+    return query({
       where: {
         tags: { hasSome: tags },
         status: 'ACTIVE'
@@ -678,7 +678,7 @@ export class RecommendationEngineService {
   private async getSimilarPriceProducts(price: number, limit: number) {
     const priceRange = price * 0.3 // ±30%
     
-    return prisma.product.findMany({
+    return query({
       where: {
         price: {
           gte: price - priceRange,
@@ -698,7 +698,7 @@ export class RecommendationEngineService {
    * 상품 상세 정보 조회
    */
   private async getProductDetails(productIds: string[]) {
-    const products = await prisma.product.findMany({
+    const products = await query({
       where: {
         id: { in: productIds },
         status: 'ACTIVE'

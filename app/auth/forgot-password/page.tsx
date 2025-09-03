@@ -20,8 +20,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // TODO: 실제 비밀번호 재설정 이메일 전송 API 호출
-      console.log('Password reset request for:', email);
-      
+
       // 임시 처리
       setTimeout(() => {
         setIsLoading(false);
@@ -29,7 +28,7 @@ export default function ForgotPasswordPage() {
       }, 1000);
     } catch (error) {
       setIsLoading(false);
-      console.error('Password reset failed:', error);
+
     }
   };
 

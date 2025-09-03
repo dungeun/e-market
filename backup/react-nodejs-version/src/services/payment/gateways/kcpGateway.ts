@@ -42,7 +42,7 @@ export class KCPGateway extends PaymentGateway {
     }
   }
 
-  private generateEncData(params: Record<string, any>): string {
+  private generateEncData(params: Record<string, unknown>): string {
     // KCP encryption logic
     const paramStr = Object.entries(params)
       .map(([key, value]) => `${key}=${value}`)
@@ -107,7 +107,7 @@ export class KCPGateway extends PaymentGateway {
     }
   }
 
-  async confirmPayment(_paymentId: string, data: any): Promise<GatewayResponse> {
+  async confirmPayment(_paymentId: string, data: unknown): Promise<GatewayResponse> {
     try {
       const { enc_data, enc_info, tran_cd } = data
 
@@ -146,7 +146,7 @@ export class KCPGateway extends PaymentGateway {
           rawResponse: result,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('KCP confirm payment error:', error)
       
       return {
@@ -214,7 +214,7 @@ export class KCPGateway extends PaymentGateway {
           rawResponse: result,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('KCP refund payment error:', error)
       
       return {
@@ -259,7 +259,7 @@ export class KCPGateway extends PaymentGateway {
           rawResponse: result,
         }
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('KCP get payment status error:', error)
       
       return {
@@ -270,9 +270,9 @@ export class KCPGateway extends PaymentGateway {
     }
   }
 
-  private parseKCPResponse(responseText: string): Record<string, any> {
+  private parseKCPResponse(responseText: string): Record<string, unknown> {
     // KCP returns data in a specific format that needs parsing
-    const result: Record<string, any> = {}
+    const result: Record<string, unknown> = {}
     const lines = responseText.split('\n')
     
     lines.forEach(line => {
@@ -285,7 +285,7 @@ export class KCPGateway extends PaymentGateway {
     return result
   }
 
-  verifyWebhookSignature(_payload: any, _signature: string): boolean {
+  verifyWebhookSignature(_payload: unknown, _signature: string): boolean {
     try {
       // KCP webhook verification
       // Implementation depends on KCP's specific webhook format

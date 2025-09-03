@@ -146,7 +146,7 @@ export interface UIConfig {
 
 interface UIConfigStore {
   config: UIConfig;
-  websiteSettings: any;
+  websiteSettings: unknown;
   updateHeaderMenus: (menus: MenuItem[]) => void;
   updateFooterColumns: (columns: FooterColumn[]) => void;
   updateLogo: (logo: UIConfig['header']['logo']) => void;
@@ -162,7 +162,7 @@ interface UIConfigStore {
   updateCustomSection: (id: string, section: Partial<CustomSection>) => void;
   removeCustomSection: (id: string) => void;
   updateSectionOrder: (order: SectionOrder[]) => void;
-  updateWebsiteSettings: (settings: any) => void;
+  updateWebsiteSettings: (settings: unknown) => void;
   loadSettingsFromAPI: (language?: string) => Promise<void>;
   resetToDefault: () => void;
   setConfig: (config: UIConfig) => void;
@@ -171,7 +171,7 @@ interface UIConfigStore {
 const defaultConfig: UIConfig = {
   header: {
     logo: {
-      text: 'LinkPick',
+      text: 'E-Market Korea',
     },
     menus: [
       { id: '1', label: 'menu.campaigns', href: '/campaigns', order: 1, visible: true },
@@ -219,9 +219,9 @@ const defaultConfig: UIConfig = {
       },
     ],
     social: [
-      { platform: 'twitter', url: 'https://twitter.com/linkpick', visible: true },
-      { platform: 'facebook', url: 'https://facebook.com/linkpick', visible: true },
-      { platform: 'instagram', url: 'https://instagram.com/linkpick', visible: true },
+      { platform: 'twitter', url: 'https://twitter.com/emarketkorea', visible: true },
+      { platform: 'facebook', url: 'https://facebook.com/emarketkorea', visible: true },
+      { platform: 'instagram', url: 'https://instagram.com/emarketkorea', visible: true },
     ],
     copyright: 'footer.copyright',
   },
@@ -493,17 +493,17 @@ export const useUIConfigStore = create<UIConfigStore>()(
       loadSettingsFromAPI: async (language?: string) => {
         try {
           // UI config 로드 (공개 API 사용)
-          console.log('Loading UI config from API...');
+
           const langParam = language ? `?lang=${language}` : '';
           const uiConfigResponse = await fetch(`/api/ui-config${langParam}`)
           if (uiConfigResponse.ok) {
             const uiData = await uiConfigResponse.json()
-            console.log('UI config loaded:', uiData.config);
+
             if (uiData.config) {
               set({ config: uiData.config })
             }
           } else {
-            console.error('Failed to load UI config:', uiConfigResponse.status);
+
           }
           
           // 일반 설정 로드
@@ -523,7 +523,7 @@ export const useUIConfigStore = create<UIConfigStore>()(
             set({ websiteSettings: data.settings?.website || null })
           }
         } catch (error) {
-          console.error('Failed to load settings:', error)
+
         }
       },
       resetToDefault: () => set({ config: defaultConfig }),

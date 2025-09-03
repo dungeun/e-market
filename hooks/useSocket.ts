@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { env } from '@/lib/config/env';
 import io, { Socket } from 'socket.io-client'
 
 export const useSocket = () => {
@@ -8,17 +9,22 @@ export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000', {
-      path: '/api/socket',
+    // Connect to Socket.io server on same port as Next.js app
+    const socketUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3001' 
+      : (process.env.NEXT_PUBLIC_APP_URL || env.appUrl);
+      
+    const socketInstance = io(socketUrl, {
+      transports: ['websocket', 'polling'],
     })
 
     socketInstance.on('connect', () => {
-      console.log('Connected to socket server')
+
       setIsConnected(true)
     })
 
     socketInstance.on('disconnect', () => {
-      console.log('Disconnected from socket server')
+
       setIsConnected(false)
     })
 

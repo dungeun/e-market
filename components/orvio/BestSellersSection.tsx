@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -20,7 +22,7 @@ interface BestSellersProps {
   products?: Product[]
 }
 
-export default function OrvioBestSellersSection({ products }: BestSellersProps) {
+const OrvioBestSellersSection = React.memo(function OrvioBestSellersSection({ products }: BestSellersProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: string]: number }>({})
@@ -238,4 +240,6 @@ export default function OrvioBestSellersSection({ products }: BestSellersProps) 
       </div>
     </section>
   )
-}
+});
+
+export default OrvioBestSellersSection;

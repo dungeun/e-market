@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { 
   CreateCouponDto, 
   UpdateCouponDto, 
@@ -30,7 +30,7 @@ class CouponService {
     } = createCouponDto;
 
     // 쿠폰 코드 중복 확인
-    const existing = await this.prisma.coupon.findUnique({
+    const existing = await this.query({
       where: { code }
     });
 
@@ -38,7 +38,7 @@ class CouponService {
       throw new Error('이미 존재하는 쿠폰 코드입니다.');
     }
 
-    const coupon = await this.prisma.coupon.create({
+    const coupon = await this.query({
       data: {
         code,
         name,
@@ -70,7 +70,7 @@ class CouponService {
 
   // 쿠폰 수정
   async updateCoupon(couponId: string, updateData: UpdateCouponDto) {
-    const coupon = await this.prisma.coupon.update({
+    const coupon = await this.query({
       where: { id: couponId },
       data: updateData
     });
@@ -94,7 +94,7 @@ class CouponService {
     const { couponCode, orderAmount, shippingFee = 0, items = [] } = applyCouponDto;
 
     // 쿠폰 조회
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.query({
       where: { code: couponCode },
       include: {
         usages: {
@@ -182,7 +182,7 @@ class CouponService {
     couponCode: string,
     discountAmount: number
   ) {
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.query({
       where: { code: couponCode }
     });
 
@@ -191,7 +191,7 @@ class CouponService {
     }
 
     // 쿠폰 사용 기록
-    await this.prisma.couponUsage.create({
+    await this.query({
       data: {
         couponId: coupon.id,
         userId,
@@ -201,7 +201,7 @@ class CouponService {
     });
 
     // 사용 횟수 증가
-    await this.prisma.coupon.update({
+    await this.query({
       where: { id: coupon.id },
       data: {
         usageCount: { increment: 1 }
@@ -221,13 +221,13 @@ class CouponService {
   // 사용자 쿠폰 목록
   async getUserCoupons(userId: string, query: CouponQueryDto): Promise<{
     coupons: UserCoupon[];
-    pagination: any;
+    pagination: unknown;
   }> {
     const { page = 1, limit = 20, type, isActive = true, isValid = true } = query;
     const offset = (page - 1) * limit;
 
     // 기본 쿠폰 조건
-    const where: any = {
+    const where: unknown = {
       isActive
     };
 
@@ -241,7 +241,7 @@ class CouponService {
 
     // 사용자가 사용 가능한 쿠폰 조회
     const [coupons, total] = await Promise.all([
-      this.prisma.coupon.findMany({
+      this.query({
         where: {
           ...where,
           OR: [
@@ -263,7 +263,7 @@ class CouponService {
         take: limit,
         orderBy: { createdAt: 'desc' }
       }),
-      this.prisma.coupon.count({ where })
+      this.query({ where })
     ]);
 
     // 사용자별 쿠폰 정보 가공
@@ -296,7 +296,7 @@ class CouponService {
   // 신규 가입 쿠폰 발급
   async issueWelcomeCoupon(userId: string) {
     // 웰컴 쿠폰 템플릿 조회
-    const welcomeCoupons = await this.prisma.coupon.findMany({
+    const welcomeCoupons = await this.query({
       where: {
         type: CouponType.WELCOME,
         isActive: true,
@@ -339,7 +339,7 @@ class CouponService {
     const day = today.getDate();
 
     // 오늘이 생일인 사용자 조회
-    const birthdayUsers = await this.prisma.user.findMany({
+    const birthdayUsers = await this.query({
       where: {
         birthDate: {
           not: null
@@ -353,7 +353,7 @@ class CouponService {
     });
 
     // 생일 쿠폰 템플릿
-    const birthdayTemplate = await this.prisma.coupon.findFirst({
+    const birthdayTemplate = await this.query({
       where: {
         type: CouponType.BIRTHDAY,
         isActive: true
@@ -388,7 +388,7 @@ class CouponService {
           data: { couponCode: personalCode }
         });
       } catch (error) {
-        console.error(`Birthday coupon issue failed for user ${user.id}:`, error);
+
       }
     }
   }
@@ -396,10 +396,10 @@ class CouponService {
   // 쿠폰 통계
   async getCouponStatistics(couponId: string) {
     const [coupon, usages] = await Promise.all([
-      this.prisma.coupon.findUnique({
+      this.query({
         where: { id: couponId }
       }),
-      this.prisma.couponUsage.findMany({
+      this.query({
         where: { couponId },
         include: {
           order: {
@@ -443,7 +443,7 @@ class CouponService {
   }
 
   // 적용 가능 상품 확인
-  private checkApplicableItems(coupon: any, items: any[]): boolean {
+  private checkApplicableItems(coupon: unknown, items: unknown[]): boolean {
     const applicableCategories = coupon.applicableCategories as string[] || [];
     const applicableProducts = coupon.applicableProducts as string[] || [];
     const excludedProducts = coupon.excludedProducts as string[] || [];
@@ -467,7 +467,7 @@ class CouponService {
 
   // 할인 금액 계산
   private calculateDiscount(
-    coupon: any, 
+    coupon: unknown, 
     orderAmount: number, 
     shippingFee: number
   ): { discountAmount: number; finalAmount: number } {
@@ -504,7 +504,7 @@ class CouponService {
 
   // 쿠폰 삭제
   async deleteCoupon(couponId: string) {
-    const coupon = await this.prisma.coupon.findUnique({
+    const coupon = await this.query({
       where: { id: couponId },
       include: { usages: true }
     });
@@ -517,7 +517,7 @@ class CouponService {
       throw new Error('사용 이력이 있는 쿠폰은 삭제할 수 없습니다.');
     }
 
-    await this.prisma.coupon.delete({
+    await this.query({
       where: { id: couponId }
     });
 
@@ -549,7 +549,7 @@ class CouponService {
         
         codes.push(coupon.code);
       } catch (error) {
-        console.error(`Failed to create coupon ${code}:`, error);
+
       }
     }
 

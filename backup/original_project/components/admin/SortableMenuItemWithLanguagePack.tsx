@@ -64,7 +64,7 @@ export function SortableMenuItemWithLanguagePack({ menu, onUpdate, onDelete }: S
           }
         }
       } catch (error) {
-        console.error('언어팩 키 로드 실패:', error);
+
       }
     };
 

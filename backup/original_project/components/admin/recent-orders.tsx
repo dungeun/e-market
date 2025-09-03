@@ -31,7 +31,7 @@ export function RecentOrders() {
         setOrders(data.orders || [])
       }
     } catch (error) {
-      console.error('Error fetching recent orders:', error)
+
     } finally {
       setLoading(false)
     }

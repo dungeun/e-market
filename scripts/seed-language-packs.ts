@@ -1,8 +1,18 @@
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
-const adminLanguagePacks = [
+const basicLanguagePacks = [
+  // Header menus
+  { key: 'menu.campaigns', value: '캠페인', category: 'menu' },
+  { key: 'menu.influencers', value: '인플루언서', category: 'menu' },
+  { key: 'menu.community', value: '커뮤니티', category: 'menu' },
+  { key: 'menu.pricing', value: '요금제', category: 'menu' },
+  { key: 'menu.get_started', value: '시작하기', category: 'menu' },
+  
+  // Common actions
+  { key: 'common.save', value: '저장', category: 'common' },
+  { key: 'common.cancel', value: '취소', category: 'common' },
+  { key: 'common.loading', value: '로딩 중...', category: 'common' },
+  
   // Dashboard
   { key: 'admin.menu.dashboard', value: '대시보드', category: 'menu' },
   { key: 'admin.menu.products', value: '상품 관리', category: 'menu' },
@@ -67,15 +77,15 @@ const adminLanguagePacks = [
 ]
 
 async function main() {
-  console.log('🌱 Seeding admin language packs...')
+  console.log('🌱 Seeding basic language packs...')
 
   try {
-    for (const pack of adminLanguagePacks) {
-      await prisma.languagePack.upsert({
+    for (const pack of basicLanguagePacks) {
+      await query({
         where: {
           languageCode_namespace_key: {
             languageCode: 'ko',
-            namespace: 'admin',
+            namespace: 'default',
             key: pack.key
           }
         },
@@ -86,7 +96,7 @@ async function main() {
         },
         create: {
           languageCode: 'ko',
-          namespace: 'admin',
+          namespace: 'default',
           key: pack.key,
           value: pack.value,
           category: pack.category,
@@ -96,7 +106,7 @@ async function main() {
       })
     }
 
-    console.log(`✅ Successfully seeded ${adminLanguagePacks.length} admin language packs`)
+    console.log(`✅ Successfully seeded ${basicLanguagePacks.length} basic language packs`)
   } catch (error) {
     console.error('❌ Error seeding language packs:', error)
     throw error

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 /**
  * 성능 추적 서비스 - 동시접속 1만명 지원을 위한 성능 모니터링
  */
@@ -52,7 +53,7 @@ export class PerformanceTracker {
   /**
    * 성능 메트릭 종료 및 기록
    */
-  async endMetric(id: string, tags?: Record<string, string>, metadata?: any): Promise<PerformanceMetric | null> {
+  async endMetric(id: string, tags?: Record<string, string>, metadata?: unknown): Promise<PerformanceMetric | null> {
     const startTime = this.activeRequests.get(id)
     if (!startTime) return null
 
@@ -109,10 +110,8 @@ export class PerformanceTracker {
     const errors: Array<{ type: string; timestamp: number }> = []
     const startTime = Date.now()
 
-    console.log(`부하 테스트 시작: ${config.concurrentUsers}명 동시 사용자, ${config.duration}초간`)
-
     // 동시 요청 실행
-    const promises: any[] = []
+    const promises: unknown[] = []
     for (let i = 0; i < config.concurrentUsers; i++) {
       const promise = this.runLoadTestWorker({
         endpoint: config.endpoint,
@@ -239,7 +238,7 @@ export class PerformanceTracker {
    */
   private async simulateRequest(endpoint: string, workerId: number) {
     // 실제 애플리케이션 로직을 시뮬레이션
-    const operations: any[] = []
+    const operations: unknown[] = []
 
     // Redis 작업
     operations.push(redis.get(`user:${workerId}`))
@@ -372,7 +371,7 @@ export class PerformanceTracker {
    * 성능 경고 체크
    */
   async checkPerformanceAlerts() {
-    const alerts: any[] = []
+    const alerts: unknown[] = []
 
     // 응답시간 체크
     const responseTimeStats = await this.getPerformanceStats('api_response_time')

@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { apiClient } from './apiClient'
 
 interface ApiResponse<T> {
@@ -48,7 +49,7 @@ class AuthService {
       const response = await apiClient.post('/auth/register', data)
       return response.data
     } catch (error) {
-      console.error('Register error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Registration failed',
@@ -61,7 +62,7 @@ class AuthService {
       const response = await apiClient.post('/auth/logout')
       return response.data
     } catch (error) {
-      console.error('Logout error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Logout failed',
@@ -74,7 +75,7 @@ class AuthService {
       const response = await apiClient.post('/auth/refresh')
       return response.data
     } catch (error) {
-      console.error('Refresh token error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Token refresh failed',
@@ -87,7 +88,7 @@ class AuthService {
       const response = await apiClient.get('/auth/verify')
       return response.data
     } catch (error) {
-      console.error('Verify token error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Token verification failed',
@@ -100,7 +101,7 @@ class AuthService {
       const response = await apiClient.put('/auth/profile', data)
       return response.data
     } catch (error) {
-      console.error('Update profile error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Profile update failed',
@@ -113,7 +114,7 @@ class AuthService {
       const response = await apiClient.post('/auth/forgot-password', { email })
       return response.data
     } catch (error) {
-      console.error('Forgot password error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Password reset failed',
@@ -129,7 +130,7 @@ class AuthService {
       })
       return response.data
     } catch (error) {
-      console.error('Reset password error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Password reset failed',
@@ -145,7 +146,7 @@ class AuthService {
       })
       return response.data
     } catch (error) {
-      console.error('Change password error:', error)
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Password change failed',
@@ -158,7 +159,7 @@ class AuthService {
       const response = await apiClient.get('/auth/accounts')
       return response.data.data || []
     } catch (error) {
-      console.error('Get linked accounts error:', error)
+
       return []
     }
   }
@@ -166,8 +167,8 @@ class AuthService {
   async unlinkOAuthAccount(provider: string): Promise<void> {
     try {
       await apiClient.delete(`/auth/accounts/${provider}`)
-    } catch (error: any) {
-      console.error('Unlink account error:', error)
+    } catch (error: Error | unknown) {
+
       throw new Error(error.response?.data?.error || '계정 연결 해제에 실패했습니다.')
     }
   }

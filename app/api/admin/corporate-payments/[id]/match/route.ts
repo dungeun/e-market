@@ -1,6 +1,6 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // POST - 입금과 주문 매칭
 export async function POST(
@@ -13,7 +13,7 @@ export async function POST(
     const { orderId, isManual = false } = body
 
     // 입금 정보 조회
-    const payment = await prisma.corporatePayment.findUnique({
+    const payment = await query({
       where: { id: paymentId }
     })
 
@@ -25,7 +25,7 @@ export async function POST(
     }
 
     // 주문 정보 조회
-    const order = await prisma.order.findUnique({
+    const order = await query({
       where: { id: orderId }
     })
 
@@ -37,7 +37,7 @@ export async function POST(
     }
 
     // 이미 다른 입금과 매칭된 주문인지 확인
-    const existingMatch = await prisma.corporatePayment.findFirst({
+    const existingMatch = await query({
       where: {
         matchedOrderId: orderId,
         matchingStatus: {
@@ -121,7 +121,7 @@ export async function POST(
       order: result.updatedOrder
     })
   } catch (error) {
-    console.error('Payment matching error:', error)
+
     return NextResponse.json(
       { error: '매칭 처리 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -231,7 +231,7 @@ async function createMatchingLog(logData: {
   userId: string
 }) {
   try {
-    await prisma.paymentMatchingLog.create({
+    await query({
       data: {
         paymentId: logData.paymentId,
         orderId: logData.orderId,
@@ -242,7 +242,7 @@ async function createMatchingLog(logData: {
       }
     })
   } catch (error) {
-    console.error('Matching log creation error:', error)
+
     // 로그 생성 실패는 전체 프로세스를 중단하지 않음
   }
 }

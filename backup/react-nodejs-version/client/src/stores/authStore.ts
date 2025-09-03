@@ -97,7 +97,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authService.logout()
         } catch (error) {
-          console.error('Logout error:', error)
+
         } finally {
           set({
             user: null,

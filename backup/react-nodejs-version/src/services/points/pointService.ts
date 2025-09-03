@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { logger } from '../../utils/logger';
 import {
   PointBalance,
@@ -45,13 +45,13 @@ export class PointService {
    */
   async getBalance(userId: string): Promise<PointBalance> {
     try {
-      let point = await this.prisma.point.findUnique({
+      let point = await this.query({
         where: { userId }
       });
 
       if (!point) {
         // 포인트 계정이 없으면 생성
-        point = await this.prisma.point.create({
+        point = await this.query({
           data: { userId }
         });
       }
@@ -226,7 +226,7 @@ export class PointService {
   async cancelPoints(orderId: string): Promise<PointTransaction | null> {
     try {
       // 해당 주문의 포인트 사용 내역 찾기
-      const usedHistory = await this.prisma.pointHistory.findFirst({
+      const usedHistory = await this.query({
         where: {
           relatedId: orderId,
           relatedType: 'ORDER',
@@ -314,7 +314,7 @@ export class PointService {
       const limit = query.limit || 20;
       const skip = (page - 1) * limit;
 
-      const where: any = { userId: query.userId };
+      const where: unknown = { userId: query.userId };
 
       if (query.type) {
         where.type = query.type;
@@ -331,24 +331,24 @@ export class PointService {
       }
 
       const [histories, total] = await Promise.all([
-        this.prisma.pointHistory.findMany({
+        this.query({
           where,
           orderBy: { createdAt: 'desc' },
           skip,
           take: limit
         }),
-        this.prisma.pointHistory.count({ where })
+        this.query({ where })
       ]);
 
       const transactions: PointTransaction[] = histories.map(h => ({
         id: h.id,
-        type: h.type as any,
+        type: h.type as unknown,
         amount: h.amount,
         balance: h.balance,
         reason: h.reason,
         reasonCode: h.reasonCode,
         relatedId: h.relatedId || undefined,
-        relatedType: h.relatedType as any,
+        relatedType: h.relatedType as unknown,
         expiresAt: h.expiresAt || undefined,
         createdAt: h.createdAt
       }));

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
+import { env } from '@/lib/config/env';
 import type { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET || env.jwt.secret
 
 export function middleware(request: NextRequest) {
   // Add CORS headers
@@ -24,7 +25,7 @@ export function middleware(request: NextRequest) {
     }
     
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as any
+      const payload = jwt.verify(token, JWT_SECRET) as unknown
       // You can add role-based access control here
       // if (payload.role !== 'ADMIN') {
       //   return NextResponse.redirect(new URL('/unauthorized', request.url))
@@ -44,7 +45,7 @@ export function middleware(request: NextRequest) {
     
     if (token) {
       try {
-        const payload = jwt.verify(token, JWT_SECRET) as any
+        const payload = jwt.verify(token, JWT_SECRET) as unknown
         // Add user info to headers for API routes
         response.headers.set('x-user-id', payload.userId)
         response.headers.set('x-user-email', payload.email)

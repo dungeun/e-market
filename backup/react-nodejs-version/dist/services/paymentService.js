@@ -19,7 +19,7 @@ class PaymentService {
                 throw new error_1.AppError('Order is not in payable status', 400);
             }
             // Check if payment already exists
-            const existingPayment = await database_1.prisma.payment.findFirst({
+            const existingPayment = await database_1.query({
                 where: {
                     orderId: data.orderId,
                     status: {
@@ -31,7 +31,7 @@ class PaymentService {
                 throw new error_1.AppError('Payment already initiated for this order', 409);
             }
             // Get user info
-            const user = await database_1.prisma.user.findUnique({
+            const user = await database_1.query({
                 where: { id: order.userId },
                 select: {
                     id: true,
@@ -87,7 +87,7 @@ class PaymentService {
             };
             const gatewayResponse = await gateway.initiatePayment(paymentRequest);
             // Update payment with gateway session data
-            await database_1.prisma.payment.update({
+            await database_1.query({
                 where: { id: payment.id },
                 data: {
                     gatewayResponse: {
@@ -109,7 +109,7 @@ class PaymentService {
     }
     // Confirm payment after return from gateway
     async confirmPayment(data) {
-        const payment = await database_1.prisma.payment.findUnique({
+        const payment = await database_1.query({
             where: { id: data.paymentId },
             include: {
                 order: true,
@@ -174,7 +174,7 @@ class PaymentService {
     }
     // Cancel payment
     async cancelPayment(id, data) {
-        const payment = await database_1.prisma.payment.findUnique({
+        const payment = await database_1.query({
             where: { id },
         });
         if (!payment) {
@@ -216,7 +216,7 @@ class PaymentService {
     }
     // Process refund
     async refundPayment(id, data) {
-        const payment = await database_1.prisma.payment.findUnique({
+        const payment = await database_1.query({
             where: { id },
         });
         if (!payment) {
@@ -326,7 +326,7 @@ class PaymentService {
         }
         const skip = (page - 1) * limit;
         const [payments, total] = await Promise.all([
-            database_1.prisma.payment.findMany({
+            database_1.query({
                 where,
                 skip,
                 take: limit,
@@ -346,7 +346,7 @@ class PaymentService {
                     },
                 },
             }),
-            database_1.prisma.payment.count({ where }),
+            database_1.query({ where }),
         ]);
         const paymentsWithOrder = payments.map(payment => this.formatPaymentWithOrder(payment));
         return {
@@ -363,7 +363,7 @@ class PaymentService {
     async savePaymentMethod(userId, data) {
         // If setting as default, unset other defaults
         if (data.isDefault) {
-            await database_1.prisma.paymentMethod.updateMany({
+            await database_1.queryMany({
                 where: {
                     userId,
                     isDefault: true,
@@ -373,7 +373,7 @@ class PaymentService {
                 },
             });
         }
-        const paymentMethod = await database_1.prisma.paymentMethod.create({
+        const paymentMethod = await database_1.query({
             data: {
                 userId,
                 type: this.mapToValidPaymentMethodType(data.type),
@@ -390,7 +390,7 @@ class PaymentService {
     }
     // Get user payment methods
     async getUserPaymentMethods(userId) {
-        const methods = await database_1.prisma.paymentMethod.findMany({
+        const methods = await database_1.query({
             where: { userId },
             orderBy: [
                 { isDefault: 'desc' },
@@ -401,20 +401,20 @@ class PaymentService {
     }
     // Delete payment method
     async deletePaymentMethod(id, userId) {
-        const method = await database_1.prisma.paymentMethod.findFirst({
+        const method = await database_1.query({
             where: { id, userId },
         });
         if (!method) {
             throw new error_1.AppError('Payment method not found', 404);
         }
-        await database_1.prisma.paymentMethod.delete({
+        await database_1.query({
             where: { id },
         });
         logger_1.logger.info(`Payment method deleted: ${id}`);
     }
     // Generate payment receipt
     async generateReceipt(paymentId) {
-        const payment = await database_1.prisma.payment.findUnique({
+        const payment = await database_1.query({
             where: { id: paymentId },
             include: {
                 order: {
@@ -447,7 +447,7 @@ class PaymentService {
             ? { order: { userId } }
             : {};
         const [totalPayments, paymentStats] = await Promise.all([
-            database_1.prisma.payment.count({ where }),
+            database_1.query({ where }),
             database_1.prisma.payment.aggregate({
                 where,
                 _sum: {
@@ -482,7 +482,7 @@ class PaymentService {
         });
         // Calculate success rates by gateway
         const gatewayStats = await Promise.all(paymentsByGateway.map(async (gw) => {
-            const successCount = await database_1.prisma.payment.count({
+            const successCount = await database_1.query({
                 where: {
                     ...where,
                     gateway: gw.gateway,
@@ -499,7 +499,7 @@ class PaymentService {
             };
         }));
         // Get recent payments
-        const recentPayments = await database_1.prisma.payment.findMany({
+        const recentPayments = await database_1.query({
             where,
             take: 10,
             orderBy: { createdAt: 'desc' },
@@ -530,7 +530,7 @@ class PaymentService {
     }
     // Private helper methods
     async getPaymentWithOrder(paymentId) {
-        const payment = await database_1.prisma.payment.findUnique({
+        const payment = await database_1.query({
             where: { id: paymentId },
             include: {
                 order: {

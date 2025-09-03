@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -19,7 +21,7 @@ interface OrvioHeroProps {
   slides?: HeroSlide[]
 }
 
-export default function OrvioHeroSection({ slides }: OrvioHeroProps) {
+const OrvioHeroSection = React.memo(function OrvioHeroSection({ slides }: OrvioHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   
   const defaultSlides = [
@@ -166,4 +168,6 @@ export default function OrvioHeroSection({ slides }: OrvioHeroProps) {
       </div>
     </section>
   )
-}
+});
+
+export default OrvioHeroSection;

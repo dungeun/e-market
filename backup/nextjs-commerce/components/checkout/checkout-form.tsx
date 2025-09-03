@@ -92,7 +92,7 @@ export function CheckoutForm({ onOrderComplete }: CheckoutFormProps) {
       toast.success('주문이 완료되었습니다!')
       
     } catch (error) {
-      console.error('Order error:', error)
+
       toast.error('주문 처리 중 오류가 발생했습니다')
     } finally {
       setIsLoading(false)
@@ -205,7 +205,7 @@ export function CheckoutForm({ onOrderComplete }: CheckoutFormProps) {
         <h2 className="text-lg font-semibold mb-4">결제 방법</h2>
         <RadioGroup
           value={form.watch('paymentMethod')}
-          onValueChange={(value) => form.setValue('paymentMethod', value as any)}
+          onValueChange={(value) => form.setValue('paymentMethod', value as unknown)}
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="card" id="card" />

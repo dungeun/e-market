@@ -9,6 +9,6 @@ export function useLanguage() {
   return { t };
 }
 
-export function getTranslatedField(obj: any, field: string) {
+export function getTranslatedField(obj: unknown, field: string) {
   return obj?.[field] || '';
 }

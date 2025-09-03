@@ -1,0 +1,170 @@
+
+> korean-enterprise-commerce@1.0.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.4.6 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.45.5:3000
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · serverActions
+
+ ✓ Starting...
+ ✓ Compiled middleware in 63ms
+ ✓ Ready in 874ms
+ ○ Compiling /api/health ...
+ ✓ Compiled /api/health in 539ms
+✅ PostgreSQL 클라이언트 연결됨
+🔍 SQL Query: {
+  query: 'SELECT COUNT(*) as count FROM users',
+  params: undefined,
+  rows: 1,
+  duration: '15ms'
+}
+❌ SQL Query 오류: {
+  query: 'SELECT COUNT(*) as count FROM campaigns',
+  params: undefined,
+  error: 'relation "campaigns" does not exist'
+}
+Health check error: error: relation "campaigns" does not exist
+    at async Database.query (lib/db.ts:87:21)
+    at async GET (app/api/health/route.ts:11:32)
+  85 |     const start = Date.now();
+  86 |     try {
+> 87 |       const result = await this.pool.query(text, params);
+     |                     ^
+  88 |       const duration = Date.now() - start;
+  89 |       
+  90 |       if (process.env.NODE_ENV === 'development') { {
+  length: 108,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '31',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1395',
+  routine: 'parserOpenTable'
+}
+ GET /api/health 500 in 738ms
+📤 PostgreSQL 클라이언트 제거됨
+ ✓ Compiled /api/home/campaigns in 147ms
+Failed to connect to Redis: Redis is already connecting/connected
+[Prisma Info] Starting a postgresql pool with 25 connections.
+[Database] Connected successfully
+Redis connected successfully
+Failed to fetch campaigns: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (app/api/home/campaigns/route.ts:57:42)
+  55 |     switch(filter) {
+  56 |       case 'popular':
+> 57 |         campaigns = await prisma.campaign.findMany({
+     |                                          ^
+  58 |           ...baseQuery,
+  59 |           where: {
+  60 |             status: 'ACTIVE' // 승인된 캠페인만
+ GET /api/home/campaigns?filter=popular&limit=10 200 in 309ms
+✅ PostgreSQL 클라이언트 연결됨
+🔍 SQL Query: {
+  query: 'SELECT COUNT(*) as count FROM users',
+  params: undefined,
+  rows: 1,
+  duration: '9ms'
+}
+🔍 SQL Query: {
+  query: 'SELECT COUNT(*) as count FROM products',
+  params: undefined,
+  rows: 1,
+  duration: '3ms'
+}
+ GET /api/health 200 in 59ms
+ ✓ Compiled /api/products in 50ms
+❌ SQL Query 오류: {
+  query: 'SELECT \n' +
+    '        p.id, p.name, p.slug, p.description, p.short_description, p.price, p.compare_at, p.stock,\n' +
+    '        p.weight, p.category_id, p.brand, p.status, p.featured, p.created_at, p.updated_at,\n' +
+    '        c.name as category_name, c.slug as category_slug,\n' +
+    '        COALESCE(AVG(r.rating), 0) as rating,\n' +
+    '        COUNT(r.id) as review_count\n' +
+    "       FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN reviews r ON p.id = r.product_id AND r.approved = true WHERE p.status = 'ACTIVE' GROUP BY p.id, c.id ORDER BY created_at DESC LIMIT 2 OFFSET 0",
+  params: [],
+  error: 'column r.approved does not exist'
+}
+Error fetching products: error: column r.approved does not exist
+    at async Database.query (lib/db.ts:87:21)
+    at async GET (app/api/products/route.ts:80:42)
+  85 |     const start = Date.now();
+  86 |     try {
+> 87 |       const result = await this.pool.query(text, params);
+     |                     ^
+  88 |       const duration = Date.now() - start;
+  89 |       
+  90 |       if (process.env.NODE_ENV === 'development') { {
+  length: 109,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '456',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3675',
+  routine: 'errorMissingColumn'
+}
+ GET /api/products?limit=2 500 in 120ms
+✅ PostgreSQL 클라이언트 연결됨
+📤 PostgreSQL 클라이언트 제거됨
+🔍 SQL Query: {
+  query: "SELECT COUNT(DISTINCT p.id) as total FROM products p WHERE p.status = 'ACTIVE'",
+  params: [],
+  rows: 1,
+  duration: '52ms'
+}
+📤 PostgreSQL 클라이언트 제거됨
+Failed to fetch campaigns: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (app/api/home/campaigns/route.ts:57:42)
+  55 |     switch(filter) {
+  56 |       case 'popular':
+> 57 |         campaigns = await prisma.campaign.findMany({
+     |                                          ^
+  58 |           ...baseQuery,
+  59 |           where: {
+  60 |             status: 'ACTIVE' // 승인된 캠페인만
+ GET /api/home/campaigns?filter=popular&limit=10 200 in 91ms
+Failed to fetch campaigns: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (app/api/home/campaigns/route.ts:57:42)
+  55 |     switch(filter) {
+  56 |       case 'popular':
+> 57 |         campaigns = await prisma.campaign.findMany({
+     |                                          ^
+  58 |           ...baseQuery,
+  59 |           where: {
+  60 |             status: 'ACTIVE' // 승인된 캠페인만
+ GET /api/home/campaigns?filter=popular&limit=10 200 in 79ms
+Failed to fetch campaigns: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (app/api/home/campaigns/route.ts:57:42)
+  55 |     switch(filter) {
+  56 |       case 'popular':
+> 57 |         campaigns = await prisma.campaign.findMany({
+     |                                          ^
+  58 |           ...baseQuery,
+  59 |           where: {
+  60 |             status: 'ACTIVE' // 승인된 캠페인만
+ GET /api/home/campaigns?filter=popular&limit=10 200 in 99ms
+[Database] Disconnecting...
+[Database] Disconnected
+[?25h

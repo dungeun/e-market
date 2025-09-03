@@ -36,7 +36,7 @@ export async function createPaymentIntent(data: PaymentIntentData) {
       paymentIntentId: paymentIntent.id,
     }
   } catch (error) {
-    console.error('Error creating Stripe payment intent:', error)
+
     throw new Error('Failed to create payment intent')
   }
 }
@@ -46,7 +46,7 @@ export async function confirmPaymentIntent(paymentIntentId: string) {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
     return paymentIntent
   } catch (error) {
-    console.error('Error confirming Stripe payment:', error)
+
     throw new Error('Failed to confirm payment')
   }
 }
@@ -59,7 +59,7 @@ export async function createCustomer(data: { email: string; name: string }) {
     })
     return customer
   } catch (error) {
-    console.error('Error creating Stripe customer:', error)
+
     throw new Error('Failed to create customer')
   }
 }
@@ -72,7 +72,7 @@ export async function refundPayment(paymentIntentId: string, amount?: number) {
     })
     return refund
   } catch (error) {
-    console.error('Error processing Stripe refund:', error)
+
     throw new Error('Failed to process refund')
   }
 }

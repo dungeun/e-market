@@ -3,10 +3,10 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { ProductDetail } from '@/components/products/product-detail'
 import { RelatedProducts } from '@/components/products/related-products'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 async function getProduct(slug: string) {
-  const product = await prisma.product.findUnique({
+  const product = await query({
     where: { slug },
     include: {
       images: true,
@@ -34,7 +34,7 @@ async function getProduct(slug: string) {
 async function getRelatedProducts(categoryId?: string, currentProductId?: string) {
   if (!categoryId) return []
   
-  const products = await prisma.product.findMany({
+  const products = await query({
     where: {
       categoryId,
       isActive: true,

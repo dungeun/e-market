@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { describe, test, expect, beforeEach } from 'vitest'
 import request from 'supertest'
 import app from '../../src/index'
@@ -257,7 +258,7 @@ describe('Pricing API Integration Tests', () => {
       expect(response.body.data).toBeInstanceOf(Array)
       
       // Verify all returned rules are active
-      response.body.data.forEach((rule: any) => {
+      response.body.data.forEach((rule: unknown) => {
         expect(rule.isActive).toBe(true)
       })
     })
@@ -271,7 +272,7 @@ describe('Pricing API Integration Tests', () => {
       expect(response.body.data).toBeInstanceOf(Array)
       
       // Verify all returned rules are of correct type
-      response.body.data.forEach((rule: any) => {
+      response.body.data.forEach((rule: unknown) => {
         expect(rule.type).toBe('QUANTITY_DISCOUNT')
       })
     })

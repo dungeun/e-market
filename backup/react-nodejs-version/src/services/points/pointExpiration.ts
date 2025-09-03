@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { logger } from '../../utils/logger';
 import { PointPolicy } from '../../types/point';
 
@@ -17,7 +16,7 @@ export class PointExpirationService {
       let totalExpired = 0;
 
       // 만료 대상 포인트 조회
-      const expiredHistories = await this.prisma.pointHistory.findMany({
+      const expiredHistories = await this.query({
         where: {
           type: 'EARNED',
           expiresAt: { lte: now },
@@ -112,7 +111,7 @@ export class PointExpirationService {
       const notifyDate = new Date();
       notifyDate.setDate(notifyDate.getDate() + this.policy.expirationNotifyDays);
 
-      const expiringHistories = await this.prisma.pointHistory.findMany({
+      const expiringHistories = await this.query({
         where: {
           type: 'EARNED',
           expiresAt: {

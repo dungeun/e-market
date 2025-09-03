@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/payments/stripe'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         const orderId = paymentIntent.metadata?.orderId
 
         if (orderId) {
-          await prisma.order.update({
+          await query({
             where: { orderNumber: orderId },
             data: {
               status: 'PAID',
@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
             },
           })
 
-          console.log(`Order ${orderId} payment succeeded`)
         }
         break
       }
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
         const orderId = paymentIntent.metadata?.orderId
 
         if (orderId) {
-          await prisma.order.update({
+          await query({
             where: { orderNumber: orderId },
             data: {
               status: 'PAYMENT_FAILED',
@@ -53,7 +52,6 @@ export async function POST(request: NextRequest) {
             },
           })
 
-          console.log(`Order ${orderId} payment failed`)
         }
         break
       }
@@ -61,17 +59,17 @@ export async function POST(request: NextRequest) {
       case 'charge.dispute.created': {
         const dispute = event.data.object
         // Handle dispute created
-        console.log('Dispute created:', dispute.id)
+
         break
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Error processing webhook:', error)
+
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

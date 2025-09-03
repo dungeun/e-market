@@ -7,15 +7,15 @@ describe('Cart Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean up database before each test
-    await prisma.cartCoupon.deleteMany()
-    await prisma.cartItem.deleteMany()
-    await prisma.cart.deleteMany()
-    await prisma.productImage.deleteMany()
-    await prisma.productVariant.deleteMany()
-    await prisma.product.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
 
     // Create test product
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test Product',
         slug: 'test-product',
@@ -94,7 +94,7 @@ describe('Cart Integration Tests', () => {
     let cartId: string
 
     beforeEach(async () => {
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -137,7 +137,7 @@ describe('Cart Integration Tests', () => {
     let cartId: string
 
     beforeEach(async () => {
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -223,7 +223,7 @@ describe('Cart Integration Tests', () => {
 
     beforeEach(async () => {
       // Create cart with item
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -232,7 +232,7 @@ describe('Cart Integration Tests', () => {
       })
       cartId = cart.id
 
-      const item = await prisma.cartItem.create({
+      const item = await query({
         data: {
           cartId,
           productId,
@@ -289,7 +289,7 @@ describe('Cart Integration Tests', () => {
 
     beforeEach(async () => {
       // Create cart with item
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -298,7 +298,7 @@ describe('Cart Integration Tests', () => {
       })
       cartId = cart.id
 
-      const item = await prisma.cartItem.create({
+      const item = await query({
         data: {
           cartId,
           productId,
@@ -334,7 +334,7 @@ describe('Cart Integration Tests', () => {
 
     beforeEach(async () => {
       // Create cart with items
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -343,7 +343,7 @@ describe('Cart Integration Tests', () => {
       })
       cartId = cart.id
 
-      await prisma.cartItem.createMany({
+      await queryMany({
         data: [
           { cartId, productId, quantity: 2, price: 99.99 },
           { cartId, productId, quantity: 1, price: 99.99 },
@@ -368,7 +368,7 @@ describe('Cart Integration Tests', () => {
 
     beforeEach(async () => {
       // Create cart with item
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -377,7 +377,7 @@ describe('Cart Integration Tests', () => {
       })
       cartId = cart.id
 
-      await prisma.cartItem.create({
+      await query({
         data: {
           cartId,
           productId,
@@ -399,7 +399,7 @@ describe('Cart Integration Tests', () => {
 
     it('should return stock issues for insufficient inventory', async () => {
       // Update cart item to exceed stock
-      await prisma.cartItem.updateMany({
+      await queryMany({
         where: { cartId },
         data: { quantity: 15 }, // Exceeds available stock (10)
       })
@@ -442,7 +442,7 @@ describe('Cart Integration Tests', () => {
 
     it('should add to existing cart if found', async () => {
       // Create existing cart
-      const existingCart = await prisma.cart.create({
+      const existingCart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -450,7 +450,7 @@ describe('Cart Integration Tests', () => {
         },
       })
 
-      await prisma.cartItem.create({
+      await query({
         data: {
           cartId: existingCart.id,
           productId,
@@ -488,7 +488,7 @@ describe('Cart Integration Tests', () => {
   describe('GET /api/v1/carts/count/items', () => {
     it('should return cart item count', async () => {
       // Create cart with items
-      const cart = await prisma.cart.create({
+      const cart = await query({
         data: {
           sessionId: 'test-session-123',
           currency: 'USD',
@@ -496,7 +496,7 @@ describe('Cart Integration Tests', () => {
         },
       })
 
-      await prisma.cartItem.createMany({
+      await queryMany({
         data: [
           { cartId: cart.id, productId, quantity: 2, price: 99.99 },
           { cartId: cart.id, productId, quantity: 3, price: 99.99 },

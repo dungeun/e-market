@@ -13,7 +13,7 @@ interface NewArrivalsProps {
     layout?: 'carousel' | 'grid'
     showArrivalDate?: boolean
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function NewArrivals({ config, products }: NewArrivalsProps) {

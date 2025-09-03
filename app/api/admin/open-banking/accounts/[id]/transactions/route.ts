@@ -1,6 +1,7 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // GET - 계좌 거래내역 조회
 export async function GET(
@@ -17,7 +18,7 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '50')
 
     // 계좌 정보 조회
-    const account = await prisma.bankAccount.findUnique({
+    const account = await query({
       where: { id: accountId }
     })
 
@@ -64,7 +65,7 @@ export async function GET(
     }
 
     // DB에서 조회 (필터링 적용)
-    const where: any = {
+    const where: unknown = {
       accountId
     }
 
@@ -80,7 +81,7 @@ export async function GET(
     }
 
     const [transactions, total] = await Promise.all([
-      prisma.bankTransaction.findMany({
+      query({
         where,
         orderBy: [
           { transactionDate: 'desc' },
@@ -89,7 +90,7 @@ export async function GET(
         skip: (page - 1) * limit,
         take: limit
       }),
-      prisma.bankTransaction.count({ where })
+      query({ where })
     ])
 
     return NextResponse.json({
@@ -108,7 +109,7 @@ export async function GET(
       }
     })
   } catch (error) {
-    console.error('Transactions inquiry error:', error)
+
     return NextResponse.json(
       { error: '거래내역 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -118,7 +119,7 @@ export async function GET(
 
 // 오픈뱅킹 API 거래내역 조회
 async function getTransactionsFromOpenBanking(
-  account: any,
+  account: unknown,
   params: {
     startDate: string
     endDate: string
@@ -149,7 +150,7 @@ async function getTransactionsFromOpenBanking(
       totalCount: mockTransactions.length
     }
   } catch (error) {
-    console.error('Open Banking Transactions API Error:', error)
+
     return {
       success: false,
       message: '오픈뱅킹 거래내역 조회에 실패했습니다.'
@@ -159,7 +160,7 @@ async function getTransactionsFromOpenBanking(
 
 // 임시 거래내역 생성 (개발용)
 function generateMockTransactions(startDate: string, endDate: string) {
-  const transactions: any[] = []
+  const transactions: unknown[] = []
   const start = new Date(startDate)
   const end = new Date(endDate)
   const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
@@ -201,11 +202,11 @@ function generateMockTransactions(startDate: string, endDate: string) {
 }
 
 // 거래내역 DB 동기화
-async function syncTransactionsToDatabase(accountId: string, transactions: any[]) {
+async function syncTransactionsToDatabase(accountId: string, transactions: unknown[]) {
   try {
     for (const transaction of transactions) {
       // 중복 거래 체크
-      const existingTransaction = await prisma.bankTransaction.findFirst({
+      const existingTransaction = await query({
         where: {
           accountId,
           bankTransactionId: transaction.bankTransactionId
@@ -213,7 +214,7 @@ async function syncTransactionsToDatabase(accountId: string, transactions: any[]
       })
 
       if (!existingTransaction) {
-        await prisma.bankTransaction.create({
+        await query({
           data: {
             accountId,
             transactionDate: new Date(transaction.transactionDate + 'T00:00:00Z'),
@@ -232,7 +233,7 @@ async function syncTransactionsToDatabase(accountId: string, transactions: any[]
       }
     }
   } catch (error) {
-    console.error('Transaction sync error:', error)
+
     // 동기화 실패는 전체 프로세스를 중단하지 않음
   }
 }

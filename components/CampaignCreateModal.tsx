@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useRef } from 'react'
 import { X, Upload } from 'lucide-react'
@@ -11,7 +13,7 @@ interface CampaignCreateModalProps {
   onSuccess: () => void
 }
 
-export default function CampaignCreateModal({ isOpen, onClose, onSuccess }: CampaignCreateModalProps) {
+const CampaignCreateModal = React.memo(function CampaignCreateModal({ isOpen, onClose, onSuccess }: CampaignCreateModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -87,7 +89,7 @@ export default function CampaignCreateModal({ isOpen, onClose, onSuccess }: Camp
         setError(data.error || '캠페인 생성에 실패했습니다.')
       }
     } catch (error) {
-      console.error('캠페인 생성 오류:', error)
+
       setError('캠페인 생성 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
@@ -152,7 +154,7 @@ export default function CampaignCreateModal({ isOpen, onClose, onSuccess }: Camp
                       <textarea
                         required
                         rows={3}
-                        value={(formData as any).description}
+                        value={(formData as unknown).description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -346,5 +348,7 @@ export default function CampaignCreateModal({ isOpen, onClose, onSuccess }: Camp
         </div>
       </div>
     </>
-  )
-}
+    )
+});
+
+export default CampaignCreateModal;

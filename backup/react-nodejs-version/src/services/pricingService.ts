@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
 import { Decimal } from '@prisma/client/runtime/library'
@@ -55,7 +56,7 @@ export class PricingService {
   async calculatePrice(request: PricingCalculationRequest): Promise<PricingCalculationResult> {
     try {
       // Get product with base price
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: request.productId },
         select: {
           id: true,
@@ -114,7 +115,7 @@ export class PricingService {
           })
 
           // Update rule usage count
-          await prisma.pricingRule.update({
+          await query({
             where: { id: rule.id },
             data: { usageCount: { increment: 1 } },
           })
@@ -177,7 +178,7 @@ export class PricingService {
     }
   }
 
-  private async getApplicablePricingRules(request: PricingCalculationRequest, product: any) {
+  private async getApplicablePricingRules(request: PricingCalculationRequest, product: unknown) {
     const now = new Date()
 
     // Base query for active rules within date range
@@ -198,7 +199,7 @@ export class PricingService {
     }
 
     // Get rules that apply to this product specifically
-    const productRules = await prisma.pricingRule.findMany({
+    const productRules = await query({
       where: {
         ...baseWhere,
         applyToProducts: true,
@@ -214,7 +215,7 @@ export class PricingService {
     })
 
     // Get rules that apply to this product's category
-    const categoryRules = product.categoryId ? await prisma.pricingRule.findMany({
+    const categoryRules = product.categoryId ? await query({
       where: {
         ...baseWhere,
         applyToCategories: true,
@@ -230,7 +231,7 @@ export class PricingService {
     }) : []
 
     // Get customer group rules if applicable
-    const customerGroupRules = request.customerGroup ? await prisma.pricingRule.findMany({
+    const customerGroupRules = request.customerGroup ? await query({
       where: {
         ...baseWhere,
         applyToCustomers: true,
@@ -246,7 +247,7 @@ export class PricingService {
     }) : []
 
     // Get global rules (no specific targeting)
-    const globalRules = await prisma.pricingRule.findMany({
+    const globalRules = await query({
       where: {
         ...baseWhere,
         applyToProducts: false,
@@ -277,7 +278,7 @@ export class PricingService {
 
         // Check per-customer usage limits
         if (rule.perCustomerLimit && request.userId) {
-          const customerUsage = await prisma.pricingApplication.count({
+          const customerUsage = await query({
             where: {
               ruleId: rule.id,
               userId: request.userId,
@@ -295,9 +296,9 @@ export class PricingService {
     return applicableRules
   }
 
-  private async evaluateRuleConditions(rule: any, request: PricingCalculationRequest, product: any): Promise<boolean> {
+  private async evaluateRuleConditions(rule: unknown, request: PricingCalculationRequest, product: unknown): Promise<boolean> {
     try {
-      const conditions = rule.conditions as any
+      const conditions = rule.conditions as unknown
 
       // Quantity-based conditions
       if (rule.type === 'QUANTITY_DISCOUNT') {
@@ -373,10 +374,10 @@ export class PricingService {
     }
   }
 
-  private async applyPricingRule(rule: any, context: any): Promise<{ applied: boolean; newPrice: number; discountAmount: number }> {
+  private async applyPricingRule(rule: unknown, context: unknown): Promise<{ applied: boolean; newPrice: number; discountAmount: number }> {
     try {
       const { currentPrice, quantity } = context
-      const conditions = rule.conditions as any
+      const conditions = rule.conditions as unknown
       let newPrice = currentPrice
       let discountAmount = 0
 
@@ -429,9 +430,9 @@ export class PricingService {
     }
   }
 
-  private async recordPricingApplication(data: any) {
+  private async recordPricingApplication(data: unknown) {
     try {
-      await prisma.pricingApplication.create({
+      await query({
         data: {
           ruleId: data.ruleId,
           userId: data.userId,
@@ -449,9 +450,9 @@ export class PricingService {
     }
   }
 
-  async createPricingRule(data: any) {
+  async createPricingRule(data: unknown) {
     try {
-      const rule = await prisma.pricingRule.create({
+      const rule = await query({
         data: {
           name: data.name,
           description: data.description,
@@ -475,7 +476,7 @@ export class PricingService {
 
       // Associate with categories if specified
       if (data.categoryIds && data.categoryIds.length > 0) {
-        await prisma.pricingRuleCategory.createMany({
+        await queryMany({
           data: data.categoryIds.map((categoryId: string) => ({
             ruleId: rule.id,
             categoryId,
@@ -485,7 +486,7 @@ export class PricingService {
 
       // Associate with products if specified
       if (data.productIds && data.productIds.length > 0) {
-        await prisma.pricingRuleProduct.createMany({
+        await queryMany({
           data: data.productIds.map((productId: string) => ({
             ruleId: rule.id,
             productId,
@@ -495,7 +496,7 @@ export class PricingService {
 
       // Associate with customer groups if specified
       if (data.customerGroupIds && data.customerGroupIds.length > 0) {
-        await prisma.pricingRuleCustomerGroup.createMany({
+        await queryMany({
           data: data.customerGroupIds.map((groupId: string) => ({
             ruleId: rule.id,
             groupId,
@@ -510,9 +511,9 @@ export class PricingService {
     }
   }
 
-  async updatePricingRule(ruleId: string, data: any) {
+  async updatePricingRule(ruleId: string, data: unknown) {
     try {
-      const rule = await prisma.pricingRule.update({
+      const rule = await query({
         where: { id: ruleId },
         data: {
           name: data.name,
@@ -542,9 +543,9 @@ export class PricingService {
     }
   }
 
-  async getPricingRules(filters?: any) {
+  async getPricingRules(filters?: unknown) {
     try {
-      const where: any = {}
+      const where: unknown = {}
 
       if (filters?.isActive !== undefined) {
         where.isActive = filters.isActive
@@ -558,7 +559,7 @@ export class PricingService {
         where.priority = { gte: filters.priority }
       }
 
-      const rules = await prisma.pricingRule.findMany({
+      const rules = await query({
         where,
         include: {
           categories: {
@@ -589,7 +590,7 @@ export class PricingService {
 
   async deletePricingRule(ruleId: string) {
     try {
-      await prisma.pricingRule.delete({
+      await query({
         where: { id: ruleId },
       })
     } catch (error) {
@@ -598,12 +599,12 @@ export class PricingService {
     }
   }
 
-  async getPricingAnalytics(filters?: any) {
+  async getPricingAnalytics(filters?: unknown) {
     try {
       const startDate = filters?.startDate ? new Date(filters.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       const endDate = filters?.endDate ? new Date(filters.endDate) : new Date()
 
-      const applications = await prisma.pricingApplication.findMany({
+      const applications = await query({
         where: {
           appliedAt: {
             gte: startDate,
@@ -636,7 +637,7 @@ export class PricingService {
         acc[ruleId].totalSavings += Number(app.discountAmount)
         acc[ruleId].averageDiscount = acc[ruleId].totalSavings / acc[ruleId].applications
         return acc
-      }, {} as any)
+      }, {} as unknown)
 
       return {
         summary: {

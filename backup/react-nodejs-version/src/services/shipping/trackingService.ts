@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { logger } from '../../utils/logger';
 import {
   TrackingEvent,
@@ -143,7 +142,7 @@ export class TrackingService {
    */
   async updateShipmentStatus(shipmentId: string): Promise<void> {
     try {
-      const shipment = await this.prisma.shipment.findUnique({
+      const shipment = await this.query({
         where: { id: shipmentId }
       });
 
@@ -161,10 +160,10 @@ export class TrackingService {
         const newStatus = this.mapTrackingLevelToStatus(trackingResult.trackingInfo.level);
         
         if (newStatus !== shipment.status) {
-          await this.prisma.shipment.update({
+          await this.query({
             where: { id: shipmentId },
             data: {
-              status: newStatus as any
+              status: newStatus as unknown
             }
           });
 
@@ -187,7 +186,7 @@ export class TrackingService {
   private async saveTrackingEvent(shipmentId: string, event: TrackingEvent): Promise<void> {
     try {
       // 중복 체크
-      const existing = await this.prisma.trackingEvent.findFirst({
+      const existing = await this.query({
         where: {
           shipmentId,
           timestamp: event.time,
@@ -196,7 +195,7 @@ export class TrackingService {
       });
 
       if (!existing) {
-        await this.prisma.trackingEvent.create({
+        await this.query({
           data: {
             shipmentId,
             status: event.status,
@@ -219,7 +218,7 @@ export class TrackingService {
   /**
    * 조회 이력 저장
    */
-  private async saveTrackingHistory(request: TrackingRequest, result: any): Promise<void> {
+  private async saveTrackingHistory(request: TrackingRequest, result: unknown): Promise<void> {
     try {
       // TODO: 조회 이력 테이블 추가 시 구현
       logger.info('Tracking history', {

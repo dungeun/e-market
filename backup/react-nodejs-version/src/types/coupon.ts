@@ -15,7 +15,7 @@ export interface CreateCouponDto {
   validFrom: Date;
   validUntil: Date;
   isActive?: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface UpdateCouponDto {
@@ -31,7 +31,7 @@ export interface UpdateCouponDto {
   validFrom?: Date;
   validUntil?: Date;
   isActive?: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export enum CouponType {
@@ -78,7 +78,7 @@ export interface CouponQueryDto {
 }
 
 export interface UserCoupon {
-  coupon: any;
+  coupon: unknown;
   usageCount: number;
   remainingUses: number;
   isEligible: boolean;

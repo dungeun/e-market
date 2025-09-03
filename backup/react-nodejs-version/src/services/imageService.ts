@@ -174,7 +174,7 @@ export class ImageService {
     }
   }
 
-  validateImageFile(file: any): boolean {
+  validateImageFile(file: unknown): boolean {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp']
     const maxSize = 10 * 1024 * 1024 // 10MB
 

@@ -61,7 +61,7 @@ export interface ProductSection {
       productCount?: number;
     }[];
     // 기타 섹션별 설정
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -78,10 +78,10 @@ export interface UIConfig {
       spacing: string;
     };
   };
-  footer?: any;
-  header?: any;
-  mainPageCustomSections?: any[];
-  mainPage?: any;
+  footer?: unknown;
+  header?: unknown;
+  mainPageCustomSections?: unknown[];
+  mainPage?: unknown;
 }
 
 interface UIConfigStore {
@@ -95,12 +95,12 @@ interface UIConfigStore {
   loadSettingsFromAPI: () => Promise<void>;
   resetToDefault: () => void;
   setConfig: (config: UIConfig) => void;
-  updateFooter: (footer: any) => void;
-  updateFooterColumns: (columns: any[]) => void;
+  updateFooter: (footer: unknown) => void;
+  updateFooterColumns: (columns: unknown[]) => void;
   updateCopyright: (copyright: string) => void;
-  updateHeaderMenus: (menus: any[]) => void;
-  updateSectionOrder: (sections: any[]) => void;
-  updateMainPageCustomSections: (sections: any[]) => void;
+  updateHeaderMenus: (menus: unknown[]) => void;
+  updateSectionOrder: (sections: unknown[]) => void;
+  updateMainPageCustomSections: (sections: unknown[]) => void;
 }
 
 const defaultSections: ProductSection[] = [
@@ -385,19 +385,19 @@ export const useUIConfigStore = create<UIConfigStore>()(
         })),
       loadSettingsFromAPI: async () => {
         try {
-          console.log('Loading UI config from API...');
+
           const response = await fetch('/api/admin/ui-config');
           if (response.ok) {
             const data = await response.json();
-            console.log('UI config loaded:', data.config);
+
             if (data.config) {
               set({ config: data.config });
             }
           } else {
-            console.error('Failed to load UI config:', response.status);
+
           }
         } catch (error) {
-          console.error('Failed to load settings:', error);
+
         }
       },
       resetToDefault: () => set({ config: defaultConfig }),

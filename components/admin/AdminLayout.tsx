@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -19,16 +21,9 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (!authLoading) {
-      console.log('AdminLayout - User:', user)
-      console.log('AdminLayout - User Type:', user?.type)
-      console.log('AdminLayout - Is Authenticated:', isAuthenticated)
-      
-      if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN' && user?.type !== 'ADMIN')) {
-        console.log('AdminLayout - 관리자 권한이 없습니다. 로그인 페이지로 이동합니다.')
-        console.log('현재 사용자:', user)
-        console.log('사용자 role:', user?.role)
-        console.log('사용자 type:', user?.type)
-        
+
+      if (!isAuthenticated || (user?.type !== 'ADMIN' && user?.type !== 'admin')) {
+
         router.push('/auth/login?error=admin_required&message=관리자 권한이 필요합니다')
       }
       setIsLoading(false)
@@ -51,33 +46,6 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      )
-    },
-    {
-      title: t('admin.menu.products', '상품 관리'),
-      href: '/admin/products',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      )
-    },
-    {
-      title: t('admin.menu.categories', '카테고리'),
-      href: '/admin/categories',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-      )
-    },
-    {
-      title: t('admin.menu.orders', '주문 관리'),
-      href: '/admin/orders',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
     },
@@ -118,24 +86,6 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
       )
     },
     {
-      title: t('admin.menu.reviews', '리뷰 관리'),
-      href: '/admin/reviews',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-        </svg>
-      )
-    },
-    {
-      title: t('admin.menu.coupons', '쿠폰 관리'),
-      href: '/admin/coupons',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-        </svg>
-      )
-    },
-    {
       title: t('admin.menu.analytics', '통계 분석'),
       href: '/admin/analytics',
       icon: (
@@ -154,20 +104,30 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
       )
     },
     {
-      title: t('admin.menu.translations', '언어팩'),
-      href: '/admin/translations',
+      title: t('admin.menu.language_packs', '언어팩 관리'),
+      href: '/admin/language-packs',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
       )
     },
     {
-      title: t('admin.menu.notifications', '알림 관리'),
-      href: '/admin/notifications',
+      title: t('admin.menu.settings', '시스템 설정'),
+      href: '/admin/settings',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.868 19.558C5.734 20.09 7.874 20 9 20h6a2 2 0 002-2v-5l-2 2H9a8 8 0 01-4.132-.442zM6 8a6 6 0 1112 0c0 2-1 4-3 4H9c-2 0-3-2-3-4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      )
+    },
+    {
+      title: t('admin.menu.categories', '카테고리 관리'),
+      href: '/admin/categories',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       )
     },
@@ -181,12 +141,11 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
       )
     },
     {
-      title: t('admin.menu.settings', '시스템 설정'),
-      href: '/admin/settings',
+      title: t('admin.menu.popup_alerts', '팝업 알림'),
+      href: '/admin/popup-alerts',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM11 21H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v7.5M11 7h2m0 0h2m-2 0v2m0-2V5" />
         </svg>
       )
     },
@@ -220,16 +179,21 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
+      {/* PC 1920px 최적화 - 최소 너비 설정 */}
       <div className="min-w-[1920px] w-full">
+
+        {/* 사이드바 - PC 전용 확장 */}
         <div className="fixed inset-y-0 left-0 z-40 w-80 bg-gray-900 shadow-xl">
           <div className="flex flex-col h-full">
+            {/* 로고 - 더 큰 공간 */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-gray-800">
               <Link href="/admin" className="text-3xl font-bold text-white">
-                ShopMall Admin
+                E-Market Korea Admin
               </Link>
             </div>
 
+            {/* 네비게이션 메뉴 - 더 넓은 간격 */}
             <nav className="flex-1 px-6 py-8 space-y-2 overflow-y-auto">
               {menuItems.map((item) => {
                 const isActive = pathname === item.href
@@ -250,6 +214,7 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
               })}
             </nav>
 
+            {/* 사용자 정보 - 더 넓은 레이아웃 */}
             <div className="px-6 py-8 border-t border-gray-800">
               <div className="flex items-center px-6 py-4 bg-gray-800 rounded-xl">
                 <div className="flex-shrink-0">
@@ -277,7 +242,9 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
           </div>
         </div>
 
-        <div className="ml-80 w-[calc(100%-320px)]">
+        {/* 메인 콘텐츠 - 1920px에 맞춘 여백 */}
+        <div className="ml-80">
+          {/* 상단 헤더바 */}
           <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-8 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -302,21 +269,26 @@ function AdminLayoutContent({ children }: AdminLayoutProps) {
             </div>
           </div>
 
-          <main className="p-0">
-            <div className="w-full bg-gray-50 min-h-[calc(100vh-80px)] p-8">
+          {/* 페이지 콘텐츠 - 1920px 전체 활용 */}
+          <main className="p-8 max-w-none">
+            <div className="w-full max-w-[1600px] mx-auto">
               {children}
             </div>
           </main>
         </div>
+
       </div>
     </div>
   )
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+// AdminLayout을 AdminLanguageProvider로 감싸서 export
+const AdminLayout = React.memo(function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <AdminLanguageProvider>
       <AdminLayoutContent>{children}</AdminLayoutContent>
     </AdminLanguageProvider>
-  )
-}
+    )
+});
+
+export default AdminLayout;

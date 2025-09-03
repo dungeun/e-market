@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "language": "ko",
+    "page": 1,
+    "pageSize": 30,
+    "totalPages": 1,
+    "totalItems": 5,
+    "generated": "2025-08-28T19:43:42.221Z",
+    "cacheVersion": "v1.0.0",
+    "ttl": 3600,
+    "nextPage": null,
+    "prevPage": null
+  },
+  "products": [
+    {
+      "id": "prod_galaxy_s24",
+      "slug": "galaxy-s24",
+      "name": "갤럭시 S24",
+      "description": "Samsung Galaxy S24 최신 스마트폰. AI 기능이 강화된 플래그십 모델로 혁신적인 카메라와 성능을 자랑합니다.",
+      "price": "999000.00",
+      "images": [],
+      "category": null,
+      "rating": 0,
+      "reviewCount": 0,
+      "stock": 50,
+      "featured": true,
+      "new": true
+    },
+    {
+      "id": "prod_lg_oled_tv",
+      "slug": "lg-oled-55",
+      "name": "LG OLED 55인치 TV",
+      "description": "LG OLED55C4PNA 55인치 4K 스마트 TV. webOS 탑재로 넷플릭스, 유튜브 등 다양한 OTT 서비스 이용 가능.",
+      "price": "1990000.00",
+      "images": [],
+      "category": null,
+      "rating": 0,
+      "reviewCount": 0,
+      "stock": 15,
+      "featured": true,
+      "new": true
+    },
+    {
+      "id": "prod_sulwhasoo_serum",
+      "slug": "sulwhasoo-serum",
+      "name": "설화수 윤조에센스",
+      "description": "설화수 대표 에센스. 한방 원료로 만든 프리미엄 스킨케어 제품으로 깊은 보습과 영양을 제공합니다.",
+      "price": "89000.00",
+      "images": [],
+      "category": null,
+      "rating": 0,
+      "reviewCount": 0,
+      "stock": 100,
+      "featured": true,
+      "new": true
+    },
+    {
+      "id": "prod_dyson_vacuum",
+      "slug": "dyson-v15",
+      "name": "다이슨 V15 무선청소기",
+      "description": "다이슨 V15 디텍트 무선청소기. 레이저로 먼지를 찾아내는 혁신적인 청소기로 강력한 흡입력을 자랑합니다.",
+      "price": "899000.00",
+      "images": [],
+      "category": null,
+      "rating": 0,
+      "reviewCount": 0,
+      "stock": 25,
+      "featured": true,
+      "new": true
+    },
+    {
+      "id": "prod_nike_shoes",
+      "slug": "nike-airmax-270",
+      "name": "나이키 에어맥스 270",
+      "description": "나이키 에어맥스 270 운동화. 편안한 쿠셔닝과 스타일리시한 디자인으로 일상과 운동 모두 완벽한 신발.",
+      "price": "159000.00",
+      "images": [],
+      "category": null,
+      "rating": 0,
+      "reviewCount": 0,
+      "stock": 75,
+      "featured": false,
+      "new": true
+    }
+  ],
+  "filters": {
+    "categories": [
+      {
+        "id": "cat_electronics",
+        "slug": "electronics",
+        "name": "전자제품",
+        "count": 2
+      },
+      {
+        "id": "cat_beauty",
+        "slug": "beauty",
+        "name": "뷰티/화장품",
+        "count": 1
+      },
+      {
+        "id": "cat_home",
+        "slug": "home",
+        "name": "홈/인테리어",
+        "count": 1
+      },
+      {
+        "id": "cat_sports",
+        "slug": "sports",
+        "name": "스포츠/레저",
+        "count": 1
+      }
+    ],
+    "priceRange": {
+      "min": "89000.00",
+      "max": "1990000.00"
+    },
+    "brands": []
+  }
+}

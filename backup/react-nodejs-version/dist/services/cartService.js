@@ -66,7 +66,7 @@ class CartService {
         if (sessionId) {
             where.OR.push({ sessionId });
         }
-        const cart = await database_1.prisma.cart.findFirst({
+        const cart = await database_1.query({
             where,
             orderBy: { updatedAt: 'desc' },
         });
@@ -92,13 +92,13 @@ class CartService {
         }
         const skip = (page - 1) * limit;
         const [carts, total] = await Promise.all([
-            database_1.prisma.cart.findMany({
+            database_1.query({
                 where,
                 skip,
                 take: limit,
                 orderBy: { updatedAt: 'desc' },
             }),
-            database_1.prisma.cart.count({ where }),
+            database_1.query({ where }),
         ]);
         // Get detailed cart information
         const cartsWithDetails = await Promise.all(carts.map(cart => this.getCartWithDetails(cart.id)));
@@ -114,7 +114,7 @@ class CartService {
     }
     // Update cart
     async updateCart(id, data) {
-        const existingCart = await database_1.prisma.cart.findUnique({
+        const existingCart = await database_1.query({
             where: { id },
         });
         if (!existingCart) {
@@ -123,7 +123,7 @@ class CartService {
         if (this.isCartExpired(existingCart)) {
             throw new error_1.AppError('Cart has expired', 410);
         }
-        await database_1.prisma.cart.update({
+        await database_1.query({
             where: { id },
             data: {
                 ...data,
@@ -135,13 +135,13 @@ class CartService {
     }
     // Delete cart
     async deleteCart(id) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id },
         });
         if (!cart) {
             throw new error_1.AppError('Cart not found', 404);
         }
-        await database_1.prisma.cart.delete({
+        await database_1.query({
             where: { id },
         });
         logger_1.logger.info(`Cart deleted: ${id}`);
@@ -272,7 +272,7 @@ class CartService {
     }
     // Update cart item
     async updateCartItem(cartId, itemId, data) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
         });
         if (!cart) {
@@ -281,7 +281,7 @@ class CartService {
         if (this.isCartExpired(cart)) {
             throw new error_1.AppError('Cart has expired', 410);
         }
-        const cartItem = await database_1.prisma.cartItem.findFirst({
+        const cartItem = await database_1.query({
             where: {
                 id: itemId,
                 cartId,
@@ -349,7 +349,7 @@ class CartService {
     }
     // Remove item from cart
     async removeCartItem(cartId, itemId) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
         });
         if (!cart) {
@@ -358,7 +358,7 @@ class CartService {
         if (this.isCartExpired(cart)) {
             throw new error_1.AppError('Cart has expired', 410);
         }
-        const cartItem = await database_1.prisma.cartItem.findFirst({
+        const cartItem = await database_1.query({
             where: {
                 id: itemId,
                 cartId,
@@ -381,7 +381,7 @@ class CartService {
     }
     // Clear all items from cart
     async clearCart(cartId) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
         });
         if (!cart) {
@@ -414,7 +414,7 @@ class CartService {
     }
     // Apply coupon to cart
     async applyCoupon(cartId, data) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
             include: {
                 items: true,
@@ -430,7 +430,7 @@ class CartService {
             throw new error_1.AppError('Cart has expired', 410);
         }
         // Find the coupon
-        const coupon = await database_1.prisma.coupon.findUnique({
+        const coupon = await database_1.query({
             where: { code: data.couponCode },
         });
         if (!coupon) {
@@ -459,7 +459,7 @@ class CartService {
         if (coupon.minOrderValue && subtotal < Number(coupon.minOrderValue)) {
             throw new error_1.AppError(`Minimum order value of ${coupon.minOrderValue} required for this coupon`, 400);
         }
-        await database_1.prisma.cartCoupon.create({
+        await database_1.query({
             data: {
                 cartId,
                 couponId: coupon.id,
@@ -470,7 +470,7 @@ class CartService {
     }
     // Remove coupon from cart
     async removeCoupon(cartId, couponId) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
         });
         if (!cart) {
@@ -479,7 +479,7 @@ class CartService {
         if (this.isCartExpired(cart)) {
             throw new error_1.AppError('Cart has expired', 410);
         }
-        const cartCoupon = await database_1.prisma.cartCoupon.findFirst({
+        const cartCoupon = await database_1.query({
             where: {
                 cartId,
                 couponId,
@@ -488,7 +488,7 @@ class CartService {
         if (!cartCoupon) {
             throw new error_1.AppError('Coupon not found in cart', 404);
         }
-        await database_1.prisma.cartCoupon.delete({
+        await database_1.query({
             where: {
                 cartId_couponId: {
                     cartId,
@@ -503,11 +503,11 @@ class CartService {
     async mergeCarts(data) {
         const { sourceCartId, targetCartId } = data;
         const [sourceCart, targetCart] = await Promise.all([
-            database_1.prisma.cart.findUnique({
+            database_1.query({
                 where: { id: sourceCartId },
                 include: { items: true },
             }),
-            database_1.prisma.cart.findUnique({
+            database_1.query({
                 where: { id: targetCartId },
                 include: { items: true },
             }),
@@ -571,7 +571,7 @@ class CartService {
     // Transfer cart from session to user
     async transferCart(data) {
         const { sessionId, userId } = data;
-        const sessionCart = await database_1.prisma.cart.findFirst({
+        const sessionCart = await database_1.query({
             where: {
                 sessionId,
                 userId: null,
@@ -583,7 +583,7 @@ class CartService {
             throw new error_1.AppError('Session cart not found', 404);
         }
         // Check if user already has a cart
-        const userCart = await database_1.prisma.cart.findFirst({
+        const userCart = await database_1.query({
             where: {
                 userId,
                 expiresAt: { gt: new Date() },
@@ -600,7 +600,7 @@ class CartService {
         }
         else {
             // Transfer session cart to user
-            await database_1.prisma.cart.update({
+            await database_1.query({
                 where: { id: sessionCart.id },
                 data: {
                     userId,
@@ -614,7 +614,7 @@ class CartService {
     }
     // Validate cart stock
     async validateCartStock(cartId) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
             include: {
                 items: {
@@ -650,7 +650,7 @@ class CartService {
     }
     // Clean up expired carts
     async cleanupExpiredCarts() {
-        const result = await database_1.prisma.cart.deleteMany({
+        const result = await database_1.queryMany({
             where: {
                 expiresAt: {
                     lt: new Date(),
@@ -662,7 +662,7 @@ class CartService {
     }
     // Private helper methods
     async getCartWithDetails(cartId) {
-        const cart = await database_1.prisma.cart.findUnique({
+        const cart = await database_1.query({
             where: { id: cartId },
             include: {
                 items: {

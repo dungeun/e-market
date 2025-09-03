@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Layers, Link, Trash2, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface FooterSection {
   id: string;
@@ -35,7 +42,7 @@ export function FooterConfigDB() {
       
       if (response.ok) {
         const data = await response.json();
-        const formattedSections = data.menus.map((menu: any) => ({
+        const formattedSections = data.menus.map((menu: unknown) => ({
           id: menu.id,
           title: menu.content?.title || '',
           titleKey: menu.content?.titleKey || menu.sectionId,
@@ -46,7 +53,7 @@ export function FooterConfigDB() {
         setSections(formattedSections);
       }
     } catch (error) {
-      console.error('Failed to load footer sections:', error);
+
     } finally {
       setLoading(false);
     }
@@ -91,7 +98,7 @@ export function FooterConfigDB() {
         alert('섹션이 추가되고 자동 번역되었습니다.');
       }
     } catch (error) {
-      console.error('Failed to add section:', error);
+
       alert('섹션 추가 중 오류가 발생했습니다.');
     }
   };
@@ -155,7 +162,7 @@ export function FooterConfigDB() {
         alert('링크가 추가되고 자동 번역되었습니다.');
       }
     } catch (error) {
-      console.error('Failed to add link:', error);
+
       alert('링크 추가 중 오류가 발생했습니다.');
     }
   };
@@ -178,7 +185,7 @@ export function FooterConfigDB() {
         alert('섹션이 삭제되었습니다.');
       }
     } catch (error) {
-      console.error('Failed to delete section:', error);
+
       alert('섹션 삭제 중 오류가 발생했습니다.');
     }
   };
@@ -214,7 +221,7 @@ export function FooterConfigDB() {
         alert('링크가 삭제되었습니다.');
       }
     } catch (error) {
-      console.error('Failed to delete link:', error);
+
       alert('링크 삭제 중 오류가 발생했습니다.');
     }
   };
@@ -237,98 +244,104 @@ export function FooterConfigDB() {
         await loadSections();
       }
     } catch (error) {
-      console.error('Failed to toggle visibility:', error);
+
     }
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center py-8">
-          <p className="text-gray-500">푸터 설정을 불러오는 중...</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-sm text-muted-foreground">푸터 설정을 불러오는 중...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">푸터 섹션 설정</h2>
-          <button
-            onClick={() => setIsAddingSection(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>푸터 섹션 설정</CardTitle>
+            <CardDescription>웹사이트 하단 푸터의 섹션과 링크를 관리합니다.</CardDescription>
+          </div>
+          <Button onClick={() => setIsAddingSection(true)} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
             섹션 추가
-          </button>
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent>
 
         {/* 새 섹션 추가 폼 */}
         {isAddingSection && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-semibold mb-3">새 섹션 추가</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  value={newSectionTitle}
-                  onChange={(e) => setNewSectionTitle(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="섹션 제목 (예: 고객 지원)"
-                />
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base">새 섹션 추가</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    value={newSectionTitle}
+                    onChange={(e) => setNewSectionTitle(e.target.value)}
+                    placeholder="섹션 제목 (예: 고객 지원)"
+                  />
+                </div>
+                <Button onClick={handleAddSection} size="sm">
+                  추가
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsAddingSection(false);
+                    setNewSectionTitle('');
+                  }}
+                >
+                  취소
+                </Button>
               </div>
-              <button
-                onClick={handleAddSection}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                추가
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddingSection(false);
-                  setNewSectionTitle('');
-                }}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
-              >
-                취소
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              * 섹션 제목은 자동으로 영어와 일본어로 번역됩니다.
-            </p>
-          </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                섹션 제목은 자동으로 영어와 일본어로 번역됩니다.
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {/* 섹션 목록 */}
         <div className="space-y-4">
           {sections.map((section) => (
-            <div key={section.id} className="border rounded-lg p-4">
+            <div key={section.id} className="border border-gray-200 rounded-lg p-4 bg-white">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold">{section.title}</h3>
-                  <span className="text-sm text-gray-500">({section.titleKey})</span>
+                  <h3 className="text-sm font-semibold text-gray-900">{section.title}</h3>
+                  <span className="text-xs text-gray-500">({section.titleKey})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleToggleVisibility(section.id, section.visible)}
-                    className={`px-3 py-1 rounded text-sm ${
+                    className={`px-3 py-1 rounded-md text-xs font-medium ${
                       section.visible
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-700'
+                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     {section.visible ? '표시' : '숨김'}
                   </button>
                   <button
                     onClick={() => setIsAddingLink(section.id)}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                    className="px-3 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium hover:bg-blue-100"
                   >
-                    링크 추가
+                    + 링크
                   </button>
                   <button
                     onClick={() => handleDeleteSection(section.id)}
-                    className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                    className="px-3 py-1 bg-red-50 text-red-700 rounded-md text-xs font-medium hover:bg-red-100"
                   >
                     삭제
                   </button>
@@ -337,26 +350,26 @@ export function FooterConfigDB() {
 
               {/* 링크 추가 폼 */}
               {isAddingLink === section.id && (
-                <div className="mb-3 p-3 bg-gray-50 rounded">
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="mb-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <input
                       type="text"
                       value={newLinkName}
                       onChange={(e) => setNewLinkName(e.target.value)}
-                      className="px-2 py-1 border rounded text-sm"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       placeholder="링크 이름"
                     />
                     <input
                       type="text"
                       value={newLinkUrl}
                       onChange={(e) => setNewLinkUrl(e.target.value)}
-                      className="px-2 py-1 border rounded text-sm"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       placeholder="URL"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleAddLink(section.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded text-sm"
+                        className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
                       >
                         추가
                       </button>
@@ -366,7 +379,7 @@ export function FooterConfigDB() {
                           setNewLinkName('');
                           setNewLinkUrl('/');
                         }}
-                        className="px-3 py-1 bg-gray-400 text-white rounded text-sm"
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200"
                       >
                         취소
                       </button>
@@ -378,22 +391,22 @@ export function FooterConfigDB() {
               {/* 링크 목록 */}
               <div className="space-y-1">
                 {section.links.map((link) => (
-                  <div key={link.id} className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 rounded">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{link.label}</span>
+                  <div key={link.id} className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-900">{link.label}</span>
                       <span className="text-xs text-gray-500">({link.labelKey})</span>
                       <span className="text-xs text-blue-600">{link.href}</span>
                     </div>
                     <button
                       onClick={() => handleDeleteLink(section.id, link.id)}
-                      className="text-red-600 hover:text-red-700 text-sm"
+                      className="text-xs text-red-600 hover:text-red-700 font-medium"
                     >
                       삭제
                     </button>
                   </div>
                 ))}
                 {section.links.length === 0 && (
-                  <p className="text-sm text-gray-500 py-2">링크가 없습니다.</p>
+                  <p className="text-sm text-gray-500 py-2 px-3">링크가 없습니다.</p>
                 )}
               </div>
             </div>
@@ -401,11 +414,15 @@ export function FooterConfigDB() {
         </div>
 
         {sections.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            푸터 섹션이 없습니다. 위의 "섹션 추가" 버튼을 클릭하여 섹션을 추가하세요.
+          <div className="text-center py-12">
+            <Layers className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-medium">푸터 섹션이 없습니다</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              위의 "섹션 추가" 버튼을 클릭하여 섹션을 추가하세요.
+            </p>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

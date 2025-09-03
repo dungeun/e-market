@@ -36,7 +36,7 @@ export function AdminLanguageProvider({ children }: { children: React.ReactNode 
         setLanguagePacks(packMap);
       }
     } catch (error) {
-      console.error('Failed to load language packs:', error);
+
     } finally {
       setIsLoading(false);
     }

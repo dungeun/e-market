@@ -1,0 +1,44 @@
+{
+  "ko": {
+    "menu.home": "홈",
+    "menu.products": "상품",
+    "menu.categories": "카테고리",
+    "menu.mypage": "마이페이지",
+    "menu.cart": "장바구니",
+    "menu.login": "로그인",
+    "menu.signup": "회원가입",
+    "menu.logout": "로그아웃",
+    "language.selector.label": "언어 선택",
+    "language.ko": "한국어",
+    "language.en": "English",
+    "language.jp": "日本語"
+  },
+  "en": {
+    "menu.home": "Home",
+    "menu.products": "Products",
+    "menu.categories": "Categories",
+    "menu.mypage": "My Page",
+    "menu.cart": "Cart",
+    "menu.login": "Login",
+    "menu.signup": "Sign Up",
+    "menu.logout": "Logout",
+    "language.selector.label": "Language",
+    "language.ko": "한국어",
+    "language.en": "English",
+    "language.jp": "日本語"
+  },
+  "ja": {
+    "menu.home": "ホーム",
+    "menu.products": "商品",
+    "menu.categories": "カテゴリー",
+    "menu.mypage": "マイページ",
+    "menu.cart": "カート",
+    "menu.login": "ログイン",
+    "menu.signup": "会員登録",
+    "menu.logout": "ログアウト",
+    "language.selector.label": "言語",
+    "language.ko": "한국어",
+    "language.en": "English",
+    "language.jp": "日本語"
+  }
+}

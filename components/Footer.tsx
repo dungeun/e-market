@@ -1,12 +1,13 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useUIConfigStore } from '@/lib/stores/ui-config.store'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 
-export default function Footer() {
+const Footer = React.memo(function Footer() {
   const { config, websiteSettings, loadSettingsFromAPI } = useUIConfigStore()
   const { columns, social, copyright } = config.footer
   const { t, currentLanguage } = useLanguage()
@@ -30,7 +31,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-6 py-12">
+      <div className="max-w-[1450px] mx-auto px-6 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* 브랜드 정보 */}
           <div className="col-span-1">
@@ -173,4 +174,6 @@ export default function Footer() {
       </div>
     </footer>
   )
-}
+});
+
+export default Footer;

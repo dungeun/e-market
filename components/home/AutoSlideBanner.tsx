@@ -1,64 +1,79 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface BannerSlide {
-  id: string
-  title: string
-  subtitle?: string
-  imageUrl: string
-  link?: string
-  visible: boolean
+  id: string;
+  title: string;
+  subtitle?: string;
+  imageUrl: string;
+  link?: string;
+  visible: boolean;
 }
 
 interface AutoSlideBannerProps {
-  slides: BannerSlide[]
-  interval?: number // 자동 슬라이드 간격 (ms)
+  slides: BannerSlide[];
+  interval?: number; // 자동 슬라이드 간격 (ms)
 }
 
-export default function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBannerProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
+function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBannerProps) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-  const visibleSlides = slides.filter(slide => slide.visible)
+  // 표시할 슬라이드 필터링 - 메모이제이션
+  const visibleSlides = useMemo(
+    () => slides.filter((slide) => slide.visible),
+    [slides],
+  );
 
-  // 자동 슬라이드
+  // 자동 슬라이드 - currentSlide 제거하여 무한 재생성 방지
   useEffect(() => {
-    if (isPaused || visibleSlides.length <= 1) return
+    if (isPaused || visibleSlides.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % visibleSlides.length)
-    }, interval)
+      setCurrentSlide((prev) => (prev + 1) % visibleSlides.length);
+    }, interval);
 
-    return () => clearInterval(timer)
-  }, [currentSlide, isPaused, visibleSlides.length, interval])
+    return () => clearInterval(timer);
+  }, [isPaused, visibleSlides.length, interval]);
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
+  // 슬라이드 이동 함수들 - 메모이제이션
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+  }, []);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % visibleSlides.length)
-  }
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % visibleSlides.length);
+  }, [visibleSlides.length]);
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + visibleSlides.length) % visibleSlides.length)
-  }
+  const prevSlide = useCallback(() => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + visibleSlides.length) % visibleSlides.length,
+    );
+  }, [visibleSlides.length]);
+
+  // 현재 슬라이드 데이터 - 메모이제이션
+  const currentSlideData = useMemo(
+    () => (visibleSlides.length > 0 ? visibleSlides[currentSlide] : null),
+    [visibleSlides, currentSlide],
+  );
+
+  // 마우스 이벤트 핸들러 - 메모이제이션
+  const handleMouseEnter = useCallback(() => setIsPaused(true), []);
+  const handleMouseLeave = useCallback(() => setIsPaused(false), []);
 
   if (visibleSlides.length === 0) {
-    return null
+    return null;
   }
 
-  const currentSlideData = visibleSlides[currentSlide]
-
   return (
-    <div 
+    <div
       className="relative h-[400px] sm:h-[500px] lg:h-[600px] w-full overflow-hidden rounded-xl"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* 배너 이미지 */}
       <div className="relative h-full w-full">
@@ -66,7 +81,7 @@ export default function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBa
           <div
             key={slide.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+              index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
             {slide.link ? (
@@ -108,9 +123,9 @@ export default function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBa
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlide 
-                  ? 'bg-white w-8' 
-                  : 'bg-white/50 hover:bg-white/70'
+                index === currentSlide
+                  ? "bg-white w-8"
+                  : "bg-white/50 hover:bg-white/70"
               }`}
               aria-label={`슬라이드 ${index + 1}`}
             />
@@ -121,7 +136,7 @@ export default function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBa
       {/* 자동 슬라이드 프로그레스 바 */}
       {!isPaused && visibleSlides.length > 1 && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-          <div 
+          <div
             className="h-full bg-white/70 animate-slide-progress"
             style={{
               animationDuration: `${interval}ms`,
@@ -130,14 +145,15 @@ export default function AutoSlideBanner({ slides, interval = 5000 }: AutoSlideBa
         </div>
       )}
     </div>
-  )
+  );
 }
 
-function BannerContent({ slide }: { slide: BannerSlide }) {
+// BannerContent 컴포넌트 - 메모이제이션
+const BannerContent = memo(({ slide }: { slide: BannerSlide }) => {
   return (
     <div className="relative h-full w-full">
       <Image
-        src={slide.imageUrl || '/images/banner-placeholder.jpg'}
+        src={slide.imageUrl || "/images/banner-placeholder.jpg"}
         alt={slide.title}
         fill
         className="object-cover"
@@ -155,5 +171,10 @@ function BannerContent({ slide }: { slide: BannerSlide }) {
         )}
       </div>
     </div>
-  )
-}
+  );
+});
+
+BannerContent.displayName = "BannerContent";
+
+// React.memo로 성능 최적화
+export default memo(AutoSlideBanner);

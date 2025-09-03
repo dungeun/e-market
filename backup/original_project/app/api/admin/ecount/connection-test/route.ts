@@ -23,8 +23,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
   } catch (error) {
-    console.error('Ecount connection test error:', error)
-    
+
     // 환경변수 누락 에러 처리
     if (error instanceof Error && error.message.includes('환경 변수')) {
       return NextResponse.json({

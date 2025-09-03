@@ -13,7 +13,7 @@ interface TrendingProductsProps {
     showTrendingScore?: boolean
     updateInterval?: number
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function TrendingProducts({ config, products }: TrendingProductsProps) {

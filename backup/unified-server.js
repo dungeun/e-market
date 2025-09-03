@@ -154,11 +154,7 @@ app.use('/', createProxyMiddleware({
 }));
 
 app.listen(PORT, () => {
-  console.log(`
-🚀 통합 한국 이커머스 플랫폼이 시작되었습니다!
-📍 단일 서버 주소: http://localhost:${PORT}
-📊 API: http://localhost:${PORT}/api/v1
-📱 프론트엔드: 프록시됨 (Vite 개발서버)
+
 🕐 시작 시간: ${new Date().toLocaleString('ko-KR')}
 
 ✅ Next.js 스타일 단일 포트 구성 완료!

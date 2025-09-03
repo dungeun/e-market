@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import ProductCard from './ProductCard'
 import { Snowflake, Sun, Leaf, Flower } from 'lucide-react'
@@ -13,12 +15,12 @@ interface SeasonalCollectionProps {
     layout?: string
     limit?: number
   }
-  products: any[]
+  products: unknown[]
 }
 
-export default function SeasonalCollection({ config, products }: SeasonalCollectionProps) {
+const SeasonalCollection = React.memo(function SeasonalCollection({ config = {}, products = [] }: SeasonalCollectionProps) {
   const getSeasonIcon = () => {
-    const title = config.title?.toLowerCase() || ''
+    const title = config?.title?.toLowerCase() || ''
     if (title.includes('겨울') || title.includes('winter')) return <Snowflake className="w-8 h-8 text-blue-400" />
     if (title.includes('여름') || title.includes('summer')) return <Sun className="w-8 h-8 text-yellow-400" />
     if (title.includes('가을') || title.includes('fall')) return <Leaf className="w-8 h-8 text-orange-400" />
@@ -28,10 +30,10 @@ export default function SeasonalCollection({ config, products }: SeasonalCollect
   return (
     <section className="py-12 px-4 relative">
       {/* 배경 이미지 */}
-      {config.backgroundImage && (
+      {config?.backgroundImage && (
         <div className="absolute inset-0 z-0">
           <Image
-            src={config.backgroundImage || '/placeholder.svg'}
+            src={config?.backgroundImage || '/placeholder.svg'}
             alt="Seasonal background"
             fill
             className="object-cover opacity-10"
@@ -44,25 +46,25 @@ export default function SeasonalCollection({ config, products }: SeasonalCollect
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             {getSeasonIcon()}
-            {config.title && (
+            {config?.title && (
               <h2 className="text-3xl font-bold text-gray-900">
-                {config.title}
+                {config?.title}
               </h2>
             )}
             {getSeasonIcon()}
           </div>
-          {config.subtitle && (
+          {config?.subtitle && (
             <p className="text-gray-600">
-              {config.subtitle}
+              {config?.subtitle}
             </p>
           )}
         </div>
 
         {/* 상품 그리드 */}
         <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 ${
-          config.layout === 'masonry' ? 'auto-rows-auto' : ''
+          config?.layout === 'masonry' ? 'auto-rows-auto' : ''
         }`}>
-          {products.slice(0, config.limit || 12).map((product) => (
+          {products.slice(0, config?.limit || 12).map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -83,5 +85,7 @@ export default function SeasonalCollection({ config, products }: SeasonalCollect
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default SeasonalCollection;

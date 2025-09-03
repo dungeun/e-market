@@ -11,7 +11,7 @@ interface TossPaymentProps {
   orderName: string
   customerEmail?: string
   customerName?: string
-  onSuccess: (payment: any) => void
+  onSuccess: (payment: unknown) => void
   onError: (error: string) => void
 }
 
@@ -45,7 +45,7 @@ export function TossPayment({
         failUrl: `${window.location.origin}/payment/toss/fail`,
       })
     } catch (error) {
-      console.error('Toss payment error:', error)
+
       onError(error instanceof Error ? error.message : 'Payment failed')
       toast.error('결제 중 오류가 발생했습니다.')
     } finally {
@@ -70,7 +70,7 @@ export function TossPayment({
         failUrl: `${window.location.origin}/payment/toss/fail`,
       })
     } catch (error) {
-      console.error('Toss bank transfer error:', error)
+
       onError(error instanceof Error ? error.message : 'Payment failed')
       toast.error('결제 중 오류가 발생했습니다.')
     } finally {
@@ -95,7 +95,7 @@ export function TossPayment({
         failUrl: `${window.location.origin}/payment/toss/fail`,
       })
     } catch (error) {
-      console.error('KakaoPay error:', error)
+
       onError(error instanceof Error ? error.message : 'Payment failed')
       toast.error('결제 중 오류가 발생했습니다.')
     } finally {

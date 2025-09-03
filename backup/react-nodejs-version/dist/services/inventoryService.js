@@ -10,7 +10,7 @@ class InventoryService {
     async adjustInventory(adjustment) {
         const { productId, quantity, type, reason, reference, batchId } = adjustment;
         try {
-            const product = await database_1.prisma.product.findUnique({
+            const product = await database_1.query({
                 where: { id: productId },
                 select: {
                     id: true,
@@ -110,7 +110,7 @@ class InventoryService {
     // Get low stock products
     async getLowStockProducts() {
         try {
-            const products = await database_1.prisma.product.findMany({
+            const products = await database_1.query({
                 where: {
                     trackQuantity: true,
                     OR: [
@@ -144,7 +144,7 @@ class InventoryService {
     // Get out of stock products
     async getOutOfStockProducts() {
         try {
-            const products = await database_1.prisma.product.findMany({
+            const products = await database_1.query({
                 where: {
                     trackQuantity: true,
                     quantity: 0,
@@ -168,25 +168,25 @@ class InventoryService {
         try {
             const [totalProducts, inStockProducts, outOfStockProducts, lowStockProducts, inventoryValue, topLowStockProducts,] = await Promise.all([
                 // Total products that track quantity
-                database_1.prisma.product.count({
+                database_1.query({
                     where: { trackQuantity: true },
                 }),
                 // In stock products
-                database_1.prisma.product.count({
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: { gt: 0 },
                     },
                 }),
                 // Out of stock products
-                database_1.prisma.product.count({
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: 0,
                     },
                 }),
                 // Low stock products
-                database_1.prisma.product.count({
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: {
@@ -203,7 +203,7 @@ class InventoryService {
                     },
                 }),
                 // Top 10 low stock products
-                database_1.prisma.product.findMany({
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: {
@@ -227,7 +227,7 @@ class InventoryService {
                 return total + (Number(product.price) * product.quantity);
             }, 0);
             // Calculate total value (simplified - using current stock * price)
-            const allProducts = await database_1.prisma.product.findMany({
+            const allProducts = await database_1.query({
                 where: { trackQuantity: true },
                 select: { quantity: true, price: true },
             });
@@ -261,7 +261,7 @@ class InventoryService {
     // Get inventory movements for a product
     async getProductInventoryHistory(productId, limit = 50, offset = 0) {
         try {
-            const logs = await database_1.prisma.inventoryLog.findMany({
+            const logs = await database_1.query({
                 where: { productId },
                 orderBy: { createdAt: 'desc' },
                 take: limit,
@@ -271,7 +271,7 @@ class InventoryService {
             let runningBalance = 0;
             const movements = [];
             // Get current quantity to start calculation
-            const product = await database_1.prisma.product.findUnique({
+            const product = await database_1.query({
                 where: { id: productId },
                 select: { quantity: true },
             });
@@ -417,7 +417,7 @@ class InventoryService {
             }
             if (alertType) {
                 // Get product details for the alert
-                const product = await database_1.prisma.product.findUnique({
+                const product = await database_1.query({
                     where: { id: productId },
                     include: {
                         category: {
@@ -449,20 +449,20 @@ class InventoryService {
     async getInventoryStats() {
         try {
             const [totalProducts, lowStockCount, outOfStockCount, recentMovements,] = await Promise.all([
-                database_1.prisma.product.count({ where: { trackQuantity: true } }),
-                database_1.prisma.product.count({
+                database_1.query({ where: { trackQuantity: true } }),
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: { lte: database_1.prisma.product.fields.lowStockThreshold },
                     },
                 }),
-                database_1.prisma.product.count({
+                database_1.query({
                     where: {
                         trackQuantity: true,
                         quantity: 0,
                     },
                 }),
-                database_1.prisma.inventoryLog.count({
+                database_1.query({
                     where: {
                         createdAt: {
                             gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
@@ -471,7 +471,7 @@ class InventoryService {
                 }),
             ]);
             // Calculate total value
-            const products = await database_1.prisma.product.findMany({
+            const products = await database_1.query({
                 where: { trackQuantity: true },
                 select: { quantity: true, price: true },
             });

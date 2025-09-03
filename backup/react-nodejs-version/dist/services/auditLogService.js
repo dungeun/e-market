@@ -14,7 +14,7 @@ class AuditLogService {
      */
     async logAuthEvent(action, userId, req, metadata) {
         try {
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId: userId || 'anonymous',
                     action: `AUTH_${action}`,
@@ -46,7 +46,7 @@ class AuditLogService {
      */
     async logDataAccess(action, entityType, entityId, userId, req, metadata) {
         try {
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId,
                     action: `DATA_${action}`,
@@ -77,7 +77,7 @@ class AuditLogService {
     async logSecurityEvent(action, userId, req, metadata) {
         try {
             const severity = this.getSecurityEventSeverity(action);
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId: userId || 'anonymous',
                     action: `SECURITY_${action}`,
@@ -108,7 +108,7 @@ class AuditLogService {
      */
     async logPaymentEvent(action, paymentId, userId, req, metadata) {
         try {
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId,
                     action: `PAYMENT_${action}`,
@@ -143,7 +143,7 @@ class AuditLogService {
      */
     async logAdminAction(action, targetType, targetId, adminId, req, metadata) {
         try {
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId: adminId,
                     action: `ADMIN_${action}`,
@@ -179,7 +179,7 @@ class AuditLogService {
             const userId = req.user?.id ||
                 req.apiClient?.id ||
                 'anonymous';
-            await database_1.prisma.auditLog.create({
+            await database_1.query({
                 data: {
                     userId,
                     action: 'API_ACCESS',
@@ -213,7 +213,7 @@ class AuditLogService {
      * Check failed login patterns
      */
     async checkFailedLoginPatterns(ipAddress) {
-        const recentFailures = await database_1.prisma.auditLog.count({
+        const recentFailures = await database_1.query({
             where: {
                 action: 'AUTH_LOGIN_FAILED',
                 ipAddress,
@@ -224,7 +224,7 @@ class AuditLogService {
             logger_1.logger.warn('Multiple failed login attempts detected', { ipAddress, count: recentFailures });
             // Auto-blacklist IP after 10 failures
             if (recentFailures >= 10) {
-                await database_1.prisma.blacklist.create({
+                await database_1.query({
                     data: {
                         type: 'IP',
                         value: ipAddress,
@@ -240,7 +240,7 @@ class AuditLogService {
      * Check data exfiltration patterns
      */
     async checkDataExfiltration(userId, entityType) {
-        const recentExports = await database_1.prisma.auditLog.count({
+        const recentExports = await database_1.query({
             where: {
                 userId,
                 action: { in: ['DATA_EXPORT', 'DATA_DOWNLOAD'] },
@@ -249,7 +249,7 @@ class AuditLogService {
         });
         if (recentExports > 50) {
             logger_1.logger.warn('Potential data exfiltration detected', { userId, exports: recentExports });
-            await database_1.prisma.securityAlert.create({
+            await database_1.query({
                 data: {
                     userId,
                     alertType: 'DATA_EXFILTRATION_SUSPECTED',
@@ -268,7 +268,7 @@ class AuditLogService {
      * Check API abuse patterns
      */
     async checkAPIAbusePatterns(userId, _req) {
-        const recentRequests = await database_1.prisma.auditLog.findMany({
+        const recentRequests = await database_1.query({
             where: {
                 userId,
                 action: 'API_ACCESS',
@@ -307,7 +307,7 @@ class AuditLogService {
      * Create security alert
      */
     async createSecurityAlert(alertType, userId, req, metadata) {
-        await database_1.prisma.securityAlert.create({
+        await database_1.query({
             data: {
                 userId: userId || 'system',
                 alertType,
@@ -360,19 +360,19 @@ class AuditLogService {
             };
             switch (reportType) {
                 case 'PCI_DSS':
-                    report.paymentAccess = await database_1.prisma.auditLog.count({
+                    report.paymentAccess = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: { startsWith: 'PAYMENT_' },
                         },
                     });
-                    report.encryptionFailures = await database_1.prisma.auditLog.count({
+                    report.encryptionFailures = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: 'SECURITY_ENCRYPTION_FAILURE',
                         },
                     });
-                    report.unauthorizedAccess = await database_1.prisma.auditLog.count({
+                    report.unauthorizedAccess = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: { in: ['AUTH_LOGIN_FAILED', 'SECURITY_BLACKLIST_HIT'] },
@@ -380,19 +380,19 @@ class AuditLogService {
                     });
                     break;
                 case 'GDPR':
-                    report.dataExports = await database_1.prisma.auditLog.count({
+                    report.dataExports = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: 'USER_DATA_EXPORTED',
                         },
                     });
-                    report.dataAnonymizations = await database_1.prisma.auditLog.count({
+                    report.dataAnonymizations = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: 'USER_ANONYMIZED',
                         },
                     });
-                    report.consentUpdates = await database_1.prisma.auditLog.count({
+                    report.consentUpdates = await database_1.query({
                         where: {
                             ...baseQuery,
                             action: 'CONSENT_UPDATED',
@@ -409,10 +409,10 @@ class AuditLogService {
                         _count: true,
                     });
                     report.securityEvents = securityEvents;
-                    report.totalAlerts = await database_1.prisma.securityAlert.count({
+                    report.totalAlerts = await database_1.query({
                         where: baseQuery,
                     });
-                    report.criticalAlerts = await database_1.prisma.securityAlert.count({
+                    report.criticalAlerts = await database_1.query({
                         where: {
                             ...baseQuery,
                             severity: 'CRITICAL',
@@ -435,7 +435,7 @@ class AuditLogService {
         try {
             const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
             // Archive logs before deletion (in production, export to cold storage)
-            const logsToDelete = await database_1.prisma.auditLog.count({
+            const logsToDelete = await database_1.query({
                 where: {
                     createdAt: { lt: cutoffDate },
                 },
@@ -443,7 +443,7 @@ class AuditLogService {
             if (logsToDelete > 0) {
                 logger_1.logger.info(`Archiving ${logsToDelete} audit logs older than ${retentionDays} days`);
                 // Delete old logs
-                const result = await database_1.prisma.auditLog.deleteMany({
+                const result = await database_1.queryMany({
                     where: {
                         createdAt: { lt: cutoffDate },
                     },
@@ -480,7 +480,7 @@ class AuditLogService {
                 if (criteria.endDate)
                     where.createdAt.lte = criteria.endDate;
             }
-            return await database_1.prisma.auditLog.findMany({
+            return await database_1.query({
                 where,
                 orderBy: { createdAt: 'desc' },
                 take: criteria.limit || 100,

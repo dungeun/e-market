@@ -134,10 +134,10 @@ const payments = [
 
 export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedPayment, setSelectedPayment] = useState<any>(null)
+  const [selectedPayment, setSelectedPayment] = useState<unknown>(null)
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: any = {
+    const statusConfig: unknown = {
       completed: { label: '완료', color: 'bg-green-100 text-green-800', icon: CheckCircle },
       pending: { label: '대기중', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       processing: { label: '처리중', color: 'bg-blue-100 text-blue-800', icon: RefreshCw },
@@ -172,7 +172,7 @@ export default function PaymentsPage() {
     }
   }
 
-  const handlePaymentAction = (action: string, payment: any) => {
+  const handlePaymentAction = (action: string, payment: unknown) => {
     switch(action) {
       case 'view':
         setSelectedPayment(payment)

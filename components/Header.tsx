@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
@@ -7,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { ChevronDown, User as UserIcon, LogOut, Settings, Menu, X, Bell } from 'lucide-react'
 import { useUIConfigStore } from '@/lib/stores/ui-config.store'
 import LanguageSelector from './LanguageSelector'
+import PopupAlert from './PopupAlert'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 import Image from 'next/image'
@@ -15,7 +18,7 @@ interface HeaderProps {
   variant?: 'default' | 'transparent'
 }
 
-export default function Header({ variant = 'default' }: HeaderProps) {
+const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
@@ -24,11 +27,12 @@ export default function Header({ variant = 'default' }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
   const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const { config, loadSettingsFromAPI } = useUIConfigStore()
   const { user, isAuthenticated, logout } = useAuth()
-  const { t, currentLanguage, isLoading: languageLoading } = useLanguage()
+  const { t, currentLanguage } = useLanguage()
   const { settings: siteSettings } = useSiteSettings()
   
   const isTransparent = variant === 'transparent'
@@ -38,6 +42,27 @@ export default function Header({ variant = 'default' }: HeaderProps) {
   const isInfluencer = !user || userType === 'INFLUENCER' || userType === 'USER'
   const isBusiness = userType === 'BUSINESS'
   const isAdmin = userType === 'ADMIN'
+
+  // 동적 메뉴 구성 (설정 기반)
+  const [navigationMenus, setNavigationMenus] = useState<any[]>([])
+  const brandText = siteSettings?.general?.siteName || config?.header?.logo?.text || 'THE ROW'
+  const logoImage = siteSettings?.website?.logo !== '/logo.svg' ? siteSettings?.website?.logo : null
+
+  // DB에서 헤더 메뉴 가져오기
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const response = await fetch('/api/admin/ui-menus?type=header')
+        if (response.ok) {
+          const data = await response.json()
+          setNavigationMenus(data.menus || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch header menus:', error)
+      }
+    }
+    fetchMenus()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,27 +82,25 @@ export default function Header({ variant = 'default' }: HeaderProps) {
           const profile = JSON.parse(savedProfile)
           setProfileImage(profile.avatar || null)
         } catch (e) {
-          console.error('Failed to parse profile:', e)
+
         }
       }
     }
+    
+    // UI 설정 로드
+
+    loadSettingsFromAPI(currentLanguage)
     
     return () => {
       if (isTransparent) {
         window.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [isTransparent, user])
-
-  // UI 설정 초기 로드
-  useEffect(() => {
-    console.log('Header: Loading UI settings...');
-    loadSettingsFromAPI()
-  }, [loadSettingsFromAPI])
+  }, [isTransparent, user, loadSettingsFromAPI, currentLanguage])
 
   // 언어 변경 시 UI 설정 재로드
   useEffect(() => {
-    console.log('Header: Language changed to', currentLanguage, '- reloading UI config...');
+
     loadSettingsFromAPI(currentLanguage)
   }, [currentLanguage, loadSettingsFromAPI])
 
@@ -113,314 +136,293 @@ export default function Header({ variant = 'default' }: HeaderProps) {
     logout()
   }
 
-  const isActive = (path: string) => pathname === path
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery('')
+    }
+  }
 
+  const isActive = (path: string) => pathname === path
 
   // 사용자 타입별 대시보드 링크
   const dashboardLink = isAdmin ? '/admin' : isBusiness ? '/business/dashboard' : '/mypage'
 
   return (
-    <header 
-      className="text-white sticky top-0 z-50"
-      style={{
-        background: `linear-gradient(to right, ${siteSettings.website.primaryColor || '#3B82F6'}, ${siteSettings.website.secondaryColor || '#10B981'})`
-      }}
-    >
-      <div className="container mx-auto px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 sm:gap-8 flex-1">
-            {/* 모바일 메뉴 버튼 - 개선된 터치 영역 */}
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-3 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-95"
-              aria-label="메뉴 토글"
-            >
-              {showMobileMenu ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-            </button>
-            
-            {/* 로고 - 모바일 반응형 최적화 */}
-            <Link href="/" className="flex items-center min-w-0 flex-shrink-0">
-              {siteSettings.website.logo && siteSettings.website.logo !== '/logo.svg' ? (
-                <div className="relative h-8 sm:h-10 lg:h-12 w-auto">
-                  <Image
-                    src={siteSettings.website.logo}
-                    alt={siteSettings.general.siteName}
-                    width={120}
-                    height={40}
-                    className="h-8 sm:h-10 lg:h-12 w-auto object-contain"
-                    priority
-                  />
-                </div>
-              ) : (
-                <h1 className="text-lg sm:text-xl lg:text-3xl font-black text-white truncate">
-                  {siteSettings.general.siteName || config.header.logo.text}
-                </h1>
-              )}
-            </Link>
-            
-            {/* 공통 메뉴 */}
-            <nav className="hidden lg:flex items-center gap-6">
-              {config.header.menus
-                .filter(menu => menu.visible)
-                .sort((a, b) => a.order - b.order)
-                .map(menu => (
-                  <Link 
-                    key={menu.id}
-                    href={menu.href} 
-                    className="hover:opacity-80 transition font-medium text-white"
-                  >
-                    {t(menu.label, menu.label)}
-                  </Link>
-                ))}
-            </nav>
-          </div>
-          
-
-          {/* 사용자 메뉴와 권한별 메뉴 */}
-          <nav className="flex items-center gap-3 sm:gap-6 flex-1 justify-end">
-            {/* 언어 선택 - 관리자 페이지가 아닐 때만 표시 */}
-            {!pathname.startsWith('/admin') && <LanguageSelector />}
-            
-            {/* 알림 아이콘 - 모바일 최적화 */}
-            {isAuthenticated && (
-              <div className="relative" ref={notificationRef}>
+    <>
+      {/* Popup Alert - Top Tier */}
+      <PopupAlert maxWidth="max-w-[1450px]" />
+      
+      <header className="sticky top-0 z-50 bg-white">
+        {/* THE ROW Style Header */}
+        <div className="bg-white">
+          <div className="max-w-[1450px] mx-auto px-4 sm:px-6">
+            <div className="flex items-center justify-between h-16 lg:h-20">
+              
+              {/* Left: Mobile menu + Brand */}
+              <div className="flex items-center">
+                {/* Mobile menu button */}
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-3 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-95"
-                  aria-label="알림"
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="lg:hidden p-2 -ml-2 mr-3 hover:bg-gray-50 rounded-lg transition-all"
+                  aria-label="메뉴 토글"
                 >
-                  <Bell className="w-6 h-6" />
-                  {notifications.some(n => n.unread) && (
-                    <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-                  )}
+                  {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
                 
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 z-50">
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-                      <h3 className="font-semibold text-gray-900 text-lg">{t('notification.title', '알림')}</h3>
+                {/* Brand/Logo */}
+                <Link href="/" className="flex items-center">
+                  {logoImage ? (
+                    <div className="relative h-8 lg:h-10 w-auto">
+                      <Image
+                        src={logoImage}
+                        alt={brandText}
+                        width={120}
+                        height={40}
+                        className="h-8 lg:h-10 w-auto object-contain"
+                        priority
+                      />
                     </div>
-                    <div className="max-h-80 sm:max-h-96 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                        notifications.map(notif => (
-                          <div
-                            key={notif.id}
-                            className={`p-4 border-b hover:bg-gray-50 transition cursor-pointer ${
-                              notif.unread ? 'bg-blue-50' : ''
-                            }`}
-                          >
-                            <p className="text-sm text-gray-700">{notif.message}</p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-8 text-center text-gray-500">
-                          <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                          <p>{t('notification.empty', '알림이 없습니다')}</p>
-                        </div>
-                      )}
+                  ) : (
+                    <h1 className="text-2xl lg:text-3xl font-black tracking-wider text-black uppercase">
+                      {brandText}
+                    </h1>
+                  )}
+                </Link>
+              </div>
+
+              {/* Center: Search Bar (THE ROW Style) */}
+              <div className="flex-1 max-w-md mx-8 hidden lg:block">
+                <form onSubmit={handleSearch} className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('search.placeholder', '검색')}
+                    className="w-full px-0 py-2 text-center text-black bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors placeholder-gray-400 text-sm font-medium"
+                  />
+                  <button 
+                    type="submit"
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1"
+                  >
+                    <svg className="w-4 h-4 text-gray-400 hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                </form>
+              </div>
+
+              {/* Right: Actions */}
+              <div className="flex items-center space-x-6">
+                {/* User Authentication Area */}
+                <div className="flex items-center space-x-4 text-sm">
+                  {isAuthenticated && user ? (
+                    <div className="flex items-center space-x-4">
+                      <Link 
+                        href={dashboardLink} 
+                        className="text-black hover:opacity-60 transition-opacity font-medium hidden sm:block"
+                      >
+                        {t('menu.my', '마이페이지')}
+                      </Link>
+                      <Link 
+                        href="/mypage" 
+                        className="text-black hover:opacity-60 transition-opacity font-medium"
+                      >
+                        회원가입
+                      </Link>
+                      <div className="flex items-center space-x-1 text-black font-medium">
+                        <span>+2,000P</span>
+                      </div>
                     </div>
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      <Link href="/auth/login" className="text-black hover:opacity-60 transition-opacity font-medium">
+                        로그인
+                      </Link>
+                      <Link href="/auth/register" className="text-black hover:opacity-60 transition-opacity font-medium">
+                        회원가입
+                      </Link>
+                      <Link href="/cart" className="relative p-2">
+                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
+                        </svg>
+                        <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Language selector - hidden on mobile */}
+                {!pathname.startsWith('/admin') && (
+                  <div className="hidden lg:block">
+                    <LanguageSelector />
                   </div>
                 )}
               </div>
-            )}
-            
-            {/* 권한별 메뉴 - 데스크톱 */}
-            <div className="hidden lg:flex items-center gap-4">
-              {/* 관리자 전용 메뉴 */}
-              {isAdmin && (
-                <>
-                  <div className="h-4 w-px bg-white/30" />
-                  <Link href="/admin/users" className="hover:opacity-80 transition font-medium text-white text-sm">
-                    {t('menu.user_management', '사용자 관리')}
-                  </Link>
-                  <Link href="/admin/campaigns" className="hover:opacity-80 transition font-medium text-white text-sm">
-                    {t('menu.campaign_management', '캠페인 관리')}
-                  </Link>
-                </>
-              )}
-              
-              {/* 인플루언서 전용 메뉴 */}
-              {isInfluencer && user && (
-                <>
-                  <div className="h-4 w-px bg-white/30" />
-                  <Link href="/mypage" className="flex flex-col items-center gap-1 hover:opacity-80 transition">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="text-xs">{t('menu.mypage', '마이페이지')}</span>
-                  </Link>
-                </>
-              )}
-              
-              {/* 업체 전용 메뉴 */}
-              {isBusiness && (
-                <>
-                  <div className="h-4 w-px bg-white/30" />
-                  <Link href="/business/dashboard" className="flex flex-col items-center gap-1 hover:opacity-80 transition">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span className="text-xs">{t('menu.dashboard', '대시보드')}</span>
-                  </Link>
-                </>
-              )}
             </div>
-            
-            {/* 로그인/로그아웃 버튼 */}
-            <div className="flex items-center gap-2">
-              {isAuthenticated && user ? (
-                <>
-                  {/* 데스크톱 버튼 */}
-                  <div className="hidden sm:flex items-center gap-2">
-                    {!isInfluencer && !isBusiness && (
-                      <Link 
-                        href={dashboardLink} 
-                        className="flex flex-col items-center gap-1 hover:opacity-80 transition"
-                      >
-                        <UserIcon className="w-5 h-5" />
-                        <span className="text-xs">{t('menu.my', '마이')}</span>
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} className="flex flex-col items-center gap-1 hover:opacity-80 transition">
-                      <LogOut className="w-5 h-5" />
-                      <span className="text-xs">{t('menu.logout', '로그아웃')}</span>
-                    </button>
-                  </div>
-                  
-                  {/* 모바일 버튼 */}
-                  <div className="sm:hidden">
-                    <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-lg transition">
-                      <LogOut className="w-5 h-5" />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/login" className="hover:opacity-80 transition text-sm text-white">
-                    {t('menu.login', '로그인')}
-                  </Link>
-                  <Link href="/auth/register" className="bg-white/20 backdrop-blur px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white/30 transition text-sm text-white">
-                    {t('menu.signup', '회원가입')}
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
+          </div>
         </div>
-        
-        {/* 모바일 메뉴 - 풀스크린 최적화 */}
+
+        {/* THE ROW Style Navigation */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-[1450px] mx-auto px-4 sm:px-6">
+            <nav className="hidden lg:flex items-center justify-center space-x-8 py-4">
+              {navigationMenus.map((menu, index) => {
+                const menuContent = menu.content || {}
+                const translations = menu.translations || {}
+                
+                // 우선순위: 언어팩 번역 > content 필드 > 기본값
+                const label = currentLanguage === 'en' ? (translations.en || menuContent.label_en || translations.ko || menuContent.label) : 
+                              currentLanguage === 'ja' ? (translations.ja || menuContent.label_ja || translations.ko || menuContent.label) :
+                              (translations.ko || menuContent.label || menuContent.name);
+                              
+                const href = menuContent.href || '#';
+                
+                if (href === '#') {
+                  return (
+                    <button 
+                      key={menu.id || index}
+                      className="text-black hover:opacity-60 transition-opacity font-medium uppercase text-sm tracking-wider"
+                    >
+                      {label}
+                    </button>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={menu.id || index}
+                    href={href}
+                    className={`font-medium uppercase text-sm tracking-wider transition-opacity hover:opacity-60 ${
+                      isActive(href) ? 'text-black border-b border-black pb-1' : 'text-black'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Mobile search bar */}
+            <div className="lg:hidden py-4 border-t border-gray-200">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('search.placeholder', '검색')}
+                  className="w-full px-0 py-2 text-center text-black bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors placeholder-gray-400 text-sm font-medium"
+                />
+                <button 
+                  type="submit"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1"
+                >
+                  <svg className="w-4 h-4 text-gray-400 hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+        </div>
+      </div>
+
+        {/* THE ROW Mobile Menu Overlay */}
         {showMobileMenu && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-sm">
+          <div className="lg:hidden fixed inset-0 z-50 bg-white">
             <div className="flex flex-col h-full">
-              {/* 헤더 */}
-              <div className="flex items-center justify-between p-6 border-b border-white/20">
-                <h2 className="text-2xl font-bold text-white">메뉴</h2>
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h2 className="text-xl font-black tracking-wider text-black uppercase">MENU</h2>
                 <button
                   onClick={() => setShowMobileMenu(false)}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200"
+                  className="p-2 hover:bg-gray-50 rounded-lg transition-all"
                   aria-label="메뉴 닫기"
                 >
-                  <X className="w-7 h-7 text-white" />
+                  <X className="w-6 h-6 text-black" />
                 </button>
               </div>
 
-              {/* 메뉴 컨텐츠 */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <nav className="space-y-2">
-                  {config.header.menus
-                    .filter(menu => menu.visible)
-                    .sort((a, b) => a.order - b.order)
-                    .map(menu => (
-                      <Link 
-                        key={menu.id}
-                        href={menu.href} 
-                        className="flex items-center px-4 py-4 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium text-white text-lg"
+              {/* Menu Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <nav className="space-y-1">
+                  {/* Dynamic Navigation Menus from DB */}
+                  {navigationMenus.map((menu, index) => {
+                    const menuContent = menu.content || {}
+                    const translations = menu.translations || {}
+                    
+                    // 우선순위: 언어팩 번역 > content 필드 > 기본값
+                    const label = currentLanguage === 'en' ? (translations.en || menuContent.label_en || translations.ko || menuContent.label) : 
+                                  currentLanguage === 'ja' ? (translations.ja || menuContent.label_ja || translations.ko || menuContent.label) :
+                                  (translations.ko || menuContent.label || menuContent.name);
+                                  
+                    const href = menuContent.href || '#';
+                    
+                    if (href === '#') {
+                      return (
+                        <button 
+                          key={menu.id || index}
+                          className="block w-full px-4 py-4 text-left font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowMobileMenu(false)}
+                        >
+                          {label}
+                        </button>
+                      );
+                    }
+                    
+                    return (
+                      <Link
+                        key={menu.id || index}
+                        href={href}
+                        className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
                         onClick={() => setShowMobileMenu(false)}
                       >
-                        <span className="w-2 h-2 bg-blue-400 rounded-full mr-4"></span>
-                        {t(menu.label, menu.label)}
+                        {label}
                       </Link>
-                    ))}
+                    );
+                  })}
                   
-                  {/* 권한별 메뉴 구분선 */}
-                  {(isAdmin || isInfluencer || isBusiness) && (
-                    <div className="h-px bg-white/20 my-6" />
-                  )}
+                  {/* Divider */}
+                  <div className="h-px bg-gray-200 my-6" />
                   
-                  {/* 관리자 메뉴 */}
+                  {/* User-specific menu items */}
                   {isAdmin && (
-                    <>
-                      <div className="px-4 py-2 text-white/60 text-sm font-medium uppercase tracking-wider">
-                        관리자 메뉴
-                      </div>
-                      <Link 
-                        href="/admin/users" 
-                        className="flex items-center px-4 py-4 rounded-xl hover:bg-white/10 transition-all duration-200 text-white text-lg"
-                        onClick={() => setShowMobileMenu(false)}
-                      >
-                        <span className="w-2 h-2 bg-red-400 rounded-full mr-4"></span>
-                        {t('menu.user_management', '사용자 관리')}
-                      </Link>
-                      <Link 
-                        href="/admin/campaigns" 
-                        className="flex items-center px-4 py-4 rounded-xl hover:bg-white/10 transition-all duration-200 text-white text-lg"
-                        onClick={() => setShowMobileMenu(false)}
-                      >
-                        <span className="w-2 h-2 bg-red-400 rounded-full mr-4"></span>
-                        {t('menu.campaign_management', '캠페인 관리')}
-                      </Link>
-                    </>
+                    <Link 
+                      href="/admin" 
+                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowMobileMenu(false)}
+                    >
+                      ADMIN
+                    </Link>
                   )}
                   
-                  {/* 인플루언서 메뉴 */}
-                  {isInfluencer && user && (
-                    <>
-                      <div className="px-4 py-2 text-white/60 text-sm font-medium uppercase tracking-wider">
-                        개인 메뉴
-                      </div>
-                      <Link 
-                        href="/mypage" 
-                        className="flex items-center px-4 py-4 rounded-xl hover:bg-white/10 transition-all duration-200 text-white text-lg"
-                        onClick={() => setShowMobileMenu(false)}
-                      >
-                        <span className="w-2 h-2 bg-green-400 rounded-full mr-4"></span>
-                        {t('menu.mypage', '마이페이지')}
-                      </Link>
-                    </>
-                  )}
-                  
-                  {/* 비즈니스 메뉴 */}
-                  {isBusiness && (
-                    <>
-                      <div className="px-4 py-2 text-white/60 text-sm font-medium uppercase tracking-wider">
-                        비즈니스 메뉴
-                      </div>
-                      <Link 
-                        href="/business/dashboard" 
-                        className="flex items-center px-4 py-4 rounded-xl hover:bg-white/10 transition-all duration-200 text-white text-lg"
-                        onClick={() => setShowMobileMenu(false)}
-                      >
-                        <span className="w-2 h-2 bg-purple-400 rounded-full mr-4"></span>
-                        {t('menu.dashboard', '대시보드')}
-                      </Link>
-                    </>
+                  {isAuthenticated && user && (
+                    <Link 
+                      href={dashboardLink} 
+                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowMobileMenu(false)}
+                    >
+                      MY PAGE
+                    </Link>
                   )}
                 </nav>
               </div>
 
-              {/* 하단 로그인/로그아웃 버튼 */}
-              <div className="p-6 border-t border-white/20">
+              {/* Bottom Actions */}
+              <div className="p-4 border-t border-gray-200">
                 {isAuthenticated && user ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3 px-4 py-3 bg-white/10 rounded-xl">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold">
-                          {user.name?.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">{user.name}</p>
-                        <p className="text-white/60 text-sm">{user.email}</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-sm">
+                            {user.name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-black font-medium text-sm">{user.name}</p>
+                          <p className="text-gray-500 text-xs">+2,000P</p>
+                        </div>
                       </div>
                     </div>
                     <button 
@@ -428,26 +430,26 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                         handleLogout();
                         setShowMobileMenu(false);
                       }}
-                      className="w-full px-6 py-4 bg-red-500 text-white rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-red-600 active:scale-95"
+                      className="w-full px-4 py-3 bg-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800"
                     >
-                      {t('menu.logout', '로그아웃')}
+                      LOGOUT
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <Link 
                       href="/auth/login" 
-                      className="block w-full px-6 py-4 bg-white/10 text-white text-center rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-white/20"
+                      className="block w-full px-4 py-3 border border-black text-black text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-black hover:text-white"
                       onClick={() => setShowMobileMenu(false)}
                     >
-                      {t('menu.login', '로그인')}
+                      LOGIN
                     </Link>
                     <Link 
                       href="/auth/register" 
-                      className="block w-full px-6 py-4 bg-blue-500 text-white text-center rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-blue-600"
+                      className="block w-full px-4 py-3 bg-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800"
                       onClick={() => setShowMobileMenu(false)}
                     >
-                      {t('menu.signup', '회원가입')}
+                      SIGN UP
                     </Link>
                   </div>
                 )}
@@ -455,7 +457,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </div>
           </div>
         )}
-      </div>
     </header>
-  )
-}
+    </>
+    )
+});
+
+export default Header;

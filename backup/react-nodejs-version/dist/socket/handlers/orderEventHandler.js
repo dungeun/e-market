@@ -208,7 +208,7 @@ class OrderEventHandler {
         try {
             // Get all admin users
             const { prisma } = await Promise.resolve().then(() => __importStar(require('../../utils/database')));
-            const adminUsers = await prisma.user.findMany({
+            const adminUsers = await query({
                 where: {
                     role: {
                         in: ['ADMIN', 'SUPER_ADMIN'],

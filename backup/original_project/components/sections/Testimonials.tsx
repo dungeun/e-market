@@ -13,7 +13,7 @@ interface TestimonialsProps {
     layout?: string
     autoplay?: boolean
   }
-  reviews?: any[]
+  reviews?: unknown[]
 }
 
 export default function Testimonials({ config, reviews = [] }: TestimonialsProps) {

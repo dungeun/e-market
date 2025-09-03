@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,7 +18,7 @@ interface CategoriesProps {
   categories?: Category[]
 }
 
-export default function OrvioCategoriesSection({ categories }: CategoriesProps) {
+const OrvioCategoriesSection = React.memo(function OrvioCategoriesSection({ categories }: CategoriesProps) {
   const defaultCategories: Category[] = [
     {
       id: '1',
@@ -153,4 +155,6 @@ export default function OrvioCategoriesSection({ categories }: CategoriesProps) 
       </div>
     </section>
   )
-}
+});
+
+export default OrvioCategoriesSection;

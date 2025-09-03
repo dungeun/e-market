@@ -1,5 +1,6 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       'category.food'
     ];
 
-    const languagePacks = await prisma.languagePack.findMany({
+    const languagePacks = await query({
       where: {
         languageCode: testLang,
         key: {

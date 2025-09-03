@@ -50,7 +50,7 @@ export default function AdminDashboard() {
         let token = localStorage.getItem('accessToken');
         
         if (!token) {
-          console.error('토큰이 없습니다.');
+
           setLoading(false);
           navigate('/login');
           return;
@@ -68,8 +68,7 @@ export default function AdminDashboard() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          console.error('API 응답 에러:', response.status, errorData);
-          
+
           if (response.status === 401) {
             navigate('/login');
             return;
@@ -100,7 +99,7 @@ export default function AdminDashboard() {
         
         setLoading(false);
       } catch (error) {
-        console.error('대시보드 데이터 로드 실패:', error);
+
         // 에러 시 기본값 설정
         setStats({
           totalUsers: 0,
@@ -470,7 +469,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <p className="text-sm text-gray-600 mt-1">{(activity as any).description}</p>
+                    <p className="text-sm text-gray-600 mt-1">{(activity as unknown).description}</p>
                     <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                   </div>
                 </div>

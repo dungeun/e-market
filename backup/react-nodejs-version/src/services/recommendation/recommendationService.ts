@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { 
   RecommendationRequest, 
   RecommendationResult, 
@@ -79,7 +79,7 @@ export class RecommendationService {
 
       return recommendations;
     } catch (error) {
-      console.error('Recommendation service error:', error);
+
       return this.getFallbackRecommendations(request);
     }
   }
@@ -162,7 +162,7 @@ export class RecommendationService {
     const results: RecommendationResult[] = [];
     
     for (const item of trendingProducts) {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.query({
         where: { id: item.productId },
         select: { id: true, status: true }
       });
@@ -211,7 +211,7 @@ export class RecommendationService {
     limit: number = 10
   ): Promise<RecommendationResult[]> {
     // 캐시된 유사도 확인
-    const similarities = await this.prisma.productSimilarity.findMany({
+    const similarities = await this.query({
       where: {
         productId,
         similarity: { gte: 0.3 }
@@ -257,7 +257,7 @@ export class RecommendationService {
     request: RecommendationRequest
   ): Promise<RecommendationResult[]> {
     // 유사한 사용자 찾기
-    const similarUsers = await this.prisma.userSimilarity.findMany({
+    const similarUsers = await this.query({
       where: {
         userId: request.userId,
         similarity: { gte: 0.5 }
@@ -274,7 +274,7 @@ export class RecommendationService {
     const recommendations = new Map<string, number>();
     
     for (const simUser of similarUsers) {
-      const userProducts = await this.prisma.userBehavior.findMany({
+      const userProducts = await this.query({
         where: {
           userId: simUser.similarUserId,
           action: { in: ['PURCHASE', 'ADD_TO_CART', 'REVIEW'] }
@@ -309,8 +309,8 @@ export class RecommendationService {
   /**
    * 사용자 특성 추출
    */
-  private async extractUserFeatures(userId: string): Promise<any> {
-    const features: any = {
+  private async extractUserFeatures(userId: string): Promise<unknown> {
+    const features: unknown = {
       purchaseCount: 0,
       avgOrderValue: 0,
       preferredCategories: [],
@@ -320,7 +320,7 @@ export class RecommendationService {
     };
 
     // 구매 이력
-    const orders = await this.prisma.order.findMany({
+    const orders = await this.query({
       where: { userId },
       select: { totalAmount: true, createdAt: true }
     });
@@ -333,13 +333,13 @@ export class RecommendationService {
     }
 
     // 활동 수준
-    const behaviors = await this.prisma.userBehavior.count({
+    const behaviors = await this.query({
       where: { userId }
     });
     features.activityLevel = Math.min(behaviors / 100, 1); // 정규화
 
     // 마지막 활동일
-    const lastBehavior = await this.prisma.userBehavior.findFirst({
+    const lastBehavior = await this.query({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       select: { createdAt: true }
@@ -358,8 +358,8 @@ export class RecommendationService {
   /**
    * 컨텍스트 특성 추출
    */
-  private extractContextFeatures(context?: any): any {
-    const features: any = {
+  private extractContextFeatures(context?: unknown): any {
+    const features: unknown = {
       timeOfDay: new Date().getHours(),
       dayOfWeek: new Date().getDay(),
       isMobile: context?.deviceType === 'mobile',
@@ -386,13 +386,13 @@ export class RecommendationService {
    * ML 모델 예측 (시뮬레이션)
    */
   private async predictWithMLModel(
-    userFeatures: any,
+    userFeatures: unknown,
     contextFeatures: any
   ): Promise<RecommendationResult[]> {
     // 실제로는 TensorFlow.js 또는 외부 ML API 호출
     // 여기서는 시뮬레이션
 
-    const products = await this.prisma.product.findMany({
+    const products = await this.query({
       where: { status: 'PUBLISHED' },
       take: 100,
       orderBy: { createdAt: 'desc' }
@@ -417,7 +417,7 @@ export class RecommendationService {
     duration?: number,
     metadata?: any
   ): Promise<void> {
-    await this.prisma.userBehavior.create({
+    await this.query({
       data: {
         userId,
         productId,
@@ -444,7 +444,7 @@ export class RecommendationService {
     recommendationId?: string,
     sessionId?: string
   ): Promise<void> {
-    await this.prisma.recommendationClick.create({
+    await this.query({
       data: {
         userId,
         productId,
@@ -470,7 +470,7 @@ export class RecommendationService {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24시간 후 만료
 
-    await this.prisma.recommendationCache.upsert({
+    await this.query({
       where: {
         userId_algorithm: { userId, algorithm }
       },
@@ -521,7 +521,7 @@ export class RecommendationService {
     });
 
     // 결과를 모니터링 시스템으로 전송
-    console.log(`CTR stats for ${algorithm}:`, stats);
+
   }
 
   /**
@@ -531,7 +531,7 @@ export class RecommendationService {
     request: RecommendationRequest
   ): Promise<RecommendationResult[]> {
     // 인기 상품으로 폴백
-    const popularProducts = await this.prisma.product.findMany({
+    const popularProducts = await this.query({
       where: {
         status: 'PUBLISHED',
         id: { notIn: request.excludeProductIds || [] }

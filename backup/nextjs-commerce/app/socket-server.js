@@ -15,7 +15,7 @@ app.prepare().then(() => {
 
   const io = new Server(server, {
     cors: {
-      origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      origin: process.env.NEXT_PUBLIC_APP_URL || env.appUrl,
       methods: ["GET", "POST"]
     }
   })
@@ -25,7 +25,6 @@ app.prepare().then(() => {
   const adminUsers = new Set()
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`)
 
     // Handle user authentication
     socket.on('authenticate', (data) => {
@@ -38,20 +37,20 @@ app.prepare().then(() => {
       }
       
       socket.join(`user-${userId}`)
-      console.log(`User ${userId} authenticated with role ${userRole}`)
+
     })
 
     // Handle room joining
     socket.on('join-room', (data) => {
       const { room } = data
       socket.join(room)
-      console.log(`User ${socket.id} joined room: ${room}`)
+
     })
 
     socket.on('leave-room', (data) => {
       const { room } = data
       socket.leave(room)
-      console.log(`User ${socket.id} left room: ${room}`)
+
     })
 
     // Cart synchronization
@@ -66,7 +65,7 @@ app.prepare().then(() => {
     socket.on('track-order', (data) => {
       const { orderId } = data
       socket.join(`order-${orderId}`)
-      console.log(`User ${socket.id} tracking order: ${orderId}`)
+
     })
 
     // Admin functions
@@ -121,7 +120,7 @@ app.prepare().then(() => {
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.id}`)
+
       connectedUsers.delete(socket.id)
       adminUsers.delete(socket.id)
     })
@@ -129,17 +128,17 @@ app.prepare().then(() => {
 
   server.listen(PORT, (err) => {
     if (err) throw err
-    console.log(`🔌 Socket.io server ready on port ${PORT}`)
+
   })
 })
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down socket server...')
+
   process.exit(0)
 })
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down socket server...')
+
   process.exit(0)
 })

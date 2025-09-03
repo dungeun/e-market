@@ -1,3 +1,4 @@
+import type { AppError } from '@/lib/types/common';
 /**
  * 진열 성능 분석 API
  */
@@ -6,9 +7,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { displayTemplateService } from '@/lib/services/display/display-template'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // 진열 성능 조회
 export async function GET(request: NextRequest) {
@@ -111,11 +109,11 @@ export async function GET(request: NextRequest) {
       }
     } else if (position) {
       // 위치별 전체 성능 분석
-      const templates = await prisma.displayTemplate.findMany({
-        where: { position: position as any, isActive: true }
+      const templates = await query({
+        where: { position: position as unknown, isActive: true }
       })
 
-      const positionAnalytics: any[] = []
+      const positionAnalytics: unknown[] = []
 
       for (const template of templates) {
         const performance = await displayTemplateService.analyzePerformance(
@@ -159,8 +157,8 @@ export async function GET(request: NextRequest) {
       data: analytics,
       period: { start, end }
     })
-  } catch (error: any) {
-    console.error('Display analytics error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch analytics' },
       { status: 500 }
@@ -198,7 +196,7 @@ export async function POST(request: NextRequest) {
 
     // 중복 이벤트 방지 (같은 사용자의 같은 상품에 대한 같은 이벤트)
     if (userId && productId && type !== 'IMPRESSION') {
-      const recentEvent = await prisma.displayEvent.findFirst({
+      const recentEvent = await query({
         where: {
           templateId,
           type,
@@ -219,7 +217,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 이벤트 생성
-    const event = await prisma.displayEvent.create({
+    const event = await query({
       data: {
         templateId,
         type,
@@ -237,7 +235,7 @@ export async function POST(request: NextRequest) {
     if (type === 'CONVERSION' && productId) {
       // 최근 주문에서 해당 상품을 포함한 주문 찾기
       if (userId) {
-        const recentOrder = await prisma.order.findFirst({
+        const recentOrder = await query({
           where: {
             userId,
             items: {
@@ -255,7 +253,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (recentOrder) {
-          await prisma.displayEvent.update({
+          await query({
             where: { id: event.id },
             data: {
               orderId: recentOrder.id,
@@ -273,8 +271,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { eventId: event.id }
     })
-  } catch (error: any) {
-    console.error('Event tracking error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to track event' },
       { status: 500 }
@@ -350,7 +348,7 @@ export async function PATCH(request: NextRequest) {
     })
 
     // 위치별 성능
-    const positionPerformance = await prisma.displayTemplate.findMany({
+    const positionPerformance = await query({
       include: {
         _count: {
           select: {
@@ -399,8 +397,8 @@ export async function PATCH(request: NextRequest) {
       data: dashboard,
       period: { start, end }
     })
-  } catch (error: any) {
-    console.error('Dashboard analytics error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to fetch dashboard analytics' },
       { status: 500 }

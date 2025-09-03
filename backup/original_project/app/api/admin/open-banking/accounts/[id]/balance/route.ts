@@ -1,7 +1,5 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 // GET - 계좌 잔액 조회
 export async function GET(
@@ -12,7 +10,7 @@ export async function GET(
     const { id: accountId } = await params
 
     // 계좌 정보 조회
-    const account = await prisma.bankAccount.findUnique({
+    const account = await query({
       where: { id: accountId }
     })
 
@@ -49,7 +47,7 @@ export async function GET(
 
     // 계좌 정보 업데이트 (옵션)
     if (balanceResult.balance !== undefined) {
-      await prisma.bankAccount.update({
+      await query({
         where: { id: accountId },
         data: {
           updatedAt: new Date()
@@ -70,7 +68,7 @@ export async function GET(
       lastUpdated: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Balance inquiry error:', error)
+
     return NextResponse.json(
       { error: '잔액 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -79,7 +77,7 @@ export async function GET(
 }
 
 // 오픈뱅킹 API 잔액 조회
-async function getBalanceFromOpenBanking(account: any) {
+async function getBalanceFromOpenBanking(account: unknown) {
   try {
     // TODO: 실제 오픈뱅킹 API 호출
     // const response = await openBankingAPI.getBalance({
@@ -101,7 +99,7 @@ async function getBalanceFromOpenBanking(account: any) {
       printContent: '잔액조회'
     }
   } catch (error) {
-    console.error('Open Banking Balance API Error:', error)
+
     return {
       success: false,
       message: '오픈뱅킹 잔액 조회에 실패했습니다.'

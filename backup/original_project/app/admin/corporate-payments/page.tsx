@@ -75,7 +75,7 @@ export default function CorporatePaymentsPage() {
       const data = await response.json()
       setPayments(data)
     } catch (error) {
-      console.error('Error fetching payments:', error)
+
     }
   }
 
@@ -117,7 +117,7 @@ export default function CorporatePaymentsPage() {
       setMatchingCandidates(candidates)
       setIsMatchingDialogOpen(true)
     } catch (error) {
-      console.error('Error finding matches:', error)
+
     } finally {
       setLoading(false)
     }
@@ -139,7 +139,7 @@ export default function CorporatePaymentsPage() {
         setIsMatchingDialogOpen(false)
       }
     } catch (error) {
-      console.error('Error matching payment:', error)
+
     } finally {
       setLoading(false)
     }
@@ -167,7 +167,7 @@ export default function CorporatePaymentsPage() {
         setManualMatchOrderId('')
       }
     } catch (error) {
-      console.error('Error manual matching:', error)
+
     } finally {
       setLoading(false)
     }
@@ -184,7 +184,7 @@ export default function CorporatePaymentsPage() {
         fetchPayments()
       }
     } catch (error) {
-      console.error('Error unmatching payment:', error)
+
     } finally {
       setLoading(false)
     }

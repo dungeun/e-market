@@ -23,7 +23,7 @@ export function SalesChart() {
         setSalesData(data.sales || [])
       }
     } catch (error) {
-      console.error('Error fetching sales data:', error)
+
     } finally {
       setLoading(false)
     }

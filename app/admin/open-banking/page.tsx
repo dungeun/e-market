@@ -92,7 +92,7 @@ export default function OpenBankingPage() {
       const data = await response.json()
       setAccounts(data)
     } catch (error) {
-      console.error('Error fetching accounts:', error)
+
     }
   }
 
@@ -107,7 +107,7 @@ export default function OpenBankingPage() {
         acc.id === accountId ? { ...acc, balance: data.balance } : acc
       ))
     } catch (error) {
-      console.error('Error fetching balance:', error)
+
     } finally {
       setRefreshing(false)
     }
@@ -128,7 +128,7 @@ export default function OpenBankingPage() {
       const data = await response.json()
       setTransactions(data)
     } catch (error) {
-      console.error('Error fetching transactions:', error)
+
     } finally {
       setLoading(false)
     }
@@ -152,7 +152,7 @@ export default function OpenBankingPage() {
         resetNewAccount()
       }
     } catch (error) {
-      console.error('Error registering account:', error)
+
     } finally {
       setLoading(false)
     }
@@ -171,7 +171,7 @@ export default function OpenBankingPage() {
         setAccounts(prev => prev.filter(acc => acc.id !== accountId))
       }
     } catch (error) {
-      console.error('Error unlinking account:', error)
+
     } finally {
       setLoading(false)
     }
@@ -191,7 +191,7 @@ export default function OpenBankingPage() {
         })))
       }
     } catch (error) {
-      console.error('Error setting primary account:', error)
+
     } finally {
       setLoading(false)
     }

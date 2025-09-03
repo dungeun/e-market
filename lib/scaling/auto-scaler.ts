@@ -121,7 +121,7 @@ export class AutoScalerService {
   /**
    * 스케일링 점수 계산
    */
-  private calculateScalingScore(metrics: any, performanceData: any, currentInstances: number) {
+  private calculateScalingScore(metrics: unknown, performanceData: unknown, currentInstances: number) {
     const scores = {
       cpu: metrics.server.cpuUsage / 100,
       memory: metrics.server.memoryUsage / 100,
@@ -166,7 +166,7 @@ export class AutoScalerService {
     }
   }
 
-  private getScaleUpReason(scores: any): string {
+  private getScaleUpReason(scores: unknown): string {
     const reasons: string[] = []
     if (scores.cpu > 0.8) reasons.push(`High CPU usage (${Math.round(scores.cpu * 100)}%)`)
     if (scores.memory > 0.85) reasons.push(`High memory usage (${Math.round(scores.memory * 100)}%)`)
@@ -177,7 +177,7 @@ export class AutoScalerService {
     return reasons.length > 0 ? reasons.join(', ') : 'Multiple metrics above thresholds'
   }
 
-  private getScaleDownReason(scores: any): string {
+  private getScaleDownReason(scores: unknown): string {
     const reasons: string[] = []
     if (scores.cpu < 0.3) reasons.push(`Low CPU usage (${Math.round(scores.cpu * 100)}%)`)
     if (scores.memory < 0.4) reasons.push(`Low memory usage (${Math.round(scores.memory * 100)}%)`)
@@ -189,7 +189,7 @@ export class AutoScalerService {
 
   private createDecision(action: 'scale_up' | 'scale_down' | 'no_action', 
                         current: number, target: number, reason: string, 
-                        confidence: number, metrics: any, concurrentUsers: number): ScalingDecision {
+                        confidence: number, metrics: unknown, concurrentUsers: number): ScalingDecision {
     return {
       action,
       currentInstances: current,
@@ -211,9 +211,6 @@ export class AutoScalerService {
    * 실제 스케일링 실행
    */
   private async executeScaling(decision: ScalingDecision) {
-    console.log(`🔄 Scaling ${decision.action}: ${decision.currentInstances} → ${decision.targetInstances}`)
-    console.log(`📊 Reason: ${decision.reason}`)
-    console.log(`🎯 Confidence: ${decision.confidence}`)
 
     try {
       if (decision.action === 'scale_up') {
@@ -226,10 +223,9 @@ export class AutoScalerService {
       await redis.set('last_scaling_time', Date.now().toString())
 
       // 성공 로그
-      console.log(`✅ Scaling completed successfully`)
-      
+
     } catch (error) {
-      console.error(`❌ Scaling failed:`, error)
+
       // 실패 로그 저장
       await redis.lpush('scaling_errors', JSON.stringify({
         decision,
@@ -244,8 +240,7 @@ export class AutoScalerService {
    */
   private async scaleUp(instancesToAdd: number) {
     // 실제 구현에서는 Kubernetes, Docker, AWS Auto Scaling 등을 사용
-    console.log(`🚀 Starting ${instancesToAdd} new instances...`)
-    
+
     for (let i = 0; i < instancesToAdd; i++) {
       const instanceId = `instance_${Date.now()}_${i}`
       
@@ -257,8 +252,7 @@ export class AutoScalerService {
       
       // 로드 밸런서에 추가
       await this.addToLoadBalancer(instanceId)
-      
-      console.log(`📦 Instance ${instanceId} is now ready and serving traffic`)
+
     }
 
     // 인스턴스 수 업데이트
@@ -269,8 +263,7 @@ export class AutoScalerService {
    * 스케일 다운 실행
    */
   private async scaleDown(instancesToRemove: number) {
-    console.log(`🛑 Stopping ${instancesToRemove} instances...`)
-    
+
     // 가장 적게 사용되는 인스턴스부터 제거
     const instancesToStop = await this.selectInstancesForRemoval(instancesToRemove)
     
@@ -283,8 +276,7 @@ export class AutoScalerService {
       
       // 인스턴스 중지
       await this.stopInstance(instanceId)
-      
-      console.log(`🗑️ Instance ${instanceId} has been stopped`)
+
     }
 
     // 인스턴스 수 업데이트
@@ -341,8 +333,7 @@ export class AutoScalerService {
   private async addToLoadBalancer(instanceId: string) {
     await redis.sadd('lb_active_instances', instanceId)
     await redis.hset('lb_instance_weights', instanceId, '1.0')
-    
-    console.log(`🔀 Added ${instanceId} to load balancer`)
+
   }
 
   /**
@@ -351,16 +342,14 @@ export class AutoScalerService {
   private async removeFromLoadBalancer(instanceId: string) {
     await redis.srem('lb_active_instances', instanceId)
     await redis.hdel('lb_instance_weights', instanceId)
-    
-    console.log(`🚫 Removed ${instanceId} from load balancer`)
+
   }
 
   /**
    * 기존 연결 드레인
    */
   private async drainConnections(instanceId: string) {
-    console.log(`⏳ Draining connections for ${instanceId}...`)
-    
+
     // 새 연결 차단하고 기존 연결 완료 대기
     let attempts = 0
     const maxAttempts = 30 // 30초 대기
@@ -368,7 +357,7 @@ export class AutoScalerService {
     while (attempts < maxAttempts) {
       const activeConnections = await redis.get(`connections:${instanceId}`) || '0'
       if (parseInt(activeConnections) === 0) {
-        console.log(`✅ All connections drained for ${instanceId}`)
+
         return
       }
 
@@ -376,7 +365,6 @@ export class AutoScalerService {
       attempts++
     }
 
-    console.log(`⚠️ Force draining ${instanceId} after timeout`)
   }
 
   /**
@@ -385,7 +373,7 @@ export class AutoScalerService {
   private async stopInstance(instanceId: string) {
     await redis.hdel('instances', instanceId)
     await redis.del(`connections:${instanceId}`)
-    console.log(`🛑 Stopped instance ${instanceId}`)
+
   }
 
   /**
@@ -395,7 +383,7 @@ export class AutoScalerService {
     const allInstances = await redis.smembers('lb_active_instances')
     
     // 연결 수가 적은 순으로 정렬
-    const instanceConnections: any[] = []
+    const instanceConnections: unknown[] = []
     for (const instanceId of allInstances) {
       const connections = parseInt(await redis.get(`connections:${instanceId}`) || '0')
       instanceConnections.push({ instanceId, connections })
@@ -421,7 +409,7 @@ export class AutoScalerService {
     const newCount = Math.max(this.config.minInstances, currentCount + delta)
     
     await redis.set('current_instance_count', newCount)
-    console.log(`📊 Instance count updated: ${currentCount} → ${newCount}`)
+
   }
 
   /**
@@ -452,8 +440,7 @@ export class AutoScalerService {
     const historicalPattern = await this.getTrafficPattern(hour, dayOfWeek)
     
     if (historicalPattern.expectedIncrease > 1.5) {
-      console.log(`🔮 Predictive scaling: Expected ${historicalPattern.expectedIncrease}x traffic increase`)
-      
+
       const currentInstances = await this.getCurrentInstanceCount()
       const recommendedInstances = Math.ceil(currentInstances * historicalPattern.expectedIncrease)
       
@@ -528,7 +515,7 @@ export class AutoScalerService {
       if (isHealthy) {
         healthyInstances.push(instanceId)
       } else {
-        console.log(`🚨 Unhealthy instance detected: ${instanceId}`)
+
         await this.handleUnhealthyInstance(instanceId)
       }
     }
@@ -560,9 +547,9 @@ export class AutoScalerService {
       await this.restartInstance(instanceId)
       await this.waitForHealthy(instanceId)
       await this.addToLoadBalancer(instanceId)
-      console.log(`🔄 Successfully restarted ${instanceId}`)
+
     } catch (error) {
-      console.error(`❌ Failed to restart ${instanceId}:`, error)
+
       await this.stopInstance(instanceId)
     }
   }

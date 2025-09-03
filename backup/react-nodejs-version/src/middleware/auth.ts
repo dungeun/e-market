@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { config } from '../config/config'
@@ -51,7 +52,7 @@ export const authenticate = async (
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, config.jwt.secret) as any
+    const decoded = jwt.verify(token, config.jwt.secret) as unknown
 
     // Get user from mock service
     const user = await mockAuthService.verifyToken(token)
@@ -101,9 +102,9 @@ export const optionalAuth = async (
     const token = req.headers.authorization?.replace('Bearer ', '')
 
     if (token) {
-      const decoded = jwt.verify(token, config.jwt.secret) as any
+      const decoded = jwt.verify(token, config.jwt.secret) as unknown
 
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: decoded.userId },
         select: {
           id: true,
@@ -165,7 +166,7 @@ export const sessionAuth = async (
     }
 
     // Find session in database
-    const session = await prisma.session.findUnique({
+    const session = await query({
       where: { token: sessionToken },
       include: {
         user: {
@@ -187,7 +188,7 @@ export const sessionAuth = async (
     }
 
     // Update session last activity
-    await prisma.session.update({
+    await query({
       where: { id: session.id },
       data: { lastActivityAt: new Date() },
     })
@@ -233,7 +234,7 @@ export const apiKeyAuth = async (
 
     // Verify API key in database
     const hashedKey = SecurityUtils.hashData(apiKey)
-    const apiClient = await prisma.apiClient.findFirst({
+    const apiClient = await query({
       where: {
         hashedKey,
         isActive: true,
@@ -253,7 +254,7 @@ export const apiKeyAuth = async (
     }
 
     // Rate limit check
-    await prisma.apiClient.update({
+    await query({
       where: { id: apiClient.id },
       data: {
         lastUsedAt: new Date(),
@@ -262,7 +263,7 @@ export const apiKeyAuth = async (
     })
 
     // Attach client info to request
-    const authReq = req as any
+    const authReq = req as unknown
     authReq.apiClient = {
       id: apiClient.id,
       name: apiClient.name,

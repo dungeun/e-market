@@ -11,7 +11,7 @@ interface RecentlyViewedProps {
     layout?: string
     cookieBased?: boolean
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function RecentlyViewed({ config, products }: RecentlyViewedProps) {

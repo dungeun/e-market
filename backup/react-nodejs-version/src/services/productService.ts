@@ -29,7 +29,7 @@ export class ProductService {
   async createProduct(data: CreateProductInput): Promise<ProductWithRelations> {
     try {
       // Get existing slugs to ensure uniqueness
-      const existingProducts = await prisma.product.findMany({
+      const existingProducts = await query({
         select: { slug: true },
       })
       const existingSlugs = existingProducts.map(p => p.slug)
@@ -37,7 +37,7 @@ export class ProductService {
       // Get category name for SEO
       let categoryName: string | undefined
       if (data.categoryId) {
-        const category = await prisma.category.findUnique({
+        const category = await query({
           where: { id: data.categoryId },
           select: { name: true },
         })
@@ -72,7 +72,7 @@ export class ProductService {
       }
 
       // Check if slug already exists
-      const existingProduct = await prisma.product.findUnique({
+      const existingProduct = await query({
         where: { slug },
       })
 
@@ -81,7 +81,7 @@ export class ProductService {
       }
 
       // Check if SKU already exists
-      const existingSku = await prisma.product.findUnique({
+      const existingSku = await query({
         where: { sku: data.sku },
       })
 
@@ -91,7 +91,7 @@ export class ProductService {
 
       // Verify category exists if provided
       if (data.categoryId) {
-        const category = await prisma.category.findUnique({
+        const category = await query({
           where: { id: data.categoryId },
         })
 
@@ -230,7 +230,7 @@ export class ProductService {
 
   // Get product by ID with all relations
   async getProductById(id: string): Promise<ProductWithRelations> {
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id },
       include: {
         category: {
@@ -331,7 +331,7 @@ export class ProductService {
     const skip = (page - 1) * limit
 
     const [products, total] = await Promise.all([
-      prisma.product.findMany({
+      query({
         where,
         skip,
         take: limit,
@@ -363,7 +363,7 @@ export class ProductService {
           },
         },
       }),
-      prisma.product.count({ where }),
+      query({ where }),
     ])
 
     return {
@@ -381,7 +381,7 @@ export class ProductService {
   async updateProduct(id: string, data: Omit<UpdateProductInput, 'id'>): Promise<ProductWithRelations> {
     try {
       // Check if product exists
-      const existingProduct = await prisma.product.findUnique({
+      const existingProduct = await query({
         where: { id },
       })
 
@@ -391,7 +391,7 @@ export class ProductService {
 
       // Check slug uniqueness if updating
       if (data.slug && data.slug !== existingProduct.slug) {
-        const slugExists = await prisma.product.findUnique({
+        const slugExists = await query({
           where: { slug: data.slug },
         })
         if (slugExists) {
@@ -401,7 +401,7 @@ export class ProductService {
 
       // Check SKU uniqueness if updating
       if (data.sku && data.sku !== existingProduct.sku) {
-        const skuExists = await prisma.product.findUnique({
+        const skuExists = await query({
           where: { sku: data.sku },
         })
         if (skuExists) {
@@ -411,7 +411,7 @@ export class ProductService {
 
       // Verify category exists if provided
       if (data.categoryId) {
-        const category = await prisma.category.findUnique({
+        const category = await query({
           where: { id: data.categoryId },
         })
         if (!category) {
@@ -517,7 +517,7 @@ export class ProductService {
 
   // Delete product
   async deleteProduct(id: string): Promise<void> {
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id },
     })
 
@@ -525,7 +525,7 @@ export class ProductService {
       throw new AppError('Product not found', 404)
     }
 
-    await prisma.product.delete({
+    await query({
       where: { id },
     })
 
@@ -534,7 +534,7 @@ export class ProductService {
 
   // Inventory management
   async adjustInventory(data: InventoryAdjustmentInput): Promise<void> {
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { id: data.productId },
     })
 
@@ -576,7 +576,7 @@ export class ProductService {
 
   // Get low stock products
   async getLowStockProducts(): Promise<Product[]> {
-    return prisma.product.findMany({
+    return query({
       where: {
         trackQuantity: true,
         quantity: {
@@ -593,7 +593,7 @@ export class ProductService {
 
   // Get product by slug
   async getProductBySlug(slug: string): Promise<ProductWithRelations> {
-    const product = await prisma.product.findUnique({
+    const product = await query({
       where: { slug },
       include: {
         category: {
@@ -644,7 +644,7 @@ export class ProductService {
   }> {
     try {
       // Get existing slugs
-      const existingProducts = await prisma.product.findMany({
+      const existingProducts = await query({
         select: { slug: true },
       })
       const existingSlugs = existingProducts.map(p => p.slug)
@@ -652,7 +652,7 @@ export class ProductService {
       // Get category name
       let categoryName: string | undefined
       if (productData.categoryId) {
-        const category = await prisma.category.findUnique({
+        const category = await query({
           where: { id: productData.categoryId },
           select: { name: true },
         })
@@ -700,10 +700,10 @@ export class ProductService {
   }
 
   private async logInventoryChange(data: Omit<InventoryAdjustmentInput, 'type'> & { type: string }): Promise<void> {
-    await prisma.inventoryLog.create({
+    await query({
       data: {
         productId: data.productId,
-        type: data.type as any,
+        type: data.type as unknown,
         quantity: data.quantity,
         reason: data.reason,
         reference: data.reference,

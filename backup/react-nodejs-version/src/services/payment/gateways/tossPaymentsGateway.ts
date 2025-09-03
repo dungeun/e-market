@@ -80,7 +80,7 @@ export class TossPaymentsGateway extends PaymentGateway {
     }
   }
 
-  async confirmPayment(paymentKey: string, data: any): Promise<GatewayResponse> {
+  async confirmPayment(paymentKey: string, data: unknown): Promise<GatewayResponse> {
     try {
       const { orderId, amount } = data
 
@@ -100,7 +100,7 @@ export class TossPaymentsGateway extends PaymentGateway {
         approvalNumber: response.data.approvalNumber,
         rawResponse: response.data,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('TossPayments confirm payment error:', error)
       
       return {
@@ -127,7 +127,7 @@ export class TossPaymentsGateway extends PaymentGateway {
         transactionId: response.data.paymentKey,
         rawResponse: response.data,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('TossPayments cancel payment error:', error)
       
       return {
@@ -157,7 +157,7 @@ export class TossPaymentsGateway extends PaymentGateway {
         approvalNumber: response.data.cancels?.[0]?.approvalNumber,
         rawResponse: response.data,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('TossPayments refund payment error:', error)
       
       return {
@@ -182,7 +182,7 @@ export class TossPaymentsGateway extends PaymentGateway {
         approvalNumber: response.data.approvalNumber,
         rawResponse: response.data,
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('TossPayments get payment status error:', error)
       
       return {
@@ -194,7 +194,7 @@ export class TossPaymentsGateway extends PaymentGateway {
     }
   }
 
-  verifyWebhookSignature(_payload: any, _signature: string): boolean {
+  verifyWebhookSignature(_payload: unknown, _signature: string): boolean {
     // TossPayments webhook verification
     // Implementation depends on their webhook signature method
     try {

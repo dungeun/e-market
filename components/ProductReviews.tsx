@@ -1,4 +1,7 @@
-'use client'
+'use client';
+
+import type { User, RequestContext } from '@/lib/types/common';
+import React from 'react';
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -21,7 +24,7 @@ interface ProductReviewsProps {
   reviews: Review[]
 }
 
-export default function ProductReviews({ productId, reviews }: ProductReviewsProps) {
+const ProductReviews = React.memo(function ProductReviews({ productId, reviews }: ProductReviewsProps) {
   const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating'>('recent')
   
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -100,7 +103,7 @@ export default function ProductReviews({ productId, reviews }: ProductReviewsPro
             </h3>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as unknown)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="recent">최신순</option>
@@ -179,5 +182,7 @@ export default function ProductReviews({ productId, reviews }: ProductReviewsPro
         </div>
       </div>
     </div>
-  )
-}
+    )
+});
+
+export default ProductReviews;

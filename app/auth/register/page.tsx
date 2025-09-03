@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -26,6 +28,8 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { register } = useAuth();
+  const { t } = useLanguage();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,31 +45,39 @@ export default function RegisterPage() {
     
     // 필수 약관 동의 확인
     if (!agreements.terms || !agreements.privacy) {
-      alert('필수 약관에 동의해주세요.');
+      alert(t('register.agreement_required', '필수 약관에 동의해주세요.'));
       return;
     }
 
     // 비밀번호 확인
     if (formData.password !== formData.confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다.');
+      alert(t('register.password_mismatch', '비밀번호가 일치하지 않습니다.'));
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // TODO: 실제 회원가입 API 호출
-      console.log('Register attempt:', { ...formData, agreements });
+      const registerData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      };
       
-      // 임시 회원가입 처리
-      setTimeout(() => {
-        setIsLoading(false);
-        alert('회원가입이 완료되었습니다!');
+      const result = await register(registerData);
+      
+      if (result.success) {
+        alert(t('register.success', '회원가입이 완료되었습니다!'));
         router.push('/auth/login');
-      }, 1000);
+      } else {
+        alert(result.error || t('register.failed', '회원가입에 실패했습니다.'));
+      }
     } catch (error) {
+
+      alert(t('register.error', '회원가입 중 오류가 발생했습니다.'));
+    } finally {
       setIsLoading(false);
-      console.error('Registration failed:', error);
     }
   };
 
@@ -77,19 +89,19 @@ export default function RegisterPage() {
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">S</span>
           </div>
-          <span className="text-2xl font-bold text-gray-900">ShopMall</span>
+          <span className="text-2xl font-bold text-gray-900">{t('site.name', 'E-Market Korea')}</span>
         </Link>
 
         <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-          회원가입
+          {t('register.title', '회원가입')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          이미 계정이 있으신가요?{' '}
+          {t('register.have_account', '이미 계정이 있으신가요?')}{' '}
           <Link
             href="/auth/login"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            로그인
+            {t('register.login_link', '로그인')}
           </Link>
         </p>
       </div>
@@ -99,7 +111,7 @@ export default function RegisterPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* 이름 */}
             <div>
-              <Label htmlFor="name">이름</Label>
+              <Label htmlFor="name">{t('register.name_label', '이름')}</Label>
               <div className="mt-1 relative">
                 <Input
                   id="name"
@@ -109,7 +121,7 @@ export default function RegisterPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="pl-10"
-                  placeholder="이름을 입력하세요"
+                  placeholder={t('register.name_placeholder', '이름을 입력하세요')}
                 />
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
@@ -117,7 +129,7 @@ export default function RegisterPage() {
 
             {/* 이메일 */}
             <div>
-              <Label htmlFor="email">이메일 주소</Label>
+              <Label htmlFor="email">{t('register.email_label', '이메일 주소')}</Label>
               <div className="mt-1 relative">
                 <Input
                   id="email"
@@ -128,7 +140,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="pl-10"
-                  placeholder="이메일을 입력하세요"
+                  placeholder={t('register.email_placeholder', '이메일을 입력하세요')}
                 />
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
@@ -136,7 +148,7 @@ export default function RegisterPage() {
 
             {/* 전화번호 */}
             <div>
-              <Label htmlFor="phone">전화번호</Label>
+              <Label htmlFor="phone">{t('register.phone_label', '전화번호')}</Label>
               <div className="mt-1 relative">
                 <Input
                   id="phone"
@@ -146,7 +158,7 @@ export default function RegisterPage() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="pl-10"
-                  placeholder="전화번호를 입력하세요"
+                  placeholder={t('register.phone_placeholder', '전화번호를 입력하세요')}
                 />
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
@@ -154,7 +166,7 @@ export default function RegisterPage() {
 
             {/* 비밀번호 */}
             <div>
-              <Label htmlFor="password">비밀번호</Label>
+              <Label htmlFor="password">{t('register.password_label', '비밀번호')}</Label>
               <div className="mt-1 relative">
                 <Input
                   id="password"
@@ -164,7 +176,7 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   className="pl-10 pr-10"
-                  placeholder="비밀번호를 입력하세요"
+                  placeholder={t('register.password_placeholder', '비밀번호를 입력하세요')}
                 />
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <button
@@ -183,7 +195,7 @@ export default function RegisterPage() {
 
             {/* 비밀번호 확인 */}
             <div>
-              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+              <Label htmlFor="confirmPassword">{t('register.confirm_password_label', '비밀번호 확인')}</Label>
               <div className="mt-1 relative">
                 <Input
                   id="confirmPassword"
@@ -193,7 +205,7 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className="pl-10 pr-10"
-                  placeholder="비밀번호를 다시 입력하세요"
+                  placeholder={t('register.confirm_password_placeholder', '비밀번호를 다시 입력하세요')}
                 />
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <button
@@ -219,9 +231,9 @@ export default function RegisterPage() {
                   onCheckedChange={(checked) => handleAgreementChange('terms', checked as boolean)}
                 />
                 <Label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                  <span className="text-red-500">*</span> 이용약관에 동의합니다.{' '}
+                  <span className="text-red-500">*</span> {t('register.agree_terms', '이용약관에 동의합니다.')}{' '}
                   <Link href="/terms" className="text-blue-600 hover:text-blue-500">
-                    보기
+                    {t('register.view', '보기')}
                   </Link>
                 </Label>
               </div>
@@ -233,9 +245,9 @@ export default function RegisterPage() {
                   onCheckedChange={(checked) => handleAgreementChange('privacy', checked as boolean)}
                 />
                 <Label htmlFor="privacy" className="ml-2 text-sm text-gray-600">
-                  <span className="text-red-500">*</span> 개인정보 수집 및 이용에 동의합니다.{' '}
+                  <span className="text-red-500">*</span> {t('register.agree_privacy', '개인정보 수집 및 이용에 동의합니다.')}{' '}
                   <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
-                    보기
+                    {t('register.view', '보기')}
                   </Link>
                 </Label>
               </div>
@@ -247,7 +259,7 @@ export default function RegisterPage() {
                   onCheckedChange={(checked) => handleAgreementChange('marketing', checked as boolean)}
                 />
                 <Label htmlFor="marketing" className="ml-2 text-sm text-gray-600">
-                  마케팅 정보 수신에 동의합니다. (선택)
+                  {t('register.agree_marketing', '마케팅 정보 수신에 동의합니다. (선택)')}
                 </Label>
               </div>
             </div>
@@ -259,7 +271,7 @@ export default function RegisterPage() {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? '가입 중...' : '회원가입'}
+                {isLoading ? t('register.loading', '가입 중...') : t('register.submit', '회원가입')}
               </Button>
             </div>
 
@@ -270,7 +282,7 @@ export default function RegisterPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">또는</span>
+                  <span className="px-2 bg-white text-gray-500">{t('register.or', '또는')}</span>
                 </div>
               </div>
 
@@ -279,54 +291,33 @@ export default function RegisterPage() {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => console.log('Google signup')}
+                  onClick={() => {}}
+                  disabled
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  Google
+                  {t('register.continueWithGoogle', 'Google로 계속하기')}
                 </Button>
-
                 <Button
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => console.log('Naver signup')}
+                  onClick={() => {}}
+                  disabled
                 >
-                  <div className="w-5 h-5 mr-2 bg-green-500 rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">N</span>
-                  </div>
-                  Naver
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                  </svg>
+                  {t('register.continueWithFacebook', 'Facebook으로 계속하기')}
                 </Button>
               </div>
             </div>
           </form>
         </div>
-      </div>
-
-      {/* 고객센터 링크 */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-600">
-          가입에 문제가 있으신가요?{' '}
-          <Link href="/support" className="font-medium text-blue-600 hover:text-blue-500">
-            고객센터
-          </Link>
-        </p>
       </div>
     </div>
   );

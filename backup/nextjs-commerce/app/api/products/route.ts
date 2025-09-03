@@ -1,5 +1,6 @@
+import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 
 const ProductCreateSchema = z.object({
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'createdAt'
     const order = searchParams.get('order') || 'desc'
     
-    const where: any = {
+    const where: unknown = {
       isActive: true,
     }
     
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       ]
     }
     
-    const products = await prisma.product.findMany({
+    const products = await query({
       where,
       include: {
         images: true,
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(products)
   } catch (error) {
-    console.error('Error fetching products:', error)
+
     return NextResponse.json(
       { error: 'Failed to fetch products' },
       { status: 500 }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = ProductCreateSchema.parse(body)
     
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         ...validatedData,
         images: validatedData.images ? {
@@ -97,8 +98,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error('Error creating product:', error)
+
     return NextResponse.json(
       { error: 'Failed to create product' },
       { status: 500 }

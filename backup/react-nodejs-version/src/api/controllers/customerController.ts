@@ -522,7 +522,7 @@ export class CustomerController {
         throw new AppError('isActive must be a boolean', 400)
       }
 
-      await prisma.user.update({
+      await query({
         where: { id: customerId },
         data: { isActive },
       })
@@ -532,7 +532,7 @@ export class CustomerController {
         req.user.id,
         'user',
         customerId,
-        req as any,
+        req as unknown,
         { reason, adminId: req.user.id }
       )
 

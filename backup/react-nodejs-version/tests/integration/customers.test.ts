@@ -13,16 +13,16 @@ describe('Customer Management Integration Tests', () => {
 
   beforeAll(async () => {
     // Clean up database
-    await prisma.wishlistItem.deleteMany()
-    await prisma.address.deleteMany()
-    await prisma.paymentMethod.deleteMany()
-    await prisma.user.deleteMany()
-    await prisma.product.deleteMany()
-    await prisma.category.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
 
     // Create test user
     const hashedPassword = await SecurityUtils.hashPassword('Test123!')
-    const user = await prisma.user.create({
+    const user = await query({
       data: {
         email: 'test@example.com',
         password: hashedPassword,
@@ -38,7 +38,7 @@ describe('Customer Management Integration Tests', () => {
     const token = SecurityUtils.generateJWT({ id: user.id, email: user.email })
     authToken = token
 
-    await prisma.session.create({
+    await query({
       data: {
         userId: user.id,
         token: SecurityUtils.hashData(token),
@@ -47,14 +47,14 @@ describe('Customer Management Integration Tests', () => {
     })
 
     // Create test product for wishlist tests
-    const category = await prisma.category.create({
+    const category = await query({
       data: {
         name: 'Test Category',
         slug: 'test-category',
       },
     })
 
-    const product = await prisma.product.create({
+    const product = await query({
       data: {
         name: 'Test Product',
         slug: 'test-product',
@@ -69,13 +69,13 @@ describe('Customer Management Integration Tests', () => {
   })
 
   afterAll(async () => {
-    await prisma.wishlistItem.deleteMany()
-    await prisma.address.deleteMany()
-    await prisma.paymentMethod.deleteMany()
-    await prisma.session.deleteMany()
-    await prisma.user.deleteMany()
-    await prisma.product.deleteMany()
-    await prisma.category.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
     await prisma.$disconnect()
   })
 
@@ -465,7 +465,7 @@ describe('Customer Management Integration Tests', () => {
     beforeAll(async () => {
       // Create admin user
       const hashedPassword = await SecurityUtils.hashPassword('Admin123!')
-      const admin = await prisma.user.create({
+      const admin = await query({
         data: {
           email: 'admin@example.com',
           password: hashedPassword,
@@ -481,7 +481,7 @@ describe('Customer Management Integration Tests', () => {
       const token = SecurityUtils.generateJWT({ id: admin.id, email: admin.email })
       adminToken = token
 
-      await prisma.session.create({
+      await query({
         data: {
           userId: admin.id,
           token: SecurityUtils.hashData(token),

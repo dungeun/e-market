@@ -42,12 +42,12 @@ describe('InventoryService', () => {
         createdAt: new Date()
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
       mockPrisma.$transaction.mockImplementation(async (callback) => {
-        return await callback(mockPrisma as any)
+        return await callback(mockPrisma as unknown)
       })
-      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: 95 } as any)
-      mockPrisma.inventoryLog.create.mockResolvedValue(mockLog as any)
+      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: 95 } as unknown)
+      mockPrisma.inventoryLog.create.mockResolvedValue(mockLog as unknown)
 
       const result = await inventoryService.adjustInventory({
         productId: 'product-1',
@@ -75,7 +75,7 @@ describe('InventoryService', () => {
         allowBackorders: false
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
 
       await expect(
         inventoryService.adjustInventory({
@@ -105,12 +105,12 @@ describe('InventoryService', () => {
         createdAt: new Date()
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
       mockPrisma.$transaction.mockImplementation(async (callback) => {
-        return await callback(mockPrisma as any)
+        return await callback(mockPrisma as unknown)
       })
-      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: -5 } as any)
-      mockPrisma.inventoryLog.create.mockResolvedValue(mockLog as any)
+      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: -5 } as unknown)
+      mockPrisma.inventoryLog.create.mockResolvedValue(mockLog as unknown)
 
       const result = await inventoryService.adjustInventory({
         productId: 'product-1',
@@ -132,12 +132,12 @@ describe('InventoryService', () => {
         allowBackorders: false
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
       mockPrisma.$transaction.mockImplementation(async (callback) => {
-        return await callback(mockPrisma as any)
+        return await callback(mockPrisma as unknown)
       })
-      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: 25 } as any)
-      mockPrisma.inventoryLog.create.mockResolvedValue({} as any)
+      mockPrisma.product.update.mockResolvedValue({ ...mockProduct, quantity: 25 } as unknown)
+      mockPrisma.inventoryLog.create.mockResolvedValue({} as unknown)
 
       await inventoryService.adjustInventory({
         productId: 'product-1',
@@ -158,7 +158,7 @@ describe('InventoryService', () => {
         quantity: 100
       }
 
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as any)
+      mockPrisma.product.findUnique.mockResolvedValue(mockProduct as unknown)
 
       await expect(
         inventoryService.adjustInventory({
@@ -198,16 +198,16 @@ describe('InventoryService', () => {
       }
 
       mockPrisma.product.findUnique
-        .mockResolvedValueOnce(mockProduct1 as any)
-        .mockResolvedValueOnce(mockProduct2 as any)
+        .mockResolvedValueOnce(mockProduct1 as unknown)
+        .mockResolvedValueOnce(mockProduct2 as unknown)
 
       mockPrisma.$transaction.mockImplementation(async (callback) => {
-        return await callback(mockPrisma as any)
+        return await callback(mockPrisma as unknown)
       })
 
       mockPrisma.inventoryLog.create
-        .mockResolvedValueOnce({ id: 'log-1' } as any)
-        .mockResolvedValueOnce({ id: 'log-2' } as any)
+        .mockResolvedValueOnce({ id: 'log-1' } as unknown)
+        .mockResolvedValueOnce({ id: 'log-2' } as unknown)
 
       const results = await inventoryService.bulkAdjustInventory(adjustments)
 
@@ -228,7 +228,7 @@ describe('InventoryService', () => {
         }
       ]
 
-      mockPrisma.product.findMany.mockResolvedValue(mockLowStockProducts as any)
+      mockPrisma.product.findMany.mockResolvedValue(mockLowStockProducts as unknown)
 
       const result = await inventoryService.getLowStockProducts()
 
@@ -271,7 +271,7 @@ describe('InventoryService', () => {
         }
       ]
 
-      mockPrisma.product.findMany.mockResolvedValue(mockOutOfStockProducts as any)
+      mockPrisma.product.findMany.mockResolvedValue(mockOutOfStockProducts as unknown)
 
       const result = await inventoryService.getOutOfStockProducts()
 
@@ -331,7 +331,7 @@ describe('InventoryService', () => {
           }
         }
         
-        return await callback(txPrisma as any)
+        return await callback(txPrisma as unknown)
       })
 
       await inventoryService.reserveInventory(items, orderId)
@@ -362,7 +362,7 @@ describe('InventoryService', () => {
           }
         }
         
-        return await callback(txPrisma as any)
+        return await callback(txPrisma as unknown)
       })
 
       await expect(
@@ -399,7 +399,7 @@ describe('InventoryService', () => {
           }
         }
         
-        return await callback(txPrisma as any)
+        return await callback(txPrisma as unknown)
       })
 
       await inventoryService.releaseInventory(items, orderId)
@@ -419,7 +419,7 @@ describe('InventoryService', () => {
 
       mockPrisma.product.aggregate.mockResolvedValue({
         _sum: { quantity: 5000 }
-      } as any)
+      } as unknown)
 
       mockPrisma.product.findMany
         .mockResolvedValueOnce([ // topLowStockProducts
@@ -461,7 +461,7 @@ describe('InventoryService', () => {
       mockPrisma.product.findMany.mockResolvedValue([
         { quantity: 10, price: 100 },
         { quantity: 20, price: 50 }
-      ] as any)
+      ] as unknown)
 
       const stats = await inventoryService.getInventoryStats()
 

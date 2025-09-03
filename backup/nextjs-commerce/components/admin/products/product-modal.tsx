@@ -80,7 +80,7 @@ export function ProductModal({ isOpen, onClose, onSubmit, product }: ProductModa
       onClose()
       form.reset()
     } catch (error) {
-      console.error('Error saving product:', error)
+
       toast.error('상품 저장 중 오류가 발생했습니다')
     } finally {
       setIsLoading(false)

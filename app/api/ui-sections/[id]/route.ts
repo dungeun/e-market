@@ -1,117 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import { query } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
+// GET: 특정 UISection 조회
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await params;
     
-    const section = await prisma.uISection.findUnique({
-      where: { id },
-      include: {
-        texts: {
-          orderBy: { key: 'asc' }
-        }
-      }
-    })
+    // SQL 쿼리 - key로 조회
+    const result = await query(
+      'SELECT * FROM ui_sections WHERE key = $1',
+      [id]
+    );
 
-    if (!section) {
-      return NextResponse.json(
-        { error: 'Section not found' },
-        { status: 404 }
-      )
+    if (result.rows.length === 0) {
+      return NextResponse.json({ 
+        error: 'Section not found',
+        success: false 
+      }, { status: 404 });
     }
 
-    return NextResponse.json({
-      section: {
-        ...section,
-        content: section.data,
-        isActive: section.isActive
-      }
-    })
-  } catch (error) {
-    console.error('Failed to fetch UI section:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch UI section' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function PUT(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await context.params
-    const body = await request.json()
+    const section = result.rows[0];
     
-    const {
-      key,
-      title,
-      type,
-      isActive,
-      order,
-      data,
-      props,
-      style
-    } = body
-
-    const updatedSection = await prisma.uISection.update({
-      where: { id },
-      data: {
-        ...(key !== undefined && { key }),
-        ...(title !== undefined && { title }),
-        ...(type !== undefined && { type }),
-        ...(isActive !== undefined && { isActive }),
-        ...(order !== undefined && { order }),
-        ...(data !== undefined && { data }),
-        ...(props !== undefined && { props }),
-        ...(style !== undefined && { style })
+    // data 파싱 처리
+    let parsedData = section.data;
+    if (typeof parsedData === 'string') {
+      try {
+        parsedData = JSON.parse(parsedData);
+      } catch (e) {
+        parsedData = {};
       }
-    })
+    }
 
-    return NextResponse.json({
+    // translations 파싱 처리
+    let parsedTranslations = section.translations;
+    if (typeof parsedTranslations === 'string') {
+      try {
+        parsedTranslations = JSON.parse(parsedTranslations);
+      } catch (e) {
+        parsedTranslations = {};
+      }
+    }
+
+    return NextResponse.json({ 
       section: {
-        ...updatedSection,
-        content: updatedSection.data,
-        isActive: updatedSection.isActive
-      }
-    })
+        id: section.id,
+        key: section.key,
+        title: section.title,
+        type: section.type,
+        order: section.order,
+        isActive: section.isActive,
+        data: parsedData,
+        translations: parsedTranslations,
+        content: parsedData, // 호환성을 위해 content도 추가
+      },
+      success: true 
+    });
   } catch (error) {
-    console.error('Failed to update UI section:', error)
-    return NextResponse.json(
-      { error: 'Failed to update UI section' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await context.params
-
-    // Delete related texts first
-    await prisma.uIText.deleteMany({
-      where: { sectionId: id }
-    })
-
-    // Then delete the section
-    await prisma.uISection.delete({
-      where: { id }
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Failed to delete UI section:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete UI section' },
-      { status: 500 }
-    )
+    logger.error('Error fetching UI section:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch UI section',
+      success: false 
+    }, { status: 500 });
   }
 }

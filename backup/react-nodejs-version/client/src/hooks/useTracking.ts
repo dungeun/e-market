@@ -48,7 +48,7 @@ export function useTracking() {
       const data = await trackingService.getCarriers();
       setCarriers(data);
     } catch (err) {
-      console.error('Failed to load carriers:', err);
+
     }
   };
 
@@ -65,7 +65,7 @@ export function useTracking() {
       } else {
         setError(result.error || '배송 조회에 실패했습니다.');
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setError(err.message || '배송 조회 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);

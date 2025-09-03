@@ -519,7 +519,7 @@ export class PerformanceMonitor extends EventEmitter {
    */
   private getMetricValue(metrics: PerformanceMetrics, path: string): number {
     const parts = path.split('.');
-    let value: any = metrics;
+    let value: unknown = metrics;
     
     for (const part of parts) {
       value = value?.[part];

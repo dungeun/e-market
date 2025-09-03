@@ -124,7 +124,7 @@ export function useLikedCampaigns(page = 1, limit = 20) {
 }
 
 // 캠페인 목록 캐싱 (필터 포함)
-export function useCampaignList(filters: any = {}) {
+export function useCampaignList(filters: unknown = {}) {
   const filterKey = JSON.stringify(filters)
   
   return useCachedData(

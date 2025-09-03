@@ -1,3 +1,4 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { prisma } from '../utils/database'
 import { logger } from '../utils/logger'
 import { AppError } from '../middleware/error'
@@ -12,13 +13,12 @@ import {
   WishlistQuery,
   CustomerActivityQuery,
 } from '../types/customer'
-import { Prisma } from '@prisma/client'
 
 export class CustomerService {
   // Profile Management
   static async getProfile(userId: string) {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: userId },
         select: {
           id: true,
@@ -46,7 +46,7 @@ export class CustomerService {
 
   static async updateProfile(userId: string, data: UpdateCustomerProfile) {
     try {
-      const updated = await prisma.user.update({
+      const updated = await query({
         where: { id: userId },
         data: {
           firstName: data.firstName,
@@ -71,7 +71,7 @@ export class CustomerService {
 
   // Address Management
   static async getAddresses(userId: string) {
-    return prisma.address.findMany({
+    return query({
       where: { userId },
       orderBy: [
         { isDefault: 'desc' },
@@ -81,7 +81,7 @@ export class CustomerService {
   }
 
   static async getAddress(userId: string, addressId: string) {
-    const address = await prisma.address.findFirst({
+    const address = await query({
       where: {
         id: addressId,
         userId,
@@ -99,13 +99,13 @@ export class CustomerService {
     try {
       // If this is set as default, unset other defaults
       if (data.isDefault) {
-        await prisma.address.updateMany({
+        await queryMany({
           where: { userId, isDefault: true },
           data: { isDefault: false },
         })
       }
 
-      const address = await prisma.address.create({
+      const address = await query({
         data: {
           ...data,
           userId,
@@ -126,13 +126,13 @@ export class CustomerService {
 
       // If setting as default, unset others
       if (data.isDefault && !existing.isDefault) {
-        await prisma.address.updateMany({
+        await queryMany({
           where: { userId, isDefault: true },
           data: { isDefault: false },
         })
       }
 
-      const updated = await prisma.address.update({
+      const updated = await query({
         where: { id: addressId },
         data,
       })
@@ -150,7 +150,7 @@ export class CustomerService {
       await this.getAddress(userId, addressId)
 
       // Check if address is used in any pending orders
-      const pendingOrders = await prisma.order.count({
+      const pendingOrders = await query({
         where: {
           userId,
           status: { in: ['PENDING', 'CONFIRMED', 'PROCESSING'] },
@@ -165,7 +165,7 @@ export class CustomerService {
         throw new AppError('Cannot delete address used in pending orders', 400)
       }
 
-      await prisma.address.delete({
+      await query({
         where: { id: addressId },
       })
     } catch (error) {
@@ -177,11 +177,11 @@ export class CustomerService {
   static async setDefaultAddress(userId: string, addressId: string) {
     try {
       await this.getAddress(userId, addressId)
-      await prisma.address.updateMany({
+      await queryMany({
         where: { userId, isDefault: true },
         data: { isDefault: false },
       })
-      const updated = await prisma.address.update({
+      const updated = await query({
         where: { id: addressId },
         data: { isDefault: true },
       })
@@ -193,7 +193,7 @@ export class CustomerService {
   }
 
   static async getPaymentMethods(userId: string) {
-    return prisma.paymentMethod.findMany({
+    return query({
       where: { userId },
       select: {
         id: true,
@@ -214,7 +214,7 @@ export class CustomerService {
   }
 
   static async getPaymentMethod(userId: string, paymentMethodId: string) {
-    const method = await prisma.paymentMethod.findFirst({
+    const method = await query({
       where: {
         id: paymentMethodId,
         userId,
@@ -242,13 +242,13 @@ export class CustomerService {
   static async addPaymentMethod(userId: string, data: CustomerPaymentMethod) {
     try {
       if (data.isDefault) {
-        await prisma.paymentMethod.updateMany({
+        await queryMany({
           where: { userId, isDefault: true },
           data: { isDefault: false },
         })
       }
 
-      const method = await prisma.paymentMethod.create({
+      const method = await query({
         data: {
           ...data,
           userId,
@@ -278,13 +278,13 @@ export class CustomerService {
       await this.getPaymentMethod(userId, paymentMethodId)
 
       if (data.isDefault) {
-        await prisma.paymentMethod.updateMany({
+        await queryMany({
           where: { userId, isDefault: true },
           data: { isDefault: false },
         })
       }
 
-      const updated = await prisma.paymentMethod.update({
+      const updated = await query({
         where: { id: paymentMethodId },
         data: {
           isDefault: data.isDefault,
@@ -312,7 +312,7 @@ export class CustomerService {
   static async deletePaymentMethod(userId: string, paymentMethodId: string) {
     try {
       await this.getPaymentMethod(userId, paymentMethodId)
-      await prisma.paymentMethod.delete({
+      await query({
         where: { id: paymentMethodId },
       })
     } catch (error) {
@@ -324,11 +324,11 @@ export class CustomerService {
   static async setDefaultPaymentMethod(userId: string, paymentMethodId: string) {
     try {
       await this.getPaymentMethod(userId, paymentMethodId)
-      await prisma.paymentMethod.updateMany({
+      await queryMany({
         where: { userId, isDefault: true },
         data: { isDefault: false },
       })
-      const updated = await prisma.paymentMethod.update({
+      const updated = await query({
         where: { id: paymentMethodId },
         data: { isDefault: true },
         select: {
@@ -354,7 +354,7 @@ export class CustomerService {
     try {
       const skip = (page - 1) * limit
       const [orders, total] = await Promise.all([
-        prisma.order.findMany({
+        query({
           where: { userId },
           include: {
             items: true,
@@ -368,7 +368,7 @@ export class CustomerService {
           skip,
           take: limit,
         }),
-        prisma.order.count({ where: { userId } }),
+        query({ where: { userId } }),
       ])
 
       return {
@@ -389,10 +389,10 @@ export class CustomerService {
   static async getWishlist(userId: string, query: WishlistQuery) {
     try {
       const skip = (query.page - 1) * query.limit
-      const where: any = { userId }
+      const where: unknown = { userId }
 
       const [items, total] = await Promise.all([
-        prisma.wishlistItem.findMany({
+        query({
           where,
           include: {
             product: {
@@ -415,7 +415,7 @@ export class CustomerService {
           skip,
           take: query.limit,
         }),
-        prisma.wishlistItem.count({ where }),
+        query({ where }),
       ])
 
       return {
@@ -435,7 +435,7 @@ export class CustomerService {
 
   static async addToWishlist(userId: string, productId: string) {
     try {
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: productId },
       })
 
@@ -443,7 +443,7 @@ export class CustomerService {
         throw new AppError('Product not found', 404)
       }
 
-      const existing = await prisma.wishlistItem.findUnique({
+      const existing = await query({
         where: {
           userId_productId: {
             userId,
@@ -456,7 +456,7 @@ export class CustomerService {
         throw new AppError('Product already in wishlist', 400)
       }
 
-      const item = await prisma.wishlistItem.create({
+      const item = await query({
         data: {
           userId,
           productId,
@@ -482,7 +482,7 @@ export class CustomerService {
 
   static async removeFromWishlist(userId: string, productId: string) {
     try {
-      const deleted = await prisma.wishlistItem.deleteMany({
+      const deleted = await queryMany({
         where: {
           userId,
           productId,
@@ -500,7 +500,7 @@ export class CustomerService {
 
   static async clearWishlist(userId: string) {
     try {
-      const deleted = await prisma.wishlistItem.deleteMany({
+      const deleted = await queryMany({
         where: { userId },
       })
 
@@ -513,7 +513,7 @@ export class CustomerService {
 
   static async getPreferences(userId: string): Promise<CustomerPreferences> {
     try {
-      const setting = await prisma.setting.findUnique({
+      const setting = await query({
         where: { key: `user_preferences_${userId}` },
       })
 
@@ -542,7 +542,7 @@ export class CustomerService {
       const current = await this.getPreferences(userId)
       const updated = { ...current, ...preferences }
 
-      await prisma.setting.upsert({
+      await query({
         where: { key: `user_preferences_${userId}` },
         update: { value: updated },
         create: {
@@ -563,7 +563,7 @@ export class CustomerService {
   static async getActivity(userId: string, query: CustomerActivityQuery) {
     try {
       const skip = (query.page - 1) * query.limit
-      const where: any = { userId }
+      const where: unknown = { userId }
 
       if (query.type) {
         where.action = { contains: query.type.toUpperCase() }
@@ -576,13 +576,13 @@ export class CustomerService {
       }
 
       const [activities, total] = await Promise.all([
-        prisma.auditLog.findMany({
+        query({
           where,
           orderBy: { createdAt: 'desc' },
           skip,
           take: query.limit,
         }),
-        prisma.auditLog.count({ where }),
+        query({ where }),
       ])
 
       return {
@@ -602,7 +602,7 @@ export class CustomerService {
 
   static async getAnalytics(customerId: string, startDate?: Date, endDate?: Date): Promise<CustomerAnalytics> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: customerId },
         include: {
           orders: {
@@ -678,7 +678,7 @@ export class CustomerService {
       }
 
       const [customers, total] = await Promise.all([
-        prisma.user.findMany({
+        query({
           where,
           select: {
             id: true,
@@ -696,7 +696,7 @@ export class CustomerService {
           skip,
           take: query.limit,
         }),
-        prisma.user.count({ where }),
+        query({ where }),
       ])
 
       return {
@@ -716,7 +716,7 @@ export class CustomerService {
 
   static async deleteAccount(userId: string, _password: string) {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: userId },
         select: { password: true },
       })
@@ -725,7 +725,7 @@ export class CustomerService {
         throw new AppError('User not found', 404)
       }
 
-      await prisma.user.update({
+      await query({
         where: { id: userId },
         data: {
           deletedAt: new Date(),
@@ -738,11 +738,11 @@ export class CustomerService {
       })
 
       await Promise.all([
-        prisma.address.deleteMany({ where: { userId } }),
-        prisma.paymentMethod.deleteMany({ where: { userId } }),
-        prisma.wishlistItem.deleteMany({ where: { userId } }),
-        prisma.cart.deleteMany({ where: { userId } }),
-        prisma.session.deleteMany({ where: { userId } }),
+        queryMany({ where: { userId } }),
+        queryMany({ where: { userId } }),
+        queryMany({ where: { userId } }),
+        queryMany({ where: { userId } }),
+        queryMany({ where: { userId } }),
       ])
 
       logger.info(`Customer account deleted: ${userId}`)
@@ -754,7 +754,7 @@ export class CustomerService {
 
   static async exportCustomerData(userId: string) {
     try {
-      const data = await prisma.user.findUnique({
+      const data = await query({
         where: { id: userId },
         include: {
           addresses: true,
@@ -799,7 +799,7 @@ export class CustomerService {
         throw new AppError('Customer not found', 404)
       }
 
-      const { password: _password, ...customerData } = data as any
+      const { password: _password, ...customerData } = data as unknown
 
       return customerData
     } catch (error) {

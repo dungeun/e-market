@@ -90,7 +90,7 @@ export function useAuth() {
         });
       }
     } catch (error) {
-      console.error('Auth error:', error);
+
       setAuthState({
         user: null,
         isAuthenticated: false,
@@ -190,7 +190,7 @@ export function useAuth() {
           },
         });
       } catch (error) {
-        console.error('Logout error:', error);
+
       }
     }
 

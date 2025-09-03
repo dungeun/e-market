@@ -103,7 +103,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         images: [...(prev.images || []), ...imageUrls]
       }));
     } catch (error) {
-      console.error('이미지 업로드 실패:', error);
+
     } finally {
       setUploading(false);
     }
@@ -129,7 +129,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         videos: [...(prev.videos || []), ...videoUrls]
       }));
     } catch (error) {
-      console.error('동영상 업로드 실패:', error);
+
     } finally {
       setUploading(false);
     }
@@ -164,7 +164,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       await reviewService.createReview(formData);
       onSuccess();
     } catch (error) {
-      console.error('리뷰 작성 실패:', error);
+
       alert('리뷰 작성에 실패했습니다.');
     } finally {
       setSubmitting(false);

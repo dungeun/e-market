@@ -1,10 +1,8 @@
 import request from 'supertest'
-import { PrismaClient } from '@prisma/client'
 import app from '../../src/index'
 import { paymentService } from '../../src/services/paymentService'
 import { orderService } from '../../src/services/orderService'
 
-const prisma = new PrismaClient()
 
 describe('Payment System Integration Tests', () => {
   let testUserId: string
@@ -13,12 +11,12 @@ describe('Payment System Integration Tests', () => {
 
   beforeAll(async () => {
     // Clean up and create test data
-    await prisma.payment.deleteMany()
-    await prisma.order.deleteMany()
-    await prisma.user.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
 
     // Create test user
-    const user = await prisma.user.create({
+    const user = await query({
       data: {
         email: 'payment.test@example.com',
         firstName: 'Payment',
@@ -65,9 +63,9 @@ describe('Payment System Integration Tests', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await prisma.payment.deleteMany()
-    await prisma.order.deleteMany()
-    await prisma.user.deleteMany()
+    await queryMany()
+    await queryMany()
+    await queryMany()
     await prisma.$disconnect()
   })
 

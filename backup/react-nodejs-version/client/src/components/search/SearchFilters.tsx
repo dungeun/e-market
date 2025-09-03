@@ -24,7 +24,7 @@ interface SearchFiltersProps {
     inStock?: boolean;
     rating?: number;
   };
-  onFilterChange: (filters: any) => void;
+  onFilterChange: (filters: unknown) => void;
   onClearFilters: () => void;
 }
 

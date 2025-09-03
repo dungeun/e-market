@@ -1,12 +1,11 @@
+import type { User, RequestContext } from '@/lib/types/common';
 /**
  * 비즈니스 인텔리전스 시스템
  * RFM 분석, 판매 예측, 고객 세분화, 실시간 대시보드
  */
 
-import { PrismaClient } from '@prisma/client'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 
-const prisma = new PrismaClient()
 
 export interface RFMScore {
   userId: string
@@ -64,7 +63,7 @@ export class BusinessIntelligenceService {
     const sixMonthsAgo = subMonths(new Date(), 6)
     
     // 모든 고객의 주문 데이터 조회
-    const customers = await prisma.user.findMany({
+    const customers = await query({
       where: {
         orders: {
           some: {
@@ -214,7 +213,7 @@ export class BusinessIntelligenceService {
    * 고객 생애 가치 (CLV) 계산
    */
   async calculateCustomerLifetimeValue(userId: string): Promise<number> {
-    const orders = await prisma.order.findMany({
+    const orders = await query({
       where: {
         userId,
         status: 'PAYMENT_COMPLETED'
@@ -251,10 +250,10 @@ export class BusinessIntelligenceService {
     message: string
     data?: any
   }>> {
-    const anomalies: any[] = []
+    const anomalies: unknown[] = []
 
     // 1. 재고 이상 탐지
-    const lowStockProducts = await prisma.inventory.findMany({
+    const lowStockProducts = await query({
       where: {
         quantity: { lte: 10 }
       },
@@ -292,8 +291,8 @@ export class BusinessIntelligenceService {
   /**
    * 코호트 분석
    */
-  async performCohortAnalysis(months: number = 6): Promise<any> {
-    const cohorts: any[] = []
+  async performCohortAnalysis(months: number = 6): Promise<unknown> {
+    const cohorts: unknown[] = []
     
     for (let i = 0; i < months; i++) {
       const cohortMonth = subMonths(new Date(), i)
@@ -301,7 +300,7 @@ export class BusinessIntelligenceService {
       const endOfCohort = endOfMonth(cohortMonth)
       
       // 해당 월에 가입한 사용자
-      const newUsers = await prisma.user.findMany({
+      const newUsers = await query({
         where: {
           createdAt: {
             gte: startOfCohort,
@@ -319,7 +318,7 @@ export class BusinessIntelligenceService {
       // 각 월별 재방문율 계산
       for (let j = 0; j <= i; j++) {
         const checkMonth = subMonths(new Date(), j)
-        const activeUsers = await prisma.order.findMany({
+        const activeUsers = await query({
           where: {
             userId: { in: newUsers.map(u => u.id) },
             createdAt: {
@@ -404,7 +403,7 @@ export class BusinessIntelligenceService {
 
   private async saveCustomerSegment(userId: string, segment: string, value: number): Promise<void> {
     // 세그먼트 찾기 또는 생성
-    const segmentRecord = await prisma.customerSegment.upsert({
+    const segmentRecord = await query({
       where: { name: segment },
       create: {
         name: segment,
@@ -416,7 +415,7 @@ export class BusinessIntelligenceService {
     })
 
     // 세그먼트 멤버십 업데이트
-    await prisma.customerSegmentMember.upsert({
+    await query({
       where: {
         segmentId_userId: {
           segmentId: segmentRecord.id,
@@ -436,7 +435,7 @@ export class BusinessIntelligenceService {
   }
 
   private async getHistoricalSales(months: number): Promise<Array<{ month: string; amount: number }>> {
-    const sales: any[] = []
+    const sales: unknown[] = []
     
     for (let i = months - 1; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(new Date(), i))
@@ -525,7 +524,7 @@ export class BusinessIntelligenceService {
   private async getActiveUsersCount(): Promise<number> {
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000)
     
-    const activeUsers = await prisma.session.count({
+    const activeUsers = await query({
       where: {
         expires: { gte: fifteenMinutesAgo }
       }
@@ -535,7 +534,7 @@ export class BusinessIntelligenceService {
   }
 
   private async getTodayOrdersCount(startOfToday: Date): Promise<number> {
-    return await prisma.order.count({
+    return await query({
       where: {
         createdAt: { gte: startOfToday }
       }
@@ -557,7 +556,7 @@ export class BusinessIntelligenceService {
   }
 
   private async getSessionCount(startOfToday: Date): Promise<number> {
-    return await prisma.session.count({
+    return await query({
       where: {
         expires: { gte: startOfToday }
       }
@@ -565,7 +564,7 @@ export class BusinessIntelligenceService {
   }
 
   private async getSalesTrend(days: number): Promise<Array<{ date: string; amount: number }>> {
-    const trend: any[] = []
+    const trend: unknown[] = []
     
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
@@ -598,7 +597,7 @@ export class BusinessIntelligenceService {
   }
 
   private async getCustomerTrend(days: number): Promise<Array<{ date: string; count: number }>> {
-    const trend: any[] = []
+    const trend: unknown[] = []
     
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
@@ -608,7 +607,7 @@ export class BusinessIntelligenceService {
       const nextDay = new Date(date)
       nextDay.setDate(nextDay.getDate() + 1)
       
-      const newCustomers = await prisma.user.count({
+      const newCustomers = await query({
         where: {
           createdAt: {
             gte: date,
@@ -640,9 +639,9 @@ export class BusinessIntelligenceService {
       take: 10
     })
     
-    const products: any[] = []
+    const products: unknown[] = []
     for (const item of topProducts) {
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: item.productId }
       })
       
@@ -671,9 +670,9 @@ export class BusinessIntelligenceService {
       take: limit
     })
     
-    const products: any[] = []
+    const products: unknown[] = []
     for (const item of topProducts) {
-      const product = await prisma.product.findUnique({
+      const product = await query({
         where: { id: item.productId }
       })
       
@@ -703,11 +702,11 @@ export class BusinessIntelligenceService {
       take: limit
     })
     
-    const customers: any[] = []
+    const customers: unknown[] = []
     for (const item of topCustomers) {
       if (!item.userId) continue
       
-      const user = await prisma.user.findUnique({
+      const user = await query({
         where: { id: item.userId }
       })
       
@@ -725,10 +724,10 @@ export class BusinessIntelligenceService {
   }
 
   private async getRiskAlerts(): Promise<Array<{ type: string; message: string; severity: string }>> {
-    const alerts: any[] = []
+    const alerts: unknown[] = []
     
     // 재고 위험
-    const lowStock = await prisma.inventory.count({
+    const lowStock = await query({
       where: { quantity: { lte: 10 } }
     })
     
@@ -742,7 +741,7 @@ export class BusinessIntelligenceService {
     
     // 이탈 위험 고객
     const thirtyDaysAgo = subMonths(new Date(), 1)
-    const churnRiskCount = await prisma.user.count({
+    const churnRiskCount = await query({
       where: {
         orders: {
           none: {
@@ -763,7 +762,7 @@ export class BusinessIntelligenceService {
     return alerts
   }
 
-  private async detectSalesAnomaly(): Promise<any> {
+  private async detectSalesAnomaly(): Promise<unknown> {
     // 어제와 오늘 판매 비교
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
@@ -812,11 +811,11 @@ export class BusinessIntelligenceService {
   }
 
   private async detectChurnRisk(): Promise<any[]> {
-    const alerts: any[] = []
+    const alerts: unknown[] = []
     const sixtyDaysAgo = subMonths(new Date(), 2)
     
     // 최근 60일간 구매가 없는 VIP 고객
-    const vipChurnRisk = await prisma.user.findMany({
+    const vipChurnRisk = await query({
       where: {
         orders: {
           none: {
@@ -839,15 +838,15 @@ export class BusinessIntelligenceService {
     return alerts
   }
 
-  private async detectPaymentAnomalies(): Promise<any> {
+  private async detectPaymentAnomalies(): Promise<unknown> {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
     const [totalPayments, failedPayments] = await Promise.all([
-      prisma.payment.count({
+      query({
         where: { createdAt: { gte: today } }
       }),
-      prisma.payment.count({
+      query({
         where: {
           createdAt: { gte: today },
           status: 'FAILED'

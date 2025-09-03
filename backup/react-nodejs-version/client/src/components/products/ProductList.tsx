@@ -16,8 +16,8 @@ export const ProductList: React.FC = () => {
     minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
     maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
     inStock: searchParams.get('inStock') === 'true',
-    sortBy: (searchParams.get('sortBy') as any) || 'createdAt',
-    sortOrder: (searchParams.get('sortOrder') as any) || 'desc',
+    sortBy: (searchParams.get('sortBy') as unknown) || 'createdAt',
+    sortOrder: (searchParams.get('sortOrder') as unknown) || 'desc',
     page: Number(searchParams.get('page')) || 1,
     limit: Number(searchParams.get('limit')) || 12,
   })
@@ -85,7 +85,7 @@ export const ProductList: React.FC = () => {
               </span>
               <select
                 value={filters.sortBy}
-                onChange={(e) => handleFilterChange({ sortBy: e.target.value as any })}
+                onChange={(e) => handleFilterChange({ sortBy: e.target.value as unknown })}
                 className="input input-sm"
               >
                 <option value="createdAt">Newest</option>
@@ -94,7 +94,7 @@ export const ProductList: React.FC = () => {
               </select>
               <select
                 value={filters.sortOrder}
-                onChange={(e) => handleFilterChange({ sortOrder: e.target.value as any })}
+                onChange={(e) => handleFilterChange({ sortOrder: e.target.value as unknown })}
                 className="input input-sm"
               >
                 <option value="asc">Ascending</option>

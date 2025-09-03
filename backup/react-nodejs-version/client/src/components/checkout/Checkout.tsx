@@ -143,7 +143,7 @@ export const Checkout: React.FC = () => {
     }
   }
 
-  const handlePayment = async (paymentMethod: string, paymentDetails?: any) => {
+  const handlePayment = async (paymentMethod: string, paymentDetails?: unknown) => {
     if (!order) return
     
     try {

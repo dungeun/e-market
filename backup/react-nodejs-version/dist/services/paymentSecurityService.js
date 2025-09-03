@@ -24,7 +24,7 @@ class PaymentSecurityService {
             // Generate card fingerprint for duplicate detection
             const fingerprint = security_1.SecurityUtils.hashData(cardData.cardNumber + cardData.expiryMonth + cardData.expiryYear);
             // Check if card already tokenized
-            const existingToken = await database_1.prisma.paymentToken.findFirst({
+            const existingToken = await database_1.query({
                 where: { fingerprint },
             });
             if (existingToken) {
@@ -43,7 +43,7 @@ class PaymentSecurityService {
             const { encryptedData } = await encryptionService_1.encryptionService.encryptPaymentMethod({
                 cardNumber: cardData.cardNumber,
             });
-            await database_1.prisma.paymentToken.create({
+            await database_1.query({
                 data: {
                     token,
                     fingerprint,
@@ -115,7 +115,7 @@ class PaymentSecurityService {
         let riskScore = 0;
         try {
             // Check velocity limits
-            const recentPayments = await database_1.prisma.payment.count({
+            const recentPayments = await database_1.query({
                 where: {
                     order: { userId: data.userId },
                     createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) }, // Last hour
@@ -138,7 +138,7 @@ class PaymentSecurityService {
                 reasons.push('Unusually high amount');
             }
             // Check IP reputation
-            const blacklistedIP = await database_1.prisma.blacklist.findFirst({
+            const blacklistedIP = await database_1.query({
                 where: {
                     type: 'IP',
                     value: data.ipAddress,
@@ -156,7 +156,7 @@ class PaymentSecurityService {
             }
             // Check card reuse across accounts
             if (data.cardToken) {
-                const cardUsage = await database_1.prisma.paymentMethod.count({
+                const cardUsage = await database_1.query({
                     where: {
                         last4: data.cardToken?.slice(-4), // Use last 4 digits instead
                         userId: { not: data.userId },
@@ -168,7 +168,7 @@ class PaymentSecurityService {
                 }
             }
             // Log fraud check
-            await database_1.prisma.fraudCheck.create({
+            await database_1.query({
                 data: {
                     userId: data.userId,
                     checkType: 'PAYMENT_VALIDATION',
@@ -225,7 +225,7 @@ class PaymentSecurityService {
                 week: 7 * 24 * 60 * 60 * 1000,
             };
             for (const [window, ms] of Object.entries(timeWindows)) {
-                const payments = await database_1.prisma.payment.findMany({
+                const payments = await database_1.query({
                     where: {
                         order: { userId },
                         createdAt: { gte: new Date(Date.now() - ms) },
@@ -271,7 +271,7 @@ class PaymentSecurityService {
      * Create security alert
      */
     async createSecurityAlert(userId, alertType, metadata) {
-        await database_1.prisma.securityAlert.create({
+        await database_1.query({
             data: {
                 userId,
                 alertType,
@@ -288,7 +288,7 @@ class PaymentSecurityService {
         try {
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth() + 1;
-            const result = await database_1.prisma.paymentToken.deleteMany({
+            const result = await database_1.queryMany({
                 where: {
                     OR: [
                         { expiryYear: { lt: currentYear } },
@@ -317,7 +317,7 @@ class PaymentSecurityService {
         const recommendations = [];
         try {
             // Check encryption status
-            const unencryptedPayments = await database_1.prisma.paymentMethod.count({
+            const unencryptedPayments = await database_1.query({
                 where: {
                     provider: { startsWith: 'stripe' }, // Use provider instead of token
                 },
@@ -327,7 +327,7 @@ class PaymentSecurityService {
                 recommendations.push('Encrypt all stored payment data');
             }
             // Check access logs
-            const recentAccessLogs = await database_1.prisma.auditLog.count({
+            const recentAccessLogs = await database_1.query({
                 where: {
                     action: { in: ['PAYMENT_VIEW', 'PAYMENT_EXPORT'] },
                     createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
@@ -343,7 +343,7 @@ class PaymentSecurityService {
                 recommendations.push('Enable HSTS for all production communications');
             }
             // Check key rotation
-            const oldTokens = await database_1.prisma.paymentToken.count({
+            const oldTokens = await database_1.query({
                 where: {
                     createdAt: { lt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) },
                 },

@@ -39,8 +39,8 @@ class SearchController {
         success: true,
         data: results
       });
-    } catch (error: any) {
-      console.error('Search error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '검색 중 오류가 발생했습니다.' 
       });
@@ -64,8 +64,8 @@ class SearchController {
         success: true,
         data: suggestions
       });
-    } catch (error: any) {
-      console.error('Autocomplete error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '자동완성 조회 중 오류가 발생했습니다.' 
       });
@@ -82,8 +82,8 @@ class SearchController {
         success: true,
         data: searches
       });
-    } catch (error: any) {
-      console.error('Popular searches error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '인기 검색어 조회 중 오류가 발생했습니다.' 
       });
@@ -104,8 +104,8 @@ class SearchController {
         success: true,
         data: related
       });
-    } catch (error: any) {
-      console.error('Related searches error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '연관 검색어 조회 중 오류가 발생했습니다.' 
       });
@@ -121,8 +121,8 @@ class SearchController {
         success: true,
         data: stats
       });
-    } catch (error: any) {
-      console.error('Index stats error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '인덱스 상태 조회 중 오류가 발생했습니다.' 
       });
@@ -139,8 +139,8 @@ class SearchController {
         success: true,
         message: '재색인이 시작되었습니다. 백그라운드에서 진행됩니다.'
       });
-    } catch (error: any) {
-      console.error('Reindex error:', error);
+    } catch (error: Error | unknown) {
+
       res.status(500).json({ 
         error: error.message || '재색인 중 오류가 발생했습니다.' 
       });

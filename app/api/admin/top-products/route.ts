@@ -1,7 +1,9 @@
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
+import { OrderItemGroup } from '@/types/database'
 
 export async function GET() {
   try {
@@ -24,11 +26,11 @@ export async function GET() {
         }
       },
       take: 5
-    })
+    }) as OrderItemGroup[]
 
     // 각 상품의 상세 정보 가져오기
     const productIds = topProducts.map(item => item.productId)
-    const products = await prisma.product.findMany({
+    const products = await query({
       where: {
         id: {
           in: productIds
@@ -55,7 +57,7 @@ export async function GET() {
 
     return NextResponse.json({ products: result })
   } catch (error) {
-    console.error('Error fetching top products:', error)
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

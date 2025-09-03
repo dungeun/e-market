@@ -1,6 +1,6 @@
+import type { User, RequestContext } from '@/lib/types/common';
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
-import { Prisma } from '@prisma/client'
 import { logger } from '../utils/logger'
 import { config } from '../config/config'
 import { circuitBreakers } from './circuitBreaker'
@@ -123,7 +123,7 @@ export class AppError extends Error implements ApiError {
     isOperational: boolean = true,
     code?: string,
     category?: ErrorCategory,
-    details?: any,
+    details?: unknown,
     documentationUrl?: string,
   ) {
     super(message)
@@ -141,7 +141,7 @@ export class AppError extends Error implements ApiError {
 /**
  * Enhanced error factory functions
  */
-export const createValidationError = (message: string, details?: any): AppError => {
+export const createValidationError = (message: string, details?: unknown): AppError => {
   return new AppError(
     message,
     400,
@@ -189,7 +189,7 @@ export const createNotFoundError = (resource: string = 'Resource'): AppError => 
   )
 }
 
-export const createConflictError = (message: string, details?: any): AppError => {
+export const createConflictError = (message: string, details?: unknown): AppError => {
   return new AppError(
     message,
     409,
@@ -201,7 +201,7 @@ export const createConflictError = (message: string, details?: any): AppError =>
   )
 }
 
-export const createRateLimitError = (message: string = 'Rate limit exceeded', details?: any): AppError => {
+export const createRateLimitError = (message: string = 'Rate limit exceeded', details?: unknown): AppError => {
   return new AppError(
     message,
     429,
@@ -262,7 +262,7 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ): void => {
-  const requestId = (req as any).id || generateRequestId()
+  const requestId = (req as unknown).id || generateRequestId()
   const isDevelopment = config.nodeEnv === 'development'
   const isProduction = config.nodeEnv === 'production'
 
@@ -274,7 +274,7 @@ export const errorHandler = (
       field: e.path.join('.'),
       message: e.message,
       code: e.code,
-      received: (e as any).received,
+      received: (e as unknown).received,
     }))
 
     error = createValidationError('Invalid input data', validationErrors)
@@ -404,8 +404,8 @@ export const errorHandler = (
       url: req.originalUrl,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
-      userId: (req as any).user?.id,
-      sessionId: (req as any).session?.id,
+      userId: (req as unknown).user?.id,
+      sessionId: (req as unknown).session?.id,
     },
     ...(isDevelopment && {
       body: req.body,
@@ -486,7 +486,7 @@ function generateErrorId(): string {
 /**
  * Report error to external monitoring service
  */
-async function reportErrorToExternalService(_error: AppError, _context: any): Promise<void> {
+async function reportErrorToExternalService(_error: AppError, _context: unknown): Promise<void> {
   try {
     if (!config.monitoring.errorReportingUrl) return
 
@@ -603,7 +603,7 @@ export const getErrorStatistics = () => {
  */
 export const requestIdMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const requestId = generateRequestId()
-  ;(req as any).id = requestId
+  ;(req as unknown).id = requestId
   res.setHeader('X-Request-ID', requestId)
   next()
 }
@@ -656,7 +656,7 @@ export const withErrorBoundary = async <T>(
 /**
  * Validation middleware with enhanced error messages
  */
-export const validateRequest = (schema: any, property: 'body' | 'query' | 'params' = 'body') => {
+export const validateRequest = (schema: unknown, property: 'body' | 'query' | 'params' = 'body') => {
   return (req: Request, _res: Response, next: NextFunction) => {
     try {
       const validatedData = schema.parse(req[property])
@@ -670,8 +670,8 @@ export const validateRequest = (schema: any, property: 'body' | 'query' | 'param
             field: e.path.join('.'),
             message: e.message,
             code: e.code,
-            received: (e as any).received,
-            expected: (e as any).expected,
+            received: (e as unknown).received,
+            expected: (e as unknown).expected,
           })),
         )
         next(validationError)

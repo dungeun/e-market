@@ -1,3 +1,5 @@
+import type { User, RequestContext } from '@/lib/types/common';
+import { env } from '@/lib/config/env';
 import { Socket } from 'socket.io'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import jwt from 'jsonwebtoken'
@@ -22,7 +24,7 @@ export const authMiddleware = (socket: AuthenticatedSocket, next: (err?: Extende
     // If token is provided, try to authenticate
     if (token) {
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || env.jwt.secret) as unknown
         socket.userId = decoded.userId || decoded.id
         socket.isAuthenticated = true
         

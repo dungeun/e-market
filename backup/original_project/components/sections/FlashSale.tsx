@@ -15,7 +15,7 @@ interface FlashSaleProps {
     backgroundColor?: string
     textColor?: string
   }
-  products: any[]
+  products: unknown[]
 }
 
 export default function FlashSale({ config, products }: FlashSaleProps) {

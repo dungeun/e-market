@@ -238,7 +238,7 @@ export class ProductController {
       const existingImages = existingProduct.images || []
       
       // Convert existing images to the format expected by updateProduct
-      const formattedExistingImages = existingImages.map((img: any) => ({
+      const formattedExistingImages = existingImages.map((img: unknown) => ({
         url: img.url,
         alt: img.alt || '',
         sortOrder: img.sortOrder,
@@ -308,7 +308,7 @@ export class ProductController {
       // Remove image from product - convert to the format expected by updateProduct
       const updatedImages = existingProduct.images
         .filter(img => img.url !== imageToDelete.url)
-        .map((img: any) => ({
+        .map((img: unknown) => ({
           url: img.url,
           alt: img.alt || '',
           sortOrder: img.sortOrder,
@@ -390,7 +390,7 @@ export class ProductController {
       return
     }
 
-    const results: Array<{ id: any; success: boolean; data?: any; error?: string }> = []
+    const results: Array<{ id: unknown; success: boolean; data?: unknown; error?: string }> = []
     
     for (const productId of productIds) {
       try {

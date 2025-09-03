@@ -16,7 +16,7 @@ export function HeaderConfigTab() {
     })
   );
 
-  const handleHeaderDragEnd = (event: any) => {
+  const handleHeaderDragEnd = (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {

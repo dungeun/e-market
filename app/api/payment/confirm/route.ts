@@ -1,3 +1,5 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 /**
  * 결제 확인 API
  */
@@ -7,8 +9,7 @@ import { paymentGateway } from '@/lib/services/payment/payment-gateway'
 import { b2bService } from '@/lib/services/business/b2b-service'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (response.status === 'COMPLETED') {
       // 주문 상태 업데이트
-      const order = await prisma.order.update({
+      const order = await query({
         where: { id: orderId },
         data: { 
           status: 'PAYMENT_COMPLETED'
@@ -56,32 +57,32 @@ export async function POST(request: NextRequest) {
             type: 'TAX_INVOICE'
           })
         } catch (error) {
-          console.error('Tax invoice creation failed:', error)
+
           // 세금계산서 발행 실패는 결제 성공에 영향을 주지 않음
         }
       }
       */
 
       // 재고 예약 확정
-      const reservations = await prisma.inventoryReservation.findMany({
+      const reservations = await query({
         where: { orderId }
       })
 
       for (const reservation of reservations) {
-        await prisma.inventoryReservation.update({
+        await query({
           where: { id: reservation.id },
           data: { status: 'CONFIRMED' }
         })
       }
     } else if (response.status === 'FAILED' || response.status === 'CANCELLED') {
       // 결제 실패 시 주문 취소
-      await prisma.order.update({
+      await query({
         where: { id: orderId },
         data: { status: 'PAYMENT_FAILED' }
       })
 
       // 재고 예약 취소
-      await prisma.inventoryReservation.updateMany({
+      await queryMany({
         where: { orderId },
         data: { status: 'CANCELLED' }
       })
@@ -91,8 +92,8 @@ export async function POST(request: NextRequest) {
       success: response.success,
       data: response
     })
-  } catch (error: any) {
-    console.error('Payment confirmation error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to confirm payment' },
       { status: 500 }

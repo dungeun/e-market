@@ -3,10 +3,6 @@
  * 한국형 PG사 + 글로벌 결제 통합
  */
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
 export type PaymentProvider = 
   | 'TOSS_PAYMENTS' 
   | 'KCP' 
@@ -30,7 +26,7 @@ export interface PaymentRequest {
   returnUrl?: string
   cancelUrl?: string
   webhookUrl?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface PaymentResponse {
@@ -94,7 +90,7 @@ export class PaymentGatewayService {
     }
 
     // 결제 레코드 생성
-    const payment = await prisma.payment.create({
+    const payment = await query({
       data: {
         orderId: request.orderId,
         provider: request.provider,
@@ -111,7 +107,7 @@ export class PaymentGatewayService {
       const response = await provider.createPayment(request)
       
       // 결제 상태 업데이트
-      await prisma.payment.update({
+      await query({
         where: { id: payment.id },
         data: {
           status: response.status,
@@ -124,9 +120,9 @@ export class PaymentGatewayService {
         ...response,
         paymentId: payment.id
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       // 실패 시 상태 업데이트
-      await prisma.payment.update({
+      await query({
         where: { id: payment.id },
         data: {
           status: 'FAILED',
@@ -141,8 +137,8 @@ export class PaymentGatewayService {
   /**
    * 결제 확인
    */
-  async confirmPayment(paymentId: string, data?: any): Promise<PaymentResponse> {
-    const payment = await prisma.payment.findUnique({
+  async confirmPayment(paymentId: string, data?: unknown): Promise<PaymentResponse> {
+    const payment = await query({
       where: { id: paymentId }
     })
 
@@ -159,7 +155,7 @@ export class PaymentGatewayService {
     const response = await provider.confirmPayment(payment.transactionId!, data)
     
     // 상태 업데이트
-    await prisma.payment.update({
+    await query({
       where: { id: paymentId },
       data: {
         status: response.status,
@@ -174,7 +170,7 @@ export class PaymentGatewayService {
    * 결제 취소/환불
    */
   async refundPayment(request: RefundRequest): Promise<PaymentResponse> {
-    const payment = await prisma.payment.findUnique({
+    const payment = await query({
       where: { id: request.paymentId }
     })
 
@@ -191,7 +187,7 @@ export class PaymentGatewayService {
     const response = await provider.refundPayment(payment.transactionId!, request)
     
     // 환불 레코드 생성
-    await prisma.refund.create({
+    await query({
       data: {
         paymentId: request.paymentId,
         amount: request.amount || payment.amount,
@@ -206,7 +202,7 @@ export class PaymentGatewayService {
   /**
    * 웹훅 처리
    */
-  async handleWebhook(provider: PaymentProvider, data: any): Promise<void> {
+  async handleWebhook(provider: PaymentProvider, data: unknown): Promise<void> {
     const providerInstance = this.providers.get(provider)
     
     if (!providerInstance) {
@@ -219,8 +215,8 @@ export class PaymentGatewayService {
   /**
    * 결제 상태 조회
    */
-  async getPaymentStatus(paymentId: string): Promise<any> {
-    const payment = await prisma.payment.findUnique({
+  async getPaymentStatus(paymentId: string): Promise<unknown> {
+    const payment = await query({
       where: { id: paymentId },
       include: {
         order: true,
@@ -251,10 +247,10 @@ export class PaymentGatewayService {
  */
 interface IPaymentProvider {
   createPayment(request: PaymentRequest): Promise<PaymentResponse>
-  confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse>
+  confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse>
   refundPayment(transactionId: string, request: RefundRequest): Promise<PaymentResponse>
-  handleWebhook(data: any): Promise<void>
-  getStatus(transactionId: string): Promise<any>
+  handleWebhook(data: unknown): Promise<void>
+  getStatus(transactionId: string): Promise<unknown>
 }
 
 /**
@@ -296,7 +292,7 @@ class TossPaymentsProvider implements IPaymentProvider {
         transactionId: data.paymentKey,
         data
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       return {
         success: false,
         paymentId: '',
@@ -307,7 +303,7 @@ class TossPaymentsProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     const response = await fetch(`${this.baseUrl}/payments/${transactionId}`, {
       method: 'POST',
       headers: {
@@ -357,12 +353,12 @@ class TossPaymentsProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
+  async handleWebhook(data: unknown): Promise<void> {
     // 토스페이먼츠 웹훅 처리
-    console.log('TossPayments webhook:', data)
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/payments/${transactionId}`, {
       headers: {
         'Authorization': `Basic ${Buffer.from(this.secretKey + ':').toString('base64')}`
@@ -392,7 +388,7 @@ class KCPProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     // KCP 승인 구현
     return {
       success: true,
@@ -414,11 +410,11 @@ class KCPProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('KCP webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     return { status: 'COMPLETED' }
   }
 }
@@ -442,7 +438,7 @@ class InicisProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     return {
       success: true,
       paymentId: transactionId,
@@ -462,11 +458,11 @@ class InicisProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('Inicis webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     return { status: 'COMPLETED' }
   }
 }
@@ -490,7 +486,7 @@ class NaverPayProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     return {
       success: true,
       paymentId: transactionId,
@@ -510,11 +506,11 @@ class NaverPayProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('NaverPay webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     return { status: 'COMPLETED' }
   }
 }
@@ -559,7 +555,7 @@ class KakaoPayProvider implements IPaymentProvider {
         transactionId: data.tid,
         data
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       return {
         success: false,
         paymentId: '',
@@ -570,7 +566,7 @@ class KakaoPayProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     const response = await fetch(`${this.baseUrl}/approve`, {
       method: 'POST',
       headers: {
@@ -625,11 +621,11 @@ class KakaoPayProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('KakaoPay webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     return { status: 'COMPLETED' }
   }
 }
@@ -668,7 +664,7 @@ class StripeProvider implements IPaymentProvider {
         transactionId: data.id,
         data
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       return {
         success: false,
         paymentId: '',
@@ -679,7 +675,7 @@ class StripeProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     const response = await fetch(`${this.baseUrl}/payment_intents/${transactionId}/confirm`, {
       method: 'POST',
       headers: {
@@ -726,11 +722,11 @@ class StripeProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('Stripe webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/payment_intents/${transactionId}`, {
       headers: {
         'Authorization': `Bearer ${this.secretKey}`
@@ -763,7 +759,7 @@ class PayPalProvider implements IPaymentProvider {
     }
   }
 
-  async confirmPayment(transactionId: string, data?: any): Promise<PaymentResponse> {
+  async confirmPayment(transactionId: string, data?: unknown): Promise<PaymentResponse> {
     return {
       success: true,
       paymentId: transactionId,
@@ -783,11 +779,11 @@ class PayPalProvider implements IPaymentProvider {
     }
   }
 
-  async handleWebhook(data: any): Promise<void> {
-    console.log('PayPal webhook:', data)
+  async handleWebhook(data: unknown): Promise<void> {
+
   }
 
-  async getStatus(transactionId: string): Promise<any> {
+  async getStatus(transactionId: string): Promise<unknown> {
     return { status: 'COMPLETED' }
   }
 }

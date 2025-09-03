@@ -1,3 +1,4 @@
+import type { AppError } from '@/lib/types/common';
 /**
  * 결제 웹훅 처리 API
  * 각 PG사의 웹훅을 통합 처리
@@ -5,10 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway, PaymentProvider } from '@/lib/services/payment/payment-gateway'
-import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
-
-const prisma = new PrismaClient()
 
 // 웹훅 서명 검증
 function verifyWebhookSignature(
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // 중복 처리 방지
     const webhookId = data.webhookId || data.eventId || `${provider}_${Date.now()}`
-    const existingWebhook = await prisma.webhookLog.findUnique({
+    const existingWebhook = await query({
       where: { webhookId }
     })
 
@@ -79,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 웹훅 로그 저장
-    await prisma.webhookLog.create({
+    await query({
       data: {
         webhookId,
         provider,
@@ -95,8 +93,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Webhook processed successfully'
     })
-  } catch (error: any) {
-    console.error('Webhook processing error:', error)
+  } catch (error: Error | unknown) {
+
     return NextResponse.json(
       { error: error.message || 'Failed to process webhook' },
       { status: 500 }
@@ -107,7 +105,7 @@ export async function POST(request: NextRequest) {
 /**
  * 프로바이더별 웹훅 처리
  */
-async function handleProviderWebhook(provider: PaymentProvider, data: any) {
+async function handleProviderWebhook(provider: PaymentProvider, data: unknown) {
   switch (provider) {
     case 'TOSS_PAYMENTS':
       await handleTossPaymentsWebhook(data)
@@ -145,22 +143,22 @@ async function handleProviderWebhook(provider: PaymentProvider, data: any) {
 /**
  * 토스페이먼츠 웹훅 처리
  */
-async function handleTossPaymentsWebhook(data: any) {
+async function handleTossPaymentsWebhook(data: unknown) {
   const { eventType, data: eventData } = data
 
   switch (eventType) {
     case 'PAYMENT_STATUS_CHANGED':
-      const payment = await prisma.payment.findFirst({
+      const payment = await query({
         where: { transactionId: eventData.paymentKey }
       })
 
       if (payment) {
-        await prisma.payment.update({
+        await query({
           where: { id: payment.id },
           data: {
             status: mapTossStatus(eventData.status),
             metadata: {
-              ...(payment.metadata as any || {}),
+              ...(payment.metadata as unknown || {}),
               tossData: eventData
             }
           }
@@ -168,12 +166,12 @@ async function handleTossPaymentsWebhook(data: any) {
 
         // 주문 상태 업데이트
         if (eventData.status === 'DONE') {
-          await prisma.order.update({
+          await query({
             where: { id: payment.orderId },
             data: { status: 'PAYMENT_COMPLETED' }
           })
         } else if (eventData.status === 'CANCELED') {
-          await prisma.order.update({
+          await query({
             where: { id: payment.orderId },
             data: { status: 'CANCELLED' }
           })
@@ -186,49 +184,49 @@ async function handleTossPaymentsWebhook(data: any) {
 /**
  * KCP 웹훅 처리
  */
-async function handleKCPWebhook(data: any) {
+async function handleKCPWebhook(data: unknown) {
   // KCP 웹훅 처리 로직
-  console.log('KCP webhook:', data)
+
 }
 
 /**
  * 이니시스 웹훅 처리
  */
-async function handleInicisWebhook(data: any) {
+async function handleInicisWebhook(data: unknown) {
   // 이니시스 웹훅 처리 로직
-  console.log('Inicis webhook:', data)
+
 }
 
 /**
  * 네이버페이 웹훅 처리
  */
-async function handleNaverPayWebhook(data: any) {
+async function handleNaverPayWebhook(data: unknown) {
   // 네이버페이 웹훅 처리 로직
-  console.log('NaverPay webhook:', data)
+
 }
 
 /**
  * 카카오페이 웹훅 처리
  */
-async function handleKakaoPayWebhook(data: any) {
+async function handleKakaoPayWebhook(data: unknown) {
   // 카카오페이 웹훅 처리 로직
-  console.log('KakaoPay webhook:', data)
+
 }
 
 /**
  * Stripe 웹훅 처리
  */
-async function handleStripeWebhook(data: any) {
+async function handleStripeWebhook(data: unknown) {
   const { type, data: { object } } = data
 
   switch (type) {
     case 'payment_intent.succeeded':
-      const payment = await prisma.payment.findFirst({
+      const payment = await query({
         where: { transactionId: object.id }
       })
 
       if (payment) {
-        await prisma.payment.update({
+        await query({
           where: { id: payment.id },
           data: {
             status: 'COMPLETED',
@@ -236,7 +234,7 @@ async function handleStripeWebhook(data: any) {
           }
         })
 
-        await prisma.order.update({
+        await query({
           where: { id: payment.orderId },
           data: { status: 'PAYMENT_COMPLETED' }
         })
@@ -244,12 +242,12 @@ async function handleStripeWebhook(data: any) {
       break
 
     case 'payment_intent.payment_failed':
-      const failedPayment = await prisma.payment.findFirst({
+      const failedPayment = await query({
         where: { transactionId: object.id }
       })
 
       if (failedPayment) {
-        await prisma.payment.update({
+        await query({
           where: { id: failedPayment.id },
           data: {
             status: 'FAILED',
@@ -257,7 +255,7 @@ async function handleStripeWebhook(data: any) {
           }
         })
 
-        await prisma.order.update({
+        await query({
           where: { id: failedPayment.orderId },
           data: { status: 'PAYMENT_FAILED' }
         })
@@ -269,9 +267,9 @@ async function handleStripeWebhook(data: any) {
 /**
  * PayPal 웹훅 처리
  */
-async function handlePayPalWebhook(data: any) {
+async function handlePayPalWebhook(data: unknown) {
   // PayPal 웹훅 처리 로직
-  console.log('PayPal webhook:', data)
+
 }
 
 /**

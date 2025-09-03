@@ -68,7 +68,7 @@ export class ReportController {
         success: true,
         data: report
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Report generation error:', error);
       res.status(500).json({
         success: false,
@@ -125,7 +125,7 @@ export class ReportController {
       const fileBuffer = await fs.readFile(filePath);
       res.send(fileBuffer);
 
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Report download error:', error);
       res.status(500).json({
         success: false,
@@ -159,7 +159,7 @@ export class ReportController {
       }
 
       // 필터 조건 구성
-      const filters: any = {};
+      const filters: unknown = {};
       if (type) filters.type = type;
       if (format) filters.format = format;
       if (startDate) filters.startDate = new Date(startDate as string);
@@ -188,7 +188,7 @@ export class ReportController {
           }
         }
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Get reports error:', error);
       res.status(500).json({
         success: false,
@@ -231,7 +231,7 @@ export class ReportController {
         success: true,
         data: mockReport
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Get report by ID error:', error);
       res.status(500).json({
         success: false,
@@ -260,7 +260,7 @@ export class ReportController {
         success: true,
         message: '리포트가 성공적으로 삭제되었습니다.'
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Delete report error:', error);
       res.status(500).json({
         success: false,
@@ -280,7 +280,7 @@ export class ReportController {
         success: true,
         data: templates
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Get templates error:', error);
       res.status(500).json({
         success: false,
@@ -336,7 +336,7 @@ export class ReportController {
         success: true,
         data: template
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Create template error:', error);
       res.status(500).json({
         success: false,
@@ -366,7 +366,7 @@ export class ReportController {
         success: true,
         data: template
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Update template error:', error);
       res.status(500).json({
         success: false,
@@ -395,7 +395,7 @@ export class ReportController {
         success: true,
         message: '템플릿이 성공적으로 삭제되었습니다.'
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Delete template error:', error);
       res.status(500).json({
         success: false,
@@ -446,7 +446,7 @@ export class ReportController {
         success: true,
         data: reportData
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Preview report error:', error);
       res.status(500).json({
         success: false,
@@ -493,7 +493,7 @@ export class ReportController {
         success: true,
         data: summary
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       logger.error('Get dashboard summary error:', error);
       res.status(500).json({
         success: false,
@@ -502,14 +502,14 @@ export class ReportController {
     }
   }
 
-  private groupReportsByType(reports: any[]): Record<string, number> {
+  private groupReportsByType(reports: unknown[]): Record<string, number> {
     return reports.reduce((acc, report) => {
       acc[report.type] = (acc[report.type] || 0) + 1;
       return acc;
     }, {});
   }
 
-  private groupReportsByFormat(reports: any[]): Record<string, number> {
+  private groupReportsByFormat(reports: unknown[]): Record<string, number> {
     return reports.reduce((acc, report) => {
       acc[report.format] = (acc[report.format] || 0) + 1;
       return acc;

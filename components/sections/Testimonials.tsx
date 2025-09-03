@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import { Star, Quote } from 'lucide-react'
 import Image from 'next/image'
@@ -13,10 +15,10 @@ interface TestimonialsProps {
     layout?: string
     autoplay?: boolean
   }
-  reviews?: any[]
+  reviews?: unknown[]
 }
 
-export default function Testimonials({ config, reviews = [] }: TestimonialsProps) {
+const Testimonials = React.memo(function Testimonials({ config = {}, reviews = [] }: TestimonialsProps) {
   // 임시 리뷰 데이터
   const defaultReviews = [
     {
@@ -52,27 +54,27 @@ export default function Testimonials({ config, reviews = [] }: TestimonialsProps
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          {config.title && (
+          {config?.title && (
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {config.title}
+              {config?.title}
             </h2>
           )}
-          {config.subtitle && (
+          {config?.subtitle && (
             <p className="text-gray-600">
-              {config.subtitle}
+              {config?.subtitle}
             </p>
           )}
         </div>
 
         {/* 리뷰 그리드 */}
         <div className={`grid gap-6 ${
-          config.layout === 'carousel' 
+          config?.layout === 'carousel' 
             ? 'grid-cols-1 md:grid-cols-3' 
             : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
         }`}>
           {displayReviews
-            .filter(review => review.rating >= (config.minRating || 4))
-            .slice(0, config.limit || 6)
+            .filter(review => review.rating >= (config?.minRating || 4))
+            .slice(0, config?.limit || 6)
             .map((review) => (
               <div key={review.id} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                 {/* 별점 */}
@@ -98,7 +100,7 @@ export default function Testimonials({ config, reviews = [] }: TestimonialsProps
                 </p>
 
                 {/* 상품 정보 */}
-                {config.showProductImage && review.productName && (
+                {config?.showProductImage && review.productName && (
                   <div className="text-sm text-gray-500 mb-3">
                     상품: {review.productName}
                   </div>
@@ -133,5 +135,7 @@ export default function Testimonials({ config, reviews = [] }: TestimonialsProps
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default Testimonials;

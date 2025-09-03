@@ -20,14 +20,14 @@ export function FooterConfigTab() {
     })
   );
 
-  const handleFooterDragEnd = (event: any) => {
+  const handleFooterDragEnd = (event: unknown) => {
     const { active, over } = event;
 
     if (active.id !== over.id && footerColumns.length > 0) {
-      const oldIndex = footerColumns.findIndex((item: any) => item.id === active.id);
-      const newIndex = footerColumns.findIndex((item: any) => item.id === over.id);
+      const oldIndex = footerColumns.findIndex((item: unknown) => item.id === active.id);
+      const newIndex = footerColumns.findIndex((item: unknown) => item.id === over.id);
       
-      const newColumns = arrayMove(footerColumns, oldIndex, newIndex).map((item: any, index: number) => ({
+      const newColumns = arrayMove(footerColumns, oldIndex, newIndex).map((item: unknown, index: number) => ({
         ...item,
         order: index + 1,
       }));
@@ -47,14 +47,14 @@ export function FooterConfigTab() {
   };
 
   const handleFooterColumnUpdate = (columnId: string, updates: Partial<FooterColumn>) => {
-    const newColumns = footerColumns.map((col: any) =>
+    const newColumns = footerColumns.map((col: unknown) =>
       col.id === columnId ? { ...col, ...updates } : col
     );
     updateFooterColumns(newColumns);
   };
 
   const handleDeleteFooterColumn = (columnId: string) => {
-    updateFooterColumns(footerColumns.filter((col: any) => col.id !== columnId));
+    updateFooterColumns(footerColumns.filter((col: unknown) => col.id !== columnId));
   };
 
   const handleAddFooterLink = (columnId: string) => {
@@ -66,7 +66,7 @@ export function FooterConfigTab() {
       visible: true
     };
     
-    const newColumns = footerColumns.map((col: any) => {
+    const newColumns = footerColumns.map((col: unknown) => {
       if (col.id === columnId) {
         return {
           ...col,
@@ -97,8 +97,8 @@ export function FooterConfigTab() {
           <SortableContext items={footerColumns} strategy={horizontalListSortingStrategy}>
             <div className="grid md:grid-cols-3 gap-6">
               {footerColumns
-                .sort((a: any, b: any) => a.order - b.order)
-                .map((column: any) => (
+                .sort((a: unknown, b: unknown) => a.order - b.order)
+                .map((column: unknown) => (
                   <SortableFooterColumn
                     key={column.id}
                     column={column}

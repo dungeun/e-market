@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { env } from '@/lib/config/env';
 import io, { Socket } from 'socket.io-client'
 
 export const useSocket = () => {
@@ -8,17 +9,17 @@ export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000', {
+    const socketInstance = io(process.env.NEXT_PUBLIC_APP_URL || env.appUrl, {
       path: '/api/socket',
     })
 
     socketInstance.on('connect', () => {
-      console.log('Connected to socket server')
+
       setIsConnected(true)
     })
 
     socketInstance.on('disconnect', () => {
-      console.log('Disconnected from socket server')
+
       setIsConnected(false)
     })
 

@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import React from 'react';
 
 import Image from 'next/image'
 import { Instagram, Heart, MessageCircle } from 'lucide-react'
@@ -13,7 +15,7 @@ interface InstagramFeedProps {
   }
 }
 
-export default function InstagramFeed({ config }: InstagramFeedProps) {
+const InstagramFeed = React.memo(function InstagramFeed({ config }: InstagramFeedProps) {
   // 임시 인스타그램 피드 데이터
   const mockPosts = [
     {
@@ -81,39 +83,39 @@ export default function InstagramFeed({ config }: InstagramFeedProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Instagram className="w-8 h-8 text-pink-600" />
-            {config.title && (
+            {config?.title && (
               <h2 className="text-3xl font-bold text-gray-900">
-                {config.title}
+                {config?.title}
               </h2>
             )}
           </div>
-          {config.username && (
+          {config?.username && (
             <a
-              href={`https://instagram.com/${config.username}`}
+              href={`https://instagram.com/${config?.username}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 font-medium"
             >
-              @{config.username}
+              @{config?.username}
             </a>
           )}
-          {config.hashtag && (
+          {config?.hashtag && (
             <p className="text-gray-600 mt-1">
-              {config.hashtag}
+              {config?.hashtag}
             </p>
           )}
         </div>
 
         {/* 인스타그램 그리드 */}
         <div className={`grid gap-4 ${
-          config.layout === 'grid' 
+          config?.layout === 'grid' 
             ? 'grid-cols-2 md:grid-cols-4' 
             : 'grid-cols-2 md:grid-cols-4'
         }`}>
-          {mockPosts.slice(0, config.limit || 8).map((post) => (
+          {mockPosts.slice(0, config?.limit || 8).map((post) => (
             <div key={post.id} className="group relative">
               <a
-                href={`https://instagram.com/${config.username}`}
+                href={`https://instagram.com/${config?.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
@@ -151,7 +153,7 @@ export default function InstagramFeed({ config }: InstagramFeedProps) {
         {/* 인스타그램 팔로우 버튼 */}
         <div className="text-center mt-8">
           <a
-            href={`https://instagram.com/${config.username}`}
+            href={`https://instagram.com/${config?.username}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
@@ -161,5 +163,7 @@ export default function InstagramFeed({ config }: InstagramFeedProps) {
         </div>
       </div>
     </section>
-  )
-}
+    )
+});
+
+export default InstagramFeed;

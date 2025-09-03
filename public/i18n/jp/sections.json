@@ -1,0 +1,358 @@
+{
+  "version": "2025.8.29.1200",
+  "lastUpdated": "2025-09-03T13:08:43.958Z",
+  "language": "jp",
+  "sectionOrder": [],
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "visible": true,
+      "data": {
+        "slides": [
+          {
+            "tag": "✅ 修正完了",
+            "title": "データベース更新完了",
+            "bgColor": "bg-gradient-to-br from-indigo-600 to-purple-600",
+            "subtitle": "トリガーエラーが解決されました"
+          },
+          {
+            "id": "1756329390243",
+            "tag": "NEW",
+            "order": 2,
+            "title": "プレミアムコレクション",
+            "bgColor": "bg-gradient-to-br from-blue-600 to-cyan-600",
+            "visible": true,
+            "subtitle": "限定商品をお探しください"
+          },
+          {
+            "id": "1756329396708",
+            "tag": "HOT",
+            "order": 3,
+            "title": "特別オファー",
+            "bgColor": "bg-gradient-to-br from-emerald-500 to-teal-600",
+            "visible": true,
+            "subtitle": "期間限定セール"
+          }
+        ]
+      }
+    },
+    "category": {
+      "type": "category",
+      "visible": true,
+      "data": {
+        "title": "カテゴリ",
+        "categories": [
+          {
+            "id": "cat_fashion",
+            "name": "ファッション・アパレル",
+            "order": 1,
+            "visible": true,
+            "categoryId": "fashion"
+          },
+          {
+            "id": "cat_beauty",
+            "name": "ビューティー・コスメ",
+            "badge": "HOT",
+            "order": 2,
+            "visible": true,
+            "categoryId": "beauty"
+          },
+          {
+            "id": "cat_electronics",
+            "name": "電子機器",
+            "order": 3,
+            "visible": true,
+            "categoryId": "electronics"
+          },
+          {
+            "id": "cat_home",
+            "name": "ホーム・インテリア",
+            "order": 4,
+            "visible": true,
+            "categoryId": "home"
+          },
+          {
+            "id": "cat_food",
+            "name": "食品・飲料",
+            "badge": "新着",
+            "order": 5,
+            "visible": true,
+            "categoryId": "food"
+          },
+          {
+            "id": "cat_sports",
+            "name": "スポーツ・レジャー",
+            "order": 6,
+            "visible": true,
+            "categoryId": "sports"
+          },
+          {
+            "id": "cat_books",
+            "name": "書籍・文具",
+            "order": 7,
+            "visible": true,
+            "categoryId": "books"
+          },
+          {
+            "id": "cat_baby",
+            "name": "ベビー・マタニティ",
+            "order": 8,
+            "visible": true,
+            "categoryId": "baby"
+          }
+        ],
+        "items": [
+          {
+            "id": "cat_fashion",
+            "name": "ファッション・アパレル",
+            "slug": "fashion",
+            "icon": "👗",
+            "image": "/images/categories/fashion.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_beauty",
+            "name": "ビューティー・コスメ",
+            "slug": "beauty",
+            "icon": "💄",
+            "image": "/images/categories/beauty.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_electronics",
+            "name": "電子機器",
+            "slug": "electronics",
+            "icon": "📱",
+            "image": "/images/categories/electronics.jpg",
+            "productCount": 2
+          },
+          {
+            "id": "cat_home",
+            "name": "ホーム・インテリア",
+            "slug": "home",
+            "icon": "🏠",
+            "image": "/images/categories/home.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_food",
+            "name": "食品・飲料",
+            "slug": "food",
+            "icon": "🍕",
+            "image": "/images/categories/food.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_sports",
+            "name": "スポーツ・レジャー",
+            "slug": "sports",
+            "icon": "⚽",
+            "image": "/images/categories/sports.jpg",
+            "productCount": 1
+          },
+          {
+            "id": "cat_books",
+            "name": "書籍・文具",
+            "slug": "books",
+            "icon": "📚",
+            "image": "/images/categories/books.jpg",
+            "productCount": 0
+          },
+          {
+            "id": "cat_baby",
+            "name": "ベビー・マタニティ",
+            "slug": "baby",
+            "icon": "🍼",
+            "image": "/images/categories/baby.jpg",
+            "productCount": 0
+          }
+        ],
+        "gridLayout": "6x11"
+      }
+    },
+    "quicklinks": {
+      "type": "quicklinks",
+      "visible": true,
+      "data": {
+        "title": "クイックリンク",
+        "links": [
+          {
+            "id": "quick-1",
+            "icon": "🎉",
+            "link": "/events",
+            "title": "イベント"
+          },
+          {
+            "id": "quick-2",
+            "icon": "🎫",
+            "link": "/coupons",
+            "title": "クーポン"
+          },
+          {
+            "id": "quick-3",
+            "icon": "🏆",
+            "link": "/ranking",
+            "title": "ランキング"
+          }
+        ]
+      }
+    },
+    "promo": {
+      "type": "promo",
+      "visible": true,
+      "data": {
+        "banner": {
+          "icon": "🎁",
+          "link": "",
+          "title": "🚀 今すぐ始めよう！",
+          "subtitle": "初回キャンペーン手数料50％オフ",
+          "textColor": "#000000",
+          "backgroundColor": "#FEF3C7",
+          "backgroundImage": ""
+        }
+      }
+    },
+    "featured-products": {
+      "type": "featured",
+      "visible": true,
+      "data": {
+        "title": "今月の特価",
+        "subtitle": "見逃せない特別割引",
+        "products": [],
+        "displayCount": 8
+      }
+    },
+    "products": {
+      "type": "products",
+      "visible": true,
+      "data": {
+        "title": "おすすめ商品",
+        "subtitle": "厳選された商品をご覧ください",
+        "displayCount": 10
+      }
+    },
+    "ranking": {
+      "type": "ranking",
+      "visible": true,
+      "data": {
+        "title": "リアルタイムランキング",
+        "subtitle": "最も人気のある商品",
+        "popular": [
+          {
+            "id": "rank_1",
+            "rank": 1,
+            "title": "Galaxy S24",
+            "description": "最新AI機能搭載フラッグシップスマートフォン",
+            "price": "99,900円",
+            "originalPrice": "119,900円",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "badge": "HOT",
+            "rating": 4.8
+          },
+          {
+            "id": "rank_2",
+            "rank": 2,
+            "title": "LG OLED 55インチTV",
+            "description": "完璧な画質のOLEDスマートTV",
+            "price": "199,000円",
+            "originalPrice": "229,000円",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "badge": "SALE",
+            "rating": 4.9
+          },
+          {
+            "id": "rank_3",
+            "rank": 3,
+            "title": "雪花秀エッセンス",
+            "description": "韓方原料のプレミアムエッセンス",
+            "price": "8,900円",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7
+          },
+          {
+            "id": "rank_4",
+            "rank": 4,
+            "title": "ダイソンV15コードレス掃除機",
+            "description": "レーザーほこり検知機能の強力な掃除機",
+            "price": "89,900円",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6
+          },
+          {
+            "id": "rank_5",
+            "rank": 5,
+            "title": "ナイキエアマックス270",
+            "description": "快適性とスタイルを兼ね備えたスニーカー",
+            "price": "15,900円",
+            "image": "/images/products/nike-airmax-270.jpg",
+            "link": "/products/nike-airmax-270",
+            "rating": 4.5
+          }
+        ]
+      }
+    },
+    "recommended": {
+      "type": "recommended",
+      "visible": true,
+      "data": {
+        "title": "おすすめ商品",
+        "subtitle": "厳選された人気商品をご覧ください",
+        "items": [
+          {
+            "id": "rec_1",
+            "title": "Galaxy S24",
+            "description": "AIが創る新しいスマートフォン体験",
+            "price": "99,900円",
+            "originalPrice": "119,900円",
+            "image": "/images/products/galaxy-s24.jpg",
+            "link": "/products/galaxy-s24",
+            "rating": 4.8,
+            "reviewCount": 1247,
+            "isNew": true,
+            "isSale": true
+          },
+          {
+            "id": "rec_2",
+            "title": "LG OLED 55インチTV",
+            "description": "完璧なブラックを実現するOLEDディスプレイ",
+            "price": "199,000円",
+            "originalPrice": "229,000円",
+            "image": "/images/products/lg-oled-tv.jpg",
+            "link": "/products/lg-oled-55",
+            "rating": 4.9,
+            "reviewCount": 892,
+            "isSale": true,
+            "badge": "ベスト"
+          },
+          {
+            "id": "rec_3",
+            "title": "雪花秀エッセンス",
+            "description": "韓方原料で作ったプレミアムスキンケア",
+            "price": "8,900円",
+            "image": "/images/products/sulwhasoo-serum.jpg",
+            "link": "/products/sulwhasoo-serum",
+            "rating": 4.7,
+            "reviewCount": 2456,
+            "badge": "人気"
+          },
+          {
+            "id": "rec_4",
+            "title": "ダイソンV15コードレス掃除機",
+            "description": "レーザーでほこりを見つける革新的な掃除機",
+            "price": "89,900円",
+            "originalPrice": "109,900円",
+            "image": "/images/products/dyson-v15.jpg",
+            "link": "/products/dyson-v15",
+            "rating": 4.6,
+            "reviewCount": 674,
+            "isSale": true
+          }
+        ]
+      }
+    }
+  }
+}

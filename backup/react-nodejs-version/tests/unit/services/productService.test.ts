@@ -92,7 +92,7 @@ describe('ProductService', () => {
       }
 
       // Mock database calls
-      ;(prisma.product.findUnique as jest.Mock)
+      ;(query as jest.Mock)
         .mockResolvedValueOnce(null) // slug check
         .mockResolvedValueOnce(null) // sku check
         .mockResolvedValueOnce(mockProductWithRelations) // final get
@@ -108,11 +108,11 @@ describe('ProductService', () => {
       const result = await productService.createProduct(mockProductData)
 
       expect(result).toEqual(mockProductWithRelations)
-      expect(prisma.product.findUnique).toHaveBeenCalledTimes(3)
+      expect(query).toHaveBeenCalledTimes(3)
     })
 
     it('should throw error if slug already exists', async () => {
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce({
+      ;(query as jest.Mock).mockResolvedValueOnce({
         id: 'existing-product',
         slug: 'test-product',
       })
@@ -123,7 +123,7 @@ describe('ProductService', () => {
     })
 
     it('should throw error if SKU already exists', async () => {
-      ;(prisma.product.findUnique as jest.Mock)
+      ;(query as jest.Mock)
         .mockResolvedValueOnce(null) // slug check
         .mockResolvedValueOnce({ id: 'existing-product', sku: 'TEST-001' }) // sku check
 
@@ -138,11 +138,11 @@ describe('ProductService', () => {
         categoryId: 'non-existent-category',
       }
 
-      ;(prisma.product.findUnique as jest.Mock)
+      ;(query as jest.Mock)
         .mockResolvedValueOnce(null) // slug check
         .mockResolvedValueOnce(null) // sku check
 
-      ;(prisma.category.findUnique as jest.Mock).mockResolvedValueOnce(null)
+      ;(query as jest.Mock).mockResolvedValueOnce(null)
 
       await expect(productService.createProduct(dataWithCategory)).rejects.toThrow(
         new AppError('Category not found', 404)
@@ -166,12 +166,12 @@ describe('ProductService', () => {
         _count: { reviews: 0, orderItems: 0 },
       }
 
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(mockProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(mockProduct)
 
       const result = await productService.getProductById('product-1')
 
       expect(result).toEqual(mockProduct)
-      expect(prisma.product.findUnique).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: { id: 'product-1' },
         include: expect.objectContaining({
           category: { select: { id: true, name: true, slug: true } },
@@ -189,7 +189,7 @@ describe('ProductService', () => {
     })
 
     it('should throw error if product not found', async () => {
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(null)
+      ;(query as jest.Mock).mockResolvedValueOnce(null)
 
       await expect(productService.getProductById('non-existent')).rejects.toThrow(
         new AppError('Product not found', 404)
@@ -219,8 +219,8 @@ describe('ProductService', () => {
         },
       ]
 
-      ;(prisma.product.findMany as jest.Mock).mockResolvedValueOnce(mockProducts)
-      ;(prisma.product.count as jest.Mock).mockResolvedValueOnce(1)
+      ;(query as jest.Mock).mockResolvedValueOnce(mockProducts)
+      ;(query as jest.Mock).mockResolvedValueOnce(1)
 
       const result = await productService.getProducts(mockQuery)
 
@@ -241,12 +241,12 @@ describe('ProductService', () => {
         search: 'test',
       }
 
-      ;(prisma.product.findMany as jest.Mock).mockResolvedValueOnce([])
-      ;(prisma.product.count as jest.Mock).mockResolvedValueOnce(0)
+      ;(query as jest.Mock).mockResolvedValueOnce([])
+      ;(query as jest.Mock).mockResolvedValueOnce(0)
 
       await productService.getProducts(queryWithSearch)
 
-      expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect(query).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             OR: [
@@ -266,12 +266,12 @@ describe('ProductService', () => {
         maxPrice: 100,
       }
 
-      ;(prisma.product.findMany as jest.Mock).mockResolvedValueOnce([])
-      ;(prisma.product.count as jest.Mock).mockResolvedValueOnce(0)
+      ;(query as jest.Mock).mockResolvedValueOnce([])
+      ;(query as jest.Mock).mockResolvedValueOnce(0)
 
       await productService.getProducts(queryWithPriceFilter)
 
-      expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect(query).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             price: {
@@ -310,7 +310,7 @@ describe('ProductService', () => {
         _count: { reviews: 0, orderItems: 0 },
       }
 
-      ;(prisma.product.findUnique as jest.Mock)
+      ;(query as jest.Mock)
         .mockResolvedValueOnce(existingProduct) // existence check
         .mockResolvedValueOnce(updatedProduct) // final get
 
@@ -328,7 +328,7 @@ describe('ProductService', () => {
     })
 
     it('should throw error if product not found', async () => {
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(null)
+      ;(query as jest.Mock).mockResolvedValueOnce(null)
 
       await expect(
         productService.updateProduct('non-existent', { name: 'New Name' })
@@ -343,18 +343,18 @@ describe('ProductService', () => {
         name: 'Test Product',
       }
 
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(existingProduct)
-      ;(prisma.product.delete as jest.Mock).mockResolvedValueOnce(existingProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(existingProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(existingProduct)
 
       await productService.deleteProduct('product-1')
 
-      expect(prisma.product.delete).toHaveBeenCalledWith({
+      expect(query).toHaveBeenCalledWith({
         where: { id: 'product-1' },
       })
     })
 
     it('should throw error if product not found', async () => {
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(null)
+      ;(query as jest.Mock).mockResolvedValueOnce(null)
 
       await expect(productService.deleteProduct('non-existent')).rejects.toThrow(
         new AppError('Product not found', 404)
@@ -377,7 +377,7 @@ describe('ProductService', () => {
         trackQuantity: true,
       }
 
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(existingProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(existingProduct)
       ;(prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         return callback({
           product: {
@@ -395,7 +395,7 @@ describe('ProductService', () => {
     })
 
     it('should throw error if product not found', async () => {
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(null)
+      ;(query as jest.Mock).mockResolvedValueOnce(null)
 
       await expect(productService.adjustInventory(mockAdjustmentData)).rejects.toThrow(
         new AppError('Product not found', 404)
@@ -409,7 +409,7 @@ describe('ProductService', () => {
         trackQuantity: false,
       }
 
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(existingProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(existingProduct)
 
       await expect(productService.adjustInventory(mockAdjustmentData)).rejects.toThrow(
         new AppError('Product does not track quantity', 400)
@@ -428,7 +428,7 @@ describe('ProductService', () => {
         quantity: -10, // Would result in negative inventory
       }
 
-      ;(prisma.product.findUnique as jest.Mock).mockResolvedValueOnce(existingProduct)
+      ;(query as jest.Mock).mockResolvedValueOnce(existingProduct)
 
       await expect(productService.adjustInventory(negativeAdjustment)).rejects.toThrow(
         new AppError('Insufficient inventory', 400)

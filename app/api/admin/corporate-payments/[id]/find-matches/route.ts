@@ -1,6 +1,7 @@
+import type { AppError } from '@/lib/types/common';
+// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-
+import { prisma } from '@/lib/db'
 
 // GET - 매칭 후보 찾기
 export async function GET(
@@ -11,7 +12,7 @@ export async function GET(
     const { id: paymentId } = await params
 
     // 입금 정보 조회
-    const payment = await prisma.corporatePayment.findUnique({
+    const payment = await query({
       where: { id: paymentId }
     })
 
@@ -31,7 +32,7 @@ export async function GET(
 
     return NextResponse.json(candidates)
   } catch (error) {
-    console.error('Find matches error:', error)
+
     return NextResponse.json(
       { error: '매칭 후보 검색 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -48,10 +49,10 @@ async function findMatchingCandidates(paymentData: {
   const { depositorName, amount, transactionDate } = paymentData
 
   // 1. 정확한 금액 매칭 (임시로 빈 배열 반환)
-  const exactAmountMatches: any[] = []
+  const exactAmountMatches: unknown[] = []
   
   // TODO: Prisma schema에 맞게 수정 필요
-  // const exactAmountMatches = await prisma.order.findMany({
+  // const exactAmountMatches = await query({
   //   where: {
   //     status: 'PENDING',
   //     totalAmount: amount
@@ -61,11 +62,11 @@ async function findMatchingCandidates(paymentData: {
   // })
 
   // 2. 유사한 금액 매칭 (±5% 범위) (임시로 빈 배열 반환)
-  const similarAmountMatches: any[] = []
+  const similarAmountMatches: unknown[] = []
   
   // TODO: Prisma schema에 맞게 수정 필요
   // const amountRange = amount * 0.05
-  // const similarAmountMatches = await prisma.order.findMany({
+  // const similarAmountMatches = await query({
   //   where: {
   //     status: 'PENDING',
   //     totalAmount: {
@@ -81,10 +82,10 @@ async function findMatchingCandidates(paymentData: {
   // })
 
   // 3. 이름 유사도 기반 매칭 (임시로 빈 배열 반환)
-  const nameMatches: any[] = []
+  const nameMatches: unknown[] = []
   
   // TODO: Prisma schema에 맞게 수정 필요
-  // const nameMatches = await prisma.order.findMany({
+  // const nameMatches = await query({
   //   where: {
   //     status: 'PENDING'
   //   },
@@ -172,7 +173,7 @@ function calculateMatchingScore(
 // 매칭 이유 생성
 function getMatchingReasons(
   paymentData: { depositorName: string; amount: number; transactionDate: string },
-  order: any,
+  order: unknown,
   score: number
 ): string[] {
   const reasons: string[] = []

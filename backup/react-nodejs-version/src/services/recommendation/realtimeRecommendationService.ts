@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { User, RequestContext } from '@/lib/types/common';
 import { Server as SocketServer } from 'socket.io';
 import { RecommendationResult, UserActionType } from '../../types/recommendation';
 import { recommendationService } from './recommendationService';
@@ -94,7 +94,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   async getRealtimeRecommendations(
     userId: string,
     context: any
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       // 현재 세션 컨텍스트
       const sessionContext = this.getSessionContext(userId);
@@ -139,7 +139,7 @@ export class RealtimeRecommendationService extends EventEmitter {
         }
       };
     } catch (error) {
-      console.error('Realtime recommendation error:', error);
+
       return { recommendations: [], error: error.message };
     }
   }
@@ -147,7 +147,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 사용자 행동 처리
    */
-  private async handleUserAction(data: any) {
+  private async handleUserAction(data: unknown) {
     const { userId, sessionId, productId, action, metadata } = data;
 
     // 행동 기록
@@ -179,7 +179,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 장바구니 업데이트 처리
    */
-  private async handleCartUpdate(data: any) {
+  private async handleCartUpdate(data: unknown) {
     const { userId, cartItems, action } = data;
 
     // 장바구니 기반 추천 생성
@@ -199,7 +199,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 구매 완료 처리
    */
-  private async handlePurchase(data: any) {
+  private async handlePurchase(data: unknown) {
     const { userId, orderId, items } = data;
 
     // 구매 패턴 업데이트
@@ -260,7 +260,7 @@ export class RealtimeRecommendationService extends EventEmitter {
    * 최근 사용자 행동 조회
    */
   private async getRecentUserActions(userId: string, limit: number) {
-    return await this.prisma.userBehavior.findMany({
+    return await this.query({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -280,7 +280,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 행동 패턴 분석
    */
-  private analyzeBehaviorPattern(actions: any[]): any {
+  private analyzeBehaviorPattern(actions: unknown[]): any {
     const patterns = {
       categories: new Map<string, number>(),
       priceRanges: new Map<string, number>(),
@@ -353,7 +353,7 @@ export class RealtimeRecommendationService extends EventEmitter {
    */
   private applyRealtimeBoost(
     recommendations: RecommendationResult[],
-    trendingBoost: any[],
+    trendingBoost: unknown[],
     behaviorContext: any
   ): RecommendationResult[] {
     const boostedRecs = recommendations.map(rec => {
@@ -385,7 +385,7 @@ export class RealtimeRecommendationService extends EventEmitter {
    */
   private async getCartBasedRecommendations(
     userId: string,
-    cartItems: any[]
+    cartItems: unknown[]
   ): Promise<RecommendationResult[]> {
     // 장바구니 상품들의 카테고리 분석
     const categories = new Set(cartItems.map(item => item.categoryId).filter(Boolean));
@@ -429,7 +429,7 @@ export class RealtimeRecommendationService extends EventEmitter {
    */
   private async getPostPurchaseRecommendations(
     userId: string,
-    purchasedItems: any[]
+    purchasedItems: unknown[]
   ): Promise<RecommendationResult[]> {
     // 구매한 상품의 액세서리/관련 상품
     const accessories = [];
@@ -453,7 +453,7 @@ export class RealtimeRecommendationService extends EventEmitter {
     userId: string
   ): Promise<RecommendationResult[]> {
     // 소모품 카테고리 등 재구매 주기가 있는 상품
-    const lastPurchases = await this.prisma.order.findMany({
+    const lastPurchases = await this.query({
       where: {
         userId,
         status: 'DELIVERED',
@@ -516,7 +516,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 세션 데이터 업데이트
    */
-  private updateSessionData(sessionId: string, data: any) {
+  private updateSessionData(sessionId: string, data: unknown) {
     const existing = this.sessionData.get(sessionId) || {};
     this.sessionData.set(sessionId, { ...existing, ...data });
   }
@@ -524,7 +524,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 사용자에게 브로드캐스트
    */
-  private broadcastToUser(userId: string, event: string, data: any) {
+  private broadcastToUser(userId: string, event: string, data: unknown) {
     if (!this.io) return;
 
     const sessions = this.userSessions.get(userId);
@@ -538,7 +538,7 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 가격대 키 생성
    */
-  private getPriceRangeKey(price: any): string {
+  private getPriceRangeKey(price: unknown): string {
     const priceNum = parseFloat(price?.toString() || '0');
     if (priceNum < 10000) return 'under_10k';
     if (priceNum < 50000) return '10k_50k';
@@ -559,7 +559,7 @@ export class RealtimeRecommendationService extends EventEmitter {
           this.broadcastToUser(userId, 'patternsDetected', { patterns });
         }
       } catch (error) {
-        console.error('Pattern analysis error:', error);
+
       }
     });
   }
@@ -574,7 +574,7 @@ export class RealtimeRecommendationService extends EventEmitter {
     const dayAgo = new Date();
     dayAgo.setDate(dayAgo.getDate() - 1);
     
-    const recentBehaviors = await this.prisma.userBehavior.count({
+    const recentBehaviors = await this.query({
       where: {
         userId,
         createdAt: { gte: dayAgo }
@@ -593,9 +593,9 @@ export class RealtimeRecommendationService extends EventEmitter {
   /**
    * 구매 패턴 업데이트
    */
-  private async updatePurchasePatterns(userId: string, items: any[]) {
+  private async updatePurchasePatterns(userId: string, items: unknown[]) {
     // 구매 패턴 저장 로직
-    console.log(`Updating purchase patterns for user ${userId}`);
+
   }
 }
 
