@@ -36,14 +36,14 @@ class Database {
         config = {
           connectionString: databaseUrl,
           ssl: {
-            rejectUnauthorized: false
-          },
+            rejectUnauthorized: false,
+            // Disable SSL verification for self-signed certificates
+            checkServerIdentity: () => undefined
+          } as any,
           connectionTimeoutMillis: 10000,
           idleTimeoutMillis: 30000,
           max: 20,
           // Important: Supabase pooling requires these settings
-          statement_timeout: 30000,
-          query_timeout: 30000,
           application_name: 'commerce-nextjs'
         };
       } else {

@@ -78,3 +78,6 @@ export const logError = (error: Error | unknown, context?: string) => {
 
   }
 };
+
+// Default export for backward compatibility
+export default logger;

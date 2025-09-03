@@ -34,6 +34,12 @@ function getRedisConfig() {
     return redisUrl;
   }
   
+  // 프로덕션에서 Redis URL이 없으면 null 반환
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('Redis URL not configured in production, running without cache');
+    return null;
+  }
+  
   // 개별 환경 변수 사용 (로컬 개발)
   return {
     host: process.env.REDIS_HOST || 'localhost',
@@ -57,6 +63,11 @@ const REDIS_CONFIG = getRedisConfig();
  */
 export function initRedis(): Redis {
   if (!redis) {
+    // Redis 설정이 없으면 null 반환
+    if (!REDIS_CONFIG) {
+      return null as any;
+    }
+    
     try {
       redis = new Redis(REDIS_CONFIG);
 
