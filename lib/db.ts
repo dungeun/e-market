@@ -35,7 +35,10 @@ class Database {
         database: url.pathname.substring(1),
         user: url.username,
         password: url.password,
-        ssl: url.searchParams.get('sslmode') === 'require',
+        ssl: url.searchParams.get('sslmode') === 'require' ? {
+          rejectUnauthorized: false, // Supabase 자체 서명 인증서 허용
+          ca: process.env.DATABASE_CA_CERT || undefined
+        } : false,
         connectionTimeoutMillis: 5000,
         idleTimeoutMillis: 30000,
         max: 20, // 최대 연결 수
