@@ -1,6 +1,25 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals"],
+  "ignorePatterns": [
+    "backup/**/*",
+    "backups/**/*", 
+    "node_modules/**/*",
+    "*.backup",
+    "*.old.ts",
+    "*.old.tsx"
+  ],
   "rules": {
-    "indent": "off"
-  }
+    "indent": "off",
+    "@typescript-eslint/indent": "off",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "indent": "off",
+        "@typescript-eslint/indent": "off"
+      }
+    }
+  ]
 }

@@ -42,6 +42,7 @@ next-env.d.ts
 
 # backups and duplicates
 /backup/
+/backups/
 /commerce-solution-package/
 /commerce-solution-package 2/
 /home-ui-v2-complete-backup-*/
