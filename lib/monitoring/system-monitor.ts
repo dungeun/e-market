@@ -2,7 +2,7 @@
  * 시스템 모니터링 서비스 - 실시간 성능 추적
  */
 
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 import Redis from 'ioredis'
 import os from 'os'
 import { performance } from 'perf_hooks'

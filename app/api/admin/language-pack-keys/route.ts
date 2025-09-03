@@ -1,7 +1,7 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
 import { env } from '@/lib/config/env';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
 // GET /api/admin/language-pack-keys - 언어팩 키 목록 조회

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { verifyAdminAuth } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {

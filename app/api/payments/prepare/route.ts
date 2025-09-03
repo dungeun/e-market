@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { withAuth } from '@/lib/auth/middleware';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;

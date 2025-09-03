@@ -7,7 +7,7 @@ import type { AppError } from '@/lib/types/common';
 
 import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway, PaymentProvider } from '@/lib/services/payment/payment-gateway'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 import crypto from 'crypto'
 
 // 웹훅 서명 검증

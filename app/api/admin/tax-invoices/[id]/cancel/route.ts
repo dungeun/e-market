@@ -1,7 +1,7 @@
 import type { AppError } from '@/lib/types/common';
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // POST - 세금계산서 취소
 export async function POST(

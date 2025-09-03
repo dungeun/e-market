@@ -1,7 +1,7 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/auth/jwt';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 // GET: 소셜 로그인 프로필 이미지 가져오기
 export async function GET(req: NextRequest) {

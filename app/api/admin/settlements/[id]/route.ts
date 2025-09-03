@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { settlementService } from '@/lib/services/settlement.service';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,

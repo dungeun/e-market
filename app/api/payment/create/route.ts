@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paymentGateway } from '@/lib/services/payment/payment-gateway'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {

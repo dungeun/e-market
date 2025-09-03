@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { cacheService, cacheKeys, CACHE_TTL } from '@/lib/cache/cache-service';
 
 export const dynamic = 'force-dynamic'

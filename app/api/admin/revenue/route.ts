@@ -1,7 +1,7 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth-server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 import { requireAuth, createAuthResponse, createErrorResponse } from '@/lib/auth-middleware'
 import { validateRequest, dateRangeSchema } from '@/lib/validation'
 import { DEFAULT_PLATFORM_FEE_RATE, ERROR_MESSAGES } from '@/lib/constants'

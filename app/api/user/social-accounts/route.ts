@@ -1,7 +1,7 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/auth/jwt';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 // GET: 사용자의 소셜 계정 연동 상태 조회
 export async function GET(req: NextRequest) {
