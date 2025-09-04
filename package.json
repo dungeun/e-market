@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "db:schema": "psql -h localhost -p 5432 -U admin -d commerce_plugin -f sql/schema.sql",
     "db:seed": "psql -h localhost -p 5432 -U admin -d commerce_plugin -f sql/seed.sql",
+    "seed:products": "tsx scripts/seed-products.ts",
     "db:migrate": "psql -h localhost -p 5432 -U admin -d commerce_plugin -f sql/migrations/",
     "db:init": "sh scripts/init-db.sh",
     "cache:generate": "tsx scripts/generate-json-cache.ts",
