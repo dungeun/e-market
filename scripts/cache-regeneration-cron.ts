@@ -5,7 +5,13 @@
  * 매 시간마다 실행되어 캐시를 최신 상태로 유지
  */
 
-import * as cron from 'node-cron';
+// node-cron을 동적으로 import (Vercel 빌드 에러 방지)
+let cron: any;
+try {
+  cron = require('node-cron');
+} catch (error) {
+  console.warn('node-cron not available, cron jobs disabled');
+}
 import { jsonCacheService } from '../lib/services/json-cache.service';
 import { pool } from '../lib/db';
 import { query } from '../lib/db';
