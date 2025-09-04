@@ -184,44 +184,49 @@ async function updateDatabaseUrls(migrations: ImageMigrationResult['migrations']
   });
 
   try {
-    // 1. products 테이블의 이미지 URL 업데이트
-    console.log('📦 상품 이미지 URL 업데이트 중...');
-    const productsResult = await query(`
-      SELECT id, image_url FROM products 
-      WHERE image_url IS NOT NULL AND image_url LIKE '/uploads/%'
+    // 1. product_images 테이블 업데이트 (메인 이미지 테이블)
+    console.log('🖼️  상품 이미지 URL 업데이트 중...');
+    const imagesResult = await query(`
+      SELECT id, url FROM product_images 
+      WHERE url IS NOT NULL AND url LIKE '/uploads/%'
     `);
 
-    for (const product of productsResult.rows) {
-      const newUrl = urlMapping.get(product.image_url);
+    for (const image of imagesResult.rows) {
+      const newUrl = urlMapping.get(image.url);
       if (newUrl) {
         await query(
-          'UPDATE products SET image_url = $1 WHERE id = $2',
-          [newUrl, product.id]
+          'UPDATE product_images SET url = $1 WHERE id = $2',
+          [newUrl, image.id]
         );
-        console.log(`✅ 상품 ${product.id}: ${product.image_url} -> ${newUrl}`);
+        console.log(`✅ 이미지 ${image.id}: ${image.url} -> ${newUrl}`);
       }
     }
 
-    // 2. product_images 테이블 업데이트 (존재하는 경우)
+    // 2. products 테이블의 image_url 컬럼 확인 및 업데이트 (존재하는 경우만)
     try {
-      console.log('🖼️  상품 이미지 갤러리 URL 업데이트 중...');
-      const imagesResult = await query(`
-        SELECT id, url FROM product_images 
-        WHERE url IS NOT NULL AND url LIKE '/uploads/%'
+      console.log('📦 상품 테이블 이미지 URL 확인 중...');
+      const productsResult = await query(`
+        SELECT id, image_url FROM products 
+        WHERE image_url IS NOT NULL AND image_url LIKE '/uploads/%'
       `);
 
-      for (const image of imagesResult.rows) {
-        const newUrl = urlMapping.get(image.url);
-        if (newUrl) {
-          await query(
-            'UPDATE product_images SET url = $1 WHERE id = $2',
-            [newUrl, image.id]
-          );
-          console.log(`✅ 이미지 ${image.id}: ${image.url} -> ${newUrl}`);
+      if (productsResult.rows.length > 0) {
+        console.log(`📦 상품 테이블에서 ${productsResult.rows.length}개 이미지 URL 발견`);
+        for (const product of productsResult.rows) {
+          const newUrl = urlMapping.get(product.image_url);
+          if (newUrl) {
+            await query(
+              'UPDATE products SET image_url = $1 WHERE id = $2',
+              [newUrl, product.id]
+            );
+            console.log(`✅ 상품 ${product.id}: ${product.image_url} -> ${newUrl}`);
+          }
         }
+      } else {
+        console.log('📦 상품 테이블에 마이그레이션할 이미지 URL이 없습니다.');
       }
     } catch (error) {
-      console.log('product_images 테이블이 존재하지 않거나 접근할 수 없습니다.');
+      console.log('📦 상품 테이블의 image_url 컬럼에 접근할 수 없습니다 (컬럼이 없거나 권한 부족).');
     }
 
     // 3. categories 테이블의 아이콘 이미지 업데이트 (존재하는 경우)

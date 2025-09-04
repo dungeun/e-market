@@ -24,6 +24,7 @@
     "cache:regenerate": "npm run cache:clear && npm run cache:generate",
     "cache:cron": "tsx scripts/cache-regeneration-cron.ts",
     "migrate:images": "tsx scripts/migrate-images.ts",
+    "update:database-urls": "tsx scripts/update-database-urls.ts",
     "ui:generate": "tsx scripts/generate-ui-sections.ts",
     "cache:cron:dev": "NODE_ENV=development tsx scripts/cache-regeneration-cron.ts",
     "podman:setup": "sh scripts/setup-podman.sh",

@@ -1,6 +1,7 @@
 import type { User, RequestContext } from '@/lib/types/common';
 import { Pool, Client, QueryResult } from 'pg';
 import { promisify } from 'util';
+import { parseSupabaseConnectionString, logSSLConfig } from './ssl-config';
 
 interface DatabaseConfig {
   connectionString?: string;
@@ -32,19 +33,22 @@ class Database {
       const isSupabase = databaseUrl.includes('supabase.co');
       
       if (isSupabase) {
-        // Use direct connection string for Supabase with pooling
+        // Use enhanced SSL configuration for Supabase
+        logSSLConfig();
+        
+        const { cleanConnectionString, ssl } = parseSupabaseConnectionString(databaseUrl);
+        
         config = {
-          connectionString: databaseUrl,
-          ssl: {
-            rejectUnauthorized: false,
-            // Disable SSL verification for self-signed certificates
-            checkServerIdentity: () => undefined
-          } as any,
-          connectionTimeoutMillis: 10000,
+          connectionString: cleanConnectionString,
+          ssl: ssl,
+          connectionTimeoutMillis: 15000,
           idleTimeoutMillis: 30000,
           max: 20,
           // Important: Supabase pooling requires these settings
-          application_name: 'commerce-nextjs'
+          application_name: 'commerce-nextjs',
+          // Add Node.js specific timeout handling
+          query_timeout: 60000,
+          statement_timeout: 60000
         };
       } else {
         // Parse connection string for non-Supabase databases
