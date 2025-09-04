@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, useState, useMemo } from 'react';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { ThemeProvider } from '@/components/theme-provider';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -44,9 +45,16 @@ export function Providers({ children, initialLanguagePacks = {} }: ProvidersProp
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider initialLanguagePacks={initialLanguagePacks}>
-        {children}
-      </LanguageProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem={true}
+        disableTransitionOnChange={false}
+      >
+        <LanguageProvider initialLanguagePacks={initialLanguagePacks}>
+          {children}
+        </LanguageProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

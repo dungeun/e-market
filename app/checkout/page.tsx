@@ -43,8 +43,8 @@ function CheckoutContent() {
     message: '',
   })
 
-  // 결제 방법
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'virtual'>('card')
+  // 결제 방법 (현금만)
+  const [paymentMethod, setPaymentMethod] = useState('cash')
 
   useEffect(() => {
     fetchCart()
@@ -259,53 +259,28 @@ function CheckoutContent() {
               <h2 className="text-xl font-semibold text-white mb-4">결제 방법</h2>
               
               <div className="space-y-3">
-                <label className="flex items-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
+                <div className="flex items-center p-3 border border-red-600 bg-gray-800 rounded-lg">
                   <input
                     type="radio"
                     name="payment"
-                    value="card"
-                    checked={paymentMethod === 'card'}
-                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
+                    value="cash"
+                    checked={true}
+                    readOnly
                     className="mr-3 text-red-600 focus:ring-red-500"
                   />
-                  <CreditCard className="w-5 h-5 text-gray-400 mr-2" />
+                  <Banknote className="w-5 h-5 text-red-400 mr-2" />
                   <div>
-                    <div className="font-medium text-white">신용/체크카드</div>
-                    <div className="text-sm text-gray-400">토스페이 간편결제</div>
+                    <div className="font-medium text-white">현금결제</div>
+                    <div className="text-sm text-gray-400">현장에서 현금으로 결제</div>
                   </div>
-                </label>
-                
-                <label className="flex items-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="transfer"
-                    checked={paymentMethod === 'transfer'}
-                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
-                    className="mr-3 text-red-600 focus:ring-red-500"
-                  />
-                  <Banknote className="w-5 h-5 text-gray-400 mr-2" />
-                  <div>
-                    <div className="font-medium text-white">계좌이체</div>
-                    <div className="text-sm text-gray-400">토스페이 계좌이체</div>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="virtual"
-                    checked={paymentMethod === 'virtual'}
-                    onChange={(e) => setPaymentMethod(e.target.value as unknown)}
-                    className="mr-3 text-red-600 focus:ring-red-500"
-                  />
-                  <Receipt className="w-5 h-5 text-gray-400 mr-2" />
-                  <div>
-                    <div className="font-medium text-white">가상계좌</div>
-                    <div className="text-sm text-gray-400">입금 확인 후 배송</div>
-                  </div>
-                </label>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                <div className="flex items-center">
+                  <Receipt className="w-4 h-4 text-red-400 mr-2" />
+                  <span className="text-sm text-red-300">현재 현금결제만 지원됩니다</span>
+                </div>
               </div>
             </div>
           </div>
@@ -383,7 +358,7 @@ function CheckoutContent() {
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                토스페이먼츠로 안전하게 결제됩니다
+                주문 확인 후 현장에서 현금으로 결제해주세요
               </p>
             </div>
           </div>

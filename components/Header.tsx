@@ -13,6 +13,7 @@ import PopupAlert from './PopupAlert'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 import Image from 'next/image'
+import { ThemeToggle } from './theme-toggle'
 
 interface HeaderProps {
   variant?: 'default' | 'transparent'
@@ -154,9 +155,9 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
       {/* Popup Alert - Top Tier */}
       <PopupAlert maxWidth="max-w-[1450px]" />
       
-      <header className="sticky top-0 z-50 bg-white">
+      <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 transition-colors">
         {/* THE ROW Style Header */}
-        <div className="bg-white">
+        <div className="bg-white dark:bg-gray-900 transition-colors">
           <div className="max-w-[1450px] mx-auto px-4 sm:px-6">
             <div className="flex items-center justify-between h-16 lg:h-20">
               
@@ -165,10 +166,10 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                 {/* Mobile menu button */}
                 <button
                   onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  className="lg:hidden p-2 -ml-2 mr-3 hover:bg-gray-50 rounded-lg transition-all"
+                  className="lg:hidden p-2 -ml-2 mr-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all"
                   aria-label="메뉴 토글"
                 >
-                  {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  {showMobileMenu ? <X className="w-6 h-6 text-black dark:text-white" /> : <Menu className="w-6 h-6 text-black dark:text-white" />}
                 </button>
                 
                 {/* Brand/Logo */}
@@ -185,7 +186,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                       />
                     </div>
                   ) : (
-                    <h1 className="text-2xl lg:text-3xl font-black tracking-wider text-black uppercase">
+                    <h1 className="text-2xl lg:text-3xl font-black tracking-wider text-black dark:text-white uppercase">
                       {brandText}
                     </h1>
                   )}
@@ -200,13 +201,13 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t('search.placeholder', '검색')}
-                    className="w-full px-0 py-2 text-center text-black bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors placeholder-gray-400 text-sm font-medium"
+                    className="w-full px-0 py-2 text-center text-black dark:text-white bg-transparent border-0 border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-black dark:focus:border-white transition-colors placeholder-gray-400 dark:placeholder-gray-500 text-sm font-medium"
                   />
                   <button 
                     type="submit"
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1"
                   >
-                    <svg className="w-4 h-4 text-gray-400 hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-400 hover:text-black dark:hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </button>
@@ -214,37 +215,40 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
               </div>
 
               {/* Right: Actions */}
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4 lg:space-x-6">
+                {/* Theme Toggle */}
+                <ThemeToggle />
+                
                 {/* User Authentication Area */}
                 <div className="flex items-center space-x-4 text-sm">
                   {isAuthenticated && user ? (
                     <div className="flex items-center space-x-4">
                       <Link 
                         href={dashboardLink} 
-                        className="text-black hover:opacity-60 transition-opacity font-medium hidden sm:block"
+                        className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium hidden sm:block"
                       >
                         {t('menu.my', '마이페이지')}
                       </Link>
                       <Link 
                         href="/mypage" 
-                        className="text-black hover:opacity-60 transition-opacity font-medium"
+                        className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium"
                       >
                         회원가입
                       </Link>
-                      <div className="flex items-center space-x-1 text-black font-medium">
+                      <div className="flex items-center space-x-1 text-black dark:text-white font-medium">
                         <span>+2,000P</span>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-4">
-                      <Link href="/auth/login" className="text-black hover:opacity-60 transition-opacity font-medium">
+                      <Link href="/auth/login" className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium">
                         로그인
                       </Link>
-                      <Link href="/auth/register" className="text-black hover:opacity-60 transition-opacity font-medium">
+                      <Link href="/auth/register" className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium">
                         회원가입
                       </Link>
                       <Link href="/cart" className="relative p-2">
-                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
                         </svg>
                         <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
@@ -265,7 +269,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
         </div>
 
         {/* THE ROW Style Navigation */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors">
           <div className="max-w-[1450px] mx-auto px-4 sm:px-6">
             <nav className="hidden lg:flex items-center justify-center space-x-8 py-4">
               {navigationMenus.map((menu, index) => {
@@ -283,7 +287,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                   return (
                     <button 
                       key={menu.id || index}
-                      className="text-black hover:opacity-60 transition-opacity font-medium uppercase text-sm tracking-wider"
+                      className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium uppercase text-sm tracking-wider"
                     >
                       {label}
                     </button>
@@ -295,7 +299,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                     key={menu.id || index}
                     href={href}
                     className={`font-medium uppercase text-sm tracking-wider transition-opacity hover:opacity-60 ${
-                      isActive(href) ? 'text-black border-b border-black pb-1' : 'text-black'
+                      isActive(href) ? 'text-black dark:text-white border-b border-black dark:border-white pb-1' : 'text-black dark:text-white'
                     }`}
                   >
                     {label}
@@ -305,20 +309,20 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
             </nav>
 
             {/* Mobile search bar */}
-            <div className="lg:hidden py-4 border-t border-gray-200">
+            <div className="lg:hidden py-4 border-t border-gray-200 dark:border-gray-700">
               <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('search.placeholder', '검색')}
-                  className="w-full px-0 py-2 text-center text-black bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors placeholder-gray-400 text-sm font-medium"
+                  className="w-full px-0 py-2 text-center text-black dark:text-white bg-transparent border-0 border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-black dark:focus:border-white transition-colors placeholder-gray-400 dark:placeholder-gray-500 text-sm font-medium"
                 />
                 <button 
                   type="submit"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1"
                 >
-                  <svg className="w-4 h-4 text-gray-400 hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-gray-400 hover:text-black dark:hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -329,17 +333,17 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
 
         {/* THE ROW Mobile Menu Overlay */}
         {showMobileMenu && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-white">
+          <div className="lg:hidden fixed inset-0 z-50 bg-white dark:bg-gray-900 transition-colors">
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-xl font-black tracking-wider text-black uppercase">MENU</h2>
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-black tracking-wider text-black dark:text-white uppercase">MENU</h2>
                 <button
                   onClick={() => setShowMobileMenu(false)}
-                  className="p-2 hover:bg-gray-50 rounded-lg transition-all"
+                  className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all"
                   aria-label="메뉴 닫기"
                 >
-                  <X className="w-6 h-6 text-black" />
+                  <X className="w-6 h-6 text-black dark:text-white" />
                 </button>
               </div>
 
@@ -362,7 +366,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                       return (
                         <button 
                           key={menu.id || index}
-                          className="block w-full px-4 py-4 text-left font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                          className="block w-full px-4 py-4 text-left font-medium uppercase text-sm tracking-wider text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                           onClick={() => setShowMobileMenu(false)}
                         >
                           {label}
@@ -374,7 +378,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                       <Link
                         key={menu.id || index}
                         href={href}
-                        className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                        className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         onClick={() => setShowMobileMenu(false)}
                       >
                         {label}
@@ -389,7 +393,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                   {isAdmin && (
                     <Link 
                       href="/admin" 
-                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       ADMIN
@@ -399,7 +403,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                   {isAuthenticated && user && (
                     <Link 
                       href={dashboardLink} 
-                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black hover:bg-gray-50 transition-colors"
+                      className="block px-4 py-4 font-medium uppercase text-sm tracking-wider text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       MY PAGE
@@ -409,10 +413,10 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
               </div>
 
               {/* Bottom Actions */}
-              <div className="p-4 border-t border-gray-200">
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                 {isAuthenticated && user ? (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">
@@ -420,7 +424,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                           </span>
                         </div>
                         <div>
-                          <p className="text-black font-medium text-sm">{user.name}</p>
+                          <p className="text-black dark:text-white font-medium text-sm">{user.name}</p>
                           <p className="text-gray-500 text-xs">+2,000P</p>
                         </div>
                       </div>
@@ -430,7 +434,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                         handleLogout();
                         setShowMobileMenu(false);
                       }}
-                      className="w-full px-4 py-3 bg-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800"
+                      className="w-full px-4 py-3 bg-black dark:bg-white dark:text-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800 dark:hover:bg-gray-200"
                     >
                       LOGOUT
                     </button>
@@ -439,14 +443,14 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                   <div className="space-y-3">
                     <Link 
                       href="/auth/login" 
-                      className="block w-full px-4 py-3 border border-black text-black text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-black hover:text-white"
+                      className="block w-full px-4 py-3 border border-black dark:border-white text-black dark:text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       LOGIN
                     </Link>
                     <Link 
                       href="/auth/register" 
-                      className="block w-full px-4 py-3 bg-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800"
+                      className="block w-full px-4 py-3 bg-black dark:bg-white dark:text-black text-white text-center font-medium uppercase text-sm tracking-wider transition-colors hover:bg-gray-800 dark:hover:bg-gray-200"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       SIGN UP

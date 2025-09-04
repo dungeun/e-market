@@ -30,7 +30,7 @@ const Footer = React.memo(function Footer() {
   }
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
       <div className="max-w-[1450px] mx-auto px-6 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* 브랜드 정보 */}
@@ -38,7 +38,7 @@ const Footer = React.memo(function Footer() {
             <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent mb-4">
               {siteSettings.general?.siteName || config.header.logo.text}
             </h3>
-            <p className="text-gray-400 mb-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               {siteSettings.general?.siteDescription || '브랜드와 인플루언서를 연결하는 스마트한 마케팅 플랫폼'}
             </p>
             <div className="flex space-x-4">
@@ -81,7 +81,7 @@ const Footer = React.memo(function Footer() {
                         href={url as string} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         {icons[platform] || null}
                       </a>
@@ -97,7 +97,7 @@ const Footer = React.memo(function Footer() {
                         href={socialItem.url} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         {icons[socialItem.platform] || null}
                       </a>
@@ -117,7 +117,7 @@ const Footer = React.memo(function Footer() {
                     <li key={index}>
                       <Link 
                         href={link.url} 
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         target={link.newWindow ? '_blank' : undefined}
                         rel={link.newWindow ? 'noopener noreferrer' : undefined}
                       >
@@ -140,7 +140,7 @@ const Footer = React.memo(function Footer() {
                       .sort((a, b) => a.order - b.order)
                       .map(link => (
                         <li key={link.id}>
-                          <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                          <Link href={link.href} className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             {t(link.label, link.label)}
                           </Link>
                         </li>
@@ -152,9 +152,9 @@ const Footer = React.memo(function Footer() {
         </div>
 
         {/* 구분선 */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
+        <div className="border-t border-gray-300 dark:border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-400 text-sm mb-4 md:mb-0">
+            <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
               <p>{siteSettings.website?.footerText || t(copyright, copyright)}</p>
               <p className="mt-1">
                 사업자등록번호: 123-45-67890 | 대표: 홍길동 | 
@@ -164,7 +164,7 @@ const Footer = React.memo(function Footer() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-gray-400 text-sm">
+              <div className="text-gray-600 dark:text-gray-400 text-sm">
                 <p>고객센터: {siteSettings.general?.supportEmail || '1588-1234'}</p>
                 <p>평일 09:00~18:00 (주말/공휴일 휴무)</p>
               </div>

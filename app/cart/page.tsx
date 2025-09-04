@@ -98,38 +98,26 @@ export default function CartPage() {
     }, 0)
   }
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cartItems.length === 0) {
       alert('장바구니가 비어있습니다.')
       return
     }
 
-    // 주문 생성
-    try {
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shippingAddress: '서울시 강남구', // 실제로는 사용자 입력받아야 함
-          paymentMethod: 'card',
-          items: cartItems.map(item => ({
-            product_id: item.product_id,
-            quantity: item.quantity
-          }))
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        router.push(`/checkout?orderId=${data.order.id}`)
-      } else {
-        alert(data.error || '주문 생성에 실패했습니다.')
-      }
-    } catch (error) {
-
-      alert('주문 처리 중 오류가 발생했습니다.')
+    // 결제 데이터를 세션 스토리지에 저장하고 결제 페이지로 이동
+    const checkoutData = {
+      items: cartItems.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        image: item.product.images[0]?.url || '/placeholder.svg'
+      })),
+      total: calculateTotal()
     }
+    
+    sessionStorage.setItem('checkout-data', JSON.stringify(checkoutData))
+    window.location.href = '/checkout'
   }
 
   if (loading) {
@@ -147,17 +135,17 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">장바구니</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">장바구니</h1>
 
         {cartItems.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <p className="text-gray-500 mb-4">장바구니가 비어있습니다.</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center transition-colors">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">장바구니가 비어있습니다.</p>
             <button
               onClick={() => router.push('/products')}
-              className="text-indigo-600 hover:text-indigo-500 font-medium"
+              className="text-indigo-600 dark:text-red-400 hover:text-indigo-500 dark:hover:text-red-300 font-medium"
             >
               쇼핑 계속하기
             </button>
@@ -167,7 +155,7 @@ export default function CartPage() {
             {/* 장바구니 아이템 목록 */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow-sm p-6">
+                <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 transition-colors">
                   <div className="flex gap-4">
                     {/* 상품 이미지 */}
                     <div className="w-24 h-24 flex-shrink-0">
