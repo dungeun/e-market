@@ -9,7 +9,7 @@ import { translateText } from '@/lib/services/translation.service';
 async function getEnabledLanguages(): Promise<string[]> {
   try {
     const result = await query(`
-      SELECT code FROM language_settings 
+      SELECT code FROM language_metadata 
       WHERE enabled = true 
       ORDER BY is_default DESC, code ASC
     `);

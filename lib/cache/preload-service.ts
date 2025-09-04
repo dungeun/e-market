@@ -135,7 +135,7 @@ async function getProducts(): Promise<ProductWithImage[]> {
         p.slug,
         p.price,
         p.description,
-        p."categoryId" as category_id,
+        p.category_id,
         CASE WHEN p.status = 'ACTIVE' THEN true ELSE false END as featured,
         CASE WHEN p."publishedAt" > NOW() - INTERVAL '7 days' THEN true ELSE false END as new,
         0 as rating,
@@ -169,11 +169,11 @@ async function getCategories(): Promise<CategoryRow[]> {
         description,
         icon as image_url,
         parent_id,
-        menu_order as position,
+        "order" as position,
         is_active
       FROM categories
       WHERE is_active = true
-      ORDER BY menu_order ASC, name ASC
+      ORDER BY "order" ASC, name ASC
     `);
     
     const categories = categoriesResult.rows as CategoryRow[];
