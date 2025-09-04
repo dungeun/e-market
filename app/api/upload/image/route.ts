@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveImageLocally } from '@/lib/utils/image-upload';
 import { authenticateAdmin } from '@/lib/admin-auth';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {

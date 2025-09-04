@@ -3,7 +3,7 @@ import type { AppError } from '@/lib/types/common';
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
 import { transaction } from '@/lib/db';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';

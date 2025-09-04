@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { tossPayment } from '@/lib/toss-payment'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 import { kakaoAlimtalk } from '@/lib/kakao-alimtalk'
 
 export async function POST(request: NextRequest) {

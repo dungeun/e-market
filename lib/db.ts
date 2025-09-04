@@ -27,19 +27,43 @@ class Database {
     
     if (databaseUrl) {
       console.log('Database: Using DATABASE_URL connection string');
-      // Parse connection string
-      const url = new URL(databaseUrl);
-      config = {
-        host: url.hostname,
-        port: parseInt(url.port || '5432'),
-        database: url.pathname.substring(1),
-        user: url.username,
-        password: url.password,
-        ssl: url.searchParams.get('sslmode') === 'require',
-        connectionTimeoutMillis: 5000,
-        idleTimeoutMillis: 30000,
-        max: 20, // 최대 연결 수
-      };
+      
+      // Supabase connection pooling requires special handling
+      const isSupabase = databaseUrl.includes('supabase.co');
+      
+      if (isSupabase) {
+        // Use direct connection string for Supabase with pooling
+        config = {
+          connectionString: databaseUrl,
+          ssl: {
+            rejectUnauthorized: false,
+            // Disable SSL verification for self-signed certificates
+            checkServerIdentity: () => undefined
+          } as any,
+          connectionTimeoutMillis: 10000,
+          idleTimeoutMillis: 30000,
+          max: 20,
+          // Important: Supabase pooling requires these settings
+          application_name: 'commerce-nextjs'
+        };
+      } else {
+        // Parse connection string for non-Supabase databases
+        const url = new URL(databaseUrl);
+        config = {
+          host: url.hostname,
+          port: parseInt(url.port || '5432'),
+          database: url.pathname.substring(1),
+          user: url.username,
+          password: url.password,
+          ssl: url.searchParams.get('sslmode') === 'require' ? {
+            rejectUnauthorized: false,
+            ca: process.env.DATABASE_CA_CERT || undefined
+          } : false,
+          connectionTimeoutMillis: 5000,
+          idleTimeoutMillis: 30000,
+          max: 20,
+        };
+      }
     } else {
       // Fallback to individual env vars
       config = {
@@ -87,13 +111,32 @@ class Database {
     try {
       console.log('Database: Attempting to connect...');
       const client = await this.pool.connect();
-      await client.query('SELECT NOW()');
+      
+      // Test basic connectivity
+      const result = await client.query('SELECT NOW() as current_time, current_database() as db_name');
+      console.log('Database: Connected to', result.rows[0].db_name, 'at', result.rows[0].current_time);
+      
       client.release();
       this.isConnected = true;
       console.log('Database: Connection successful');
     } catch (error) {
       console.error('Database: Connection failed:', error);
       this.isConnected = false;
+      
+      // Provide more helpful error messages for common issues
+      if (error instanceof Error) {
+        if (error.message.includes('Tenant or user not found')) {
+          console.error('Database: This appears to be a Supabase pooling issue. Please ensure:');
+          console.error('1. You are using the correct DATABASE_URL from Supabase dashboard');
+          console.error('2. The URL includes proper pooling parameters');
+          console.error('3. Your Supabase project is active and not paused');
+        } else if (error.message.includes('ECONNREFUSED')) {
+          console.error('Database: Connection refused. Please check your database is running and accessible');
+        } else if (error.message.includes('password authentication failed')) {
+          console.error('Database: Authentication failed. Please check your database credentials');
+        }
+      }
+      
       throw error;
     }
   }

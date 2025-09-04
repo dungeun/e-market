@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // GET /api/admin/categories/[id] - 특정 카테고리 조회
 export async function GET(

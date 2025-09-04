@@ -104,24 +104,28 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
   const getConditionInfo = (condition?: string) => {
     switch (condition) {
       case 'S':
+      case 'LIKE_NEW':
         return { 
           label: 'S급 (새제품)', 
           color: 'text-green-600 bg-green-50 border-green-200',
           description: '미개봉 또는 사용하지 않은 새 제품'
         };
       case 'A':
+      case 'GOOD':
         return { 
           label: 'A급 (사용감 적음)', 
           color: 'text-blue-600 bg-blue-50 border-blue-200',
           description: '사용감이 거의 없고 외관이 깨끗한 상태'
         };
       case 'B':
+      case 'FAIR':
         return { 
           label: 'B급 (사용감 있음)', 
           color: 'text-yellow-600 bg-yellow-50 border-yellow-200',
           description: '정상적인 사용감이 있으나 기능상 문제없음'
         };
       case 'C':
+      case 'POOR':
         return { 
           label: 'C급 (사용감 많음)', 
           color: 'text-orange-600 bg-orange-50 border-orange-200',
@@ -137,6 +141,10 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
   };
 
   const conditionInfo = getConditionInfo(product.condition);
+  
+  // 디버깅용 로그
+  console.log('Product condition:', product.condition);
+  console.log('Condition info:', conditionInfo);
 
   const addToCart = async () => {
     if (product.stock <= 0) {
@@ -174,6 +182,34 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
     } finally {
       setLoading(false);
     }
+  };
+
+  const buyNow = async () => {
+    if (product.stock <= 0) {
+      alert('재고가 부족합니다.');
+      return;
+    }
+    
+    if (quantity > product.stock) {
+      alert(`재고가 부족합니다. 최대 ${product.stock}개까지 주문 가능합니다.`);
+      return;
+    }
+    
+    // 바로 결제 페이지로 이동
+    const checkoutData = {
+      items: [{
+        id: product.id,
+        name: product.name,
+        price: finalPrice,
+        quantity: quantity,
+        image: product.images[0]?.url || product.images[0]?.imageUrl || '/placeholder.jpg'
+      }],
+      total: finalPrice * quantity
+    };
+    
+    // 결제 데이터를 세션 스토리지에 저장하고 결제 페이지로 이동
+    sessionStorage.setItem('checkout-data', JSON.stringify(checkoutData));
+    window.location.href = '/checkout';
   };
 
   return (
@@ -269,8 +305,8 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
               {/* 상품 정보 섹션 */}
               <div className="p-6 lg:p-8">
                 <div className="space-y-6">
-                  {/* 카테고리 및 상태 */}
-                  <div className="flex items-center justify-between">
+                  {/* 카테고리 */}
+                  <div className="flex items-center gap-3">
                     {product.category && (
                       <Link 
                         href={`/products?category=${product.category.slug}`}
@@ -279,9 +315,6 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
                         {product.category.name}
                       </Link>
                     )}
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full border ${conditionInfo.color}`}>
-                      {conditionInfo.label}
-                    </span>
                   </div>
 
                   {/* 상품명 */}
@@ -289,7 +322,6 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                       {product.name}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">{conditionInfo.description}</p>
                   </div>
 
                   {/* 판매자 정보 */}
@@ -365,6 +397,16 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
                         </span>
                       </div>
                     </div>
+                    
+                    {/* 상품 상태 */}
+                    <div className="flex items-center gap-2">
+                      <Shield className="text-gray-400" size={16} />
+                      <span className="text-gray-600">상품 상태:</span>
+                      <span className={`font-bold ${conditionInfo.color.split(' ')[0]} text-base`}>
+                        {conditionInfo.label}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 ml-6">{conditionInfo.description}</p>
                     
                     {/* 재고 상태 */}
                     <div className="flex items-center gap-2">
@@ -442,13 +484,23 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
 
                   {/* 액션 버튼들 */}
                   <div className="space-y-3">
+                    {/* 바로 구매하기 버튼 */}
+                    <button 
+                      onClick={buyNow}
+                      disabled={product.stock <= 0}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-sm"
+                    >
+                      {product.stock <= 0 ? '품절' : '바로 구매하기'}
+                    </button>
+                    
+                    {/* 장바구니 담기 버튼 */}
                     <button 
                       onClick={addToCart}
                       disabled={loading || product.stock <= 0}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-sm"
+                      className="w-full bg-white border-2 border-blue-600 text-blue-600 py-3 rounded-lg font-medium hover:bg-blue-50 disabled:bg-gray-100 disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                     >
                       <ShoppingCart size={20} />
-                      {loading ? '추가 중...' : product.stock <= 0 ? '품절' : '구매하기'}
+                      {loading ? '추가 중...' : product.stock <= 0 ? '품절' : '장바구니 담기'}
                     </button>
                     
                     <div className="grid grid-cols-2 gap-3">

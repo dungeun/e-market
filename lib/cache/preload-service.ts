@@ -141,8 +141,8 @@ async function getProducts(): Promise<ProductWithImage[]> {
         0 as rating,
         p."createdAt" as created_at,
         pi.url as image_url
-      FROM "Product" p
-      LEFT JOIN "ProductImage" pi ON p.id = pi."productId" AND pi.position = 0
+      FROM products p
+      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.order_index = 0
       WHERE p.status = 'ACTIVE'
       ORDER BY p."createdAt" DESC, p.name ASC
       LIMIT 20
@@ -167,7 +167,7 @@ async function getCategories(): Promise<CategoryRow[]> {
         name,
         slug,
         description,
-        image_url,
+        icon as image_url,
         parent_id,
         menu_order as position,
         is_active

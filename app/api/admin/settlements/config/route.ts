@@ -2,7 +2,7 @@
 // 정산 설정 API
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 // 정산 설정 조회
 export async function GET(request: NextRequest) {

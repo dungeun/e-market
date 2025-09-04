@@ -7,7 +7,7 @@
 
 import { LRUCache } from "lru-cache";
 import Redis from "ioredis";
-import { prisma } from "@/lib/db";
+// import { prisma } from "@/lib/db";
 
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds

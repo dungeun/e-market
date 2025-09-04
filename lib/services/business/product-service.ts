@@ -3,7 +3,7 @@
  * 상품 관련 비즈니스 로직 처리
  */
 
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { ProductWithImage, ProductImage } from '@/types/database';
 
 export interface ProductFilter {

@@ -3,7 +3,7 @@
  * 어드민에서 섹션을 관리하고 홈페이지에서 렌더링
  */
 
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 export interface ProductSection {
   id: string

@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { withAuth } from '@/lib/auth/middleware';
 
 // POST /api/payments/direct - 직접 결제 처리 (계좌이체)

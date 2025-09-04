@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     let cart = null
 
     if (session?.user?.email) {
-      // 로그인한 유저의 장바구니
+      // 로그인한 유저의 장바구니 (세션 기반으로 단순화)
       const result = await query(`
         SELECT 
           c.id as cart_id,
@@ -24,14 +24,12 @@ export async function GET(request: NextRequest) {
           p.price,
           p.slug,
           p.stock,
-          pi.url as image_url,
-          pi.alt as image_alt
+          pi.url as image_url
         FROM carts c
-        JOIN users u ON c.user_id = u.id
         LEFT JOIN cart_items ci ON c.id = ci.cart_id
         LEFT JOIN products p ON ci.product_id = p.id
-        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-        WHERE u.email = $1
+        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.order_index = 0
+        WHERE c.user_id = $1
         ORDER BY ci.created_at DESC
       `, [session.user.email])
 
@@ -166,22 +164,11 @@ export async function POST(request: NextRequest) {
       // 장바구니 찾기 또는 생성
       let cartId
       if (session?.user?.email) {
-        // 로그인한 유저
-        const userResult = await client.query(
-          'SELECT id FROM users WHERE email = $1',
-          [session.user.email]
-        )
-
-        if (userResult.rows.length === 0) {
-          throw new Error('사용자를 찾을 수 없습니다.')
-        }
-
-        const userId = userResult.rows[0].id
-
+        // 로그인한 유저 - user_id로 이메일 직접 사용
         // 장바구니 찾기 또는 생성
         const cartResult = await client.query(
           'SELECT id FROM carts WHERE user_id = $1',
-          [userId]
+          [session.user.email]
         )
 
         if (cartResult.rows.length > 0) {
@@ -189,7 +176,7 @@ export async function POST(request: NextRequest) {
         } else {
           const newCartResult = await client.query(
             'INSERT INTO carts (id, user_id) VALUES ($1, $2) RETURNING id',
-            [`cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, userId]
+            [`cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, session.user.email]
           )
           cartId = newCartResult.rows[0].id
         }
@@ -326,7 +313,7 @@ export async function PATCH(request: NextRequest) {
       let cartId
       if (session?.user?.email) {
         const result = await client.query(
-          'SELECT c.id FROM carts c JOIN users u ON c.user_id = u.id WHERE u.email = $1',
+          'SELECT id FROM carts WHERE user_id = $1',
           [session.user.email]
         )
         if (result.rows.length === 0) {
@@ -412,7 +399,7 @@ export async function DELETE(request: NextRequest) {
       let cartId
       if (session?.user?.email) {
         const result = await client.query(
-          'SELECT c.id FROM carts c JOIN users u ON c.user_id = u.id WHERE u.email = $1',
+          'SELECT id FROM carts WHERE user_id = $1',
           [session.user.email]
         )
         if (result.rows.length === 0) {

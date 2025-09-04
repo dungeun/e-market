@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // GET /api/payments/callback/fail - 토스페이먼츠 결제 실패 콜백
 export async function GET(request: NextRequest) {

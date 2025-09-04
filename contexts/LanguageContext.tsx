@@ -88,7 +88,7 @@ export function LanguageProvider({ children, initialLanguagePacks = {} }: Langua
     }
     
     try {
-      const response = await fetch('/api/language-packs');
+      const response = await fetch('/api/public/language-packs');
       if (response.ok) {
         const packs: LanguagePack[] = await response.json();
         const packMap = packs.reduce((acc, pack) => {

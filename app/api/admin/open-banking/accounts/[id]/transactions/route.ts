@@ -1,7 +1,7 @@
 import type { AppError } from '@/lib/types/common';
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // GET - 계좌 거래내역 조회
 export async function GET(

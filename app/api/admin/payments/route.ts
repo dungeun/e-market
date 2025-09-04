@@ -4,7 +4,7 @@ import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyJWT } from '@/lib/auth/jwt'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // GET /api/admin/payments - 결제 목록 조회
 export async function GET(request: NextRequest) {

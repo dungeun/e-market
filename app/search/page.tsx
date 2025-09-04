@@ -2,20 +2,8 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Slider } from '@/components/ui/slider'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import Image from 'next/image'
+import Link from 'next/link'
 import { 
   Search, 
   Filter, 
@@ -29,6 +17,8 @@ import {
   Calendar,
   Package
 } from 'lucide-react'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 interface Product {
   id: string
@@ -53,7 +43,7 @@ const mockProducts: Product[] = [
     name: 'iPhone 14 Pro 128GB (A급)',
     price: 950000,
     originalPrice: 1200000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.8,
     reviewCount: 24,
     category: '스마트폰',
@@ -69,7 +59,7 @@ const mockProducts: Product[] = [
     name: '삼성 갤럭시 S24 Ultra (새제품)',
     price: 1100000,
     originalPrice: 1400000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.9,
     reviewCount: 18,
     category: '스마트폰',
@@ -85,7 +75,7 @@ const mockProducts: Product[] = [
     name: 'LG 그램 17인치 노트북 (A급)',
     price: 800000,
     originalPrice: 1200000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.6,
     reviewCount: 12,
     category: '노트북',
@@ -101,7 +91,7 @@ const mockProducts: Product[] = [
     name: '맥북 에어 M2 13인치 (A급)',
     price: 1200000,
     originalPrice: 1590000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.9,
     reviewCount: 31,
     category: '노트북',
@@ -117,7 +107,7 @@ const mockProducts: Product[] = [
     name: 'Sony WH-1000XM5 무선헤드폰',
     price: 280000,
     originalPrice: 450000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.7,
     reviewCount: 45,
     category: '이어폰/헤드폰',
@@ -133,7 +123,7 @@ const mockProducts: Product[] = [
     name: 'iPad Pro 11인치 (B급)',
     price: 650000,
     originalPrice: 950000,
-    image: '/api/placeholder/300/300',
+    image: '/placeholder.svg',
     rating: 4.4,
     reviewCount: 19,
     category: '태블릿',
@@ -143,38 +133,6 @@ const mockProducts: Product[] = [
     location: '부산 해운대구',
     createdAt: '2024-01-03',
     description: '화면에 미세한 스크래치 있으나 사용에 문제없음'
-  },
-  {
-    id: 'prod-7',
-    name: '삼성 55인치 QLED TV',
-    price: 800000,
-    originalPrice: 1200000,
-    image: '/api/placeholder/300/300',
-    rating: 4.6,
-    reviewCount: 8,
-    category: 'TV/모니터',
-    brand: 'Samsung',
-    condition: 'A',
-    isLiked: false,
-    location: '대구 중구',
-    createdAt: '2024-01-02',
-    description: '2023년 모델, 벽걸이 브라켓 포함'
-  },
-  {
-    id: 'prod-8',
-    name: '다이슨 V15 무선청소기',
-    price: 450000,
-    originalPrice: 700000,
-    image: '/api/placeholder/300/300',
-    rating: 4.8,
-    reviewCount: 22,
-    category: '청소기',
-    brand: 'Dyson',
-    condition: 'A',
-    isLiked: true,
-    location: '서울 강서구',
-    createdAt: '2024-01-01',
-    description: '추가 브러시 5개 포함, 완전무결'
   }
 ]
 
@@ -184,7 +142,7 @@ function SearchContent() {
   
   // 검색 상태
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
-  const [products, setProducts] = useState<Product[]>(mockProducts)
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState('relevance')
   
@@ -197,7 +155,6 @@ function SearchContent() {
   
   // 검색 결과
   const [isSearching, setIsSearching] = useState(false)
-  const [searchHistory, setSearchHistory] = useState<string[]>([])
 
   // 필터 옵션 추출
   const categories = useMemo(() => 
@@ -215,67 +172,48 @@ function SearchContent() {
     { value: 'C', label: 'C급', color: 'bg-orange-100 text-orange-800' }
   ]
 
-  // URL에서 검색어 가져오기
-  useEffect(() => {
-    const q = searchParams.get('q')
-    if (q) {
-      setSearchQuery(q)
-      performSearch(q)
-    }
-  }, [searchParams])
-
-  // 검색 실행
-  const performSearch = async (query: string) => {
-    setIsSearching(true)
-    
-    // 검색 히스토리에 추가
-    if (query && !searchHistory.includes(query)) {
-      setSearchHistory(prev => [query, ...prev.slice(0, 4)])
-    }
-
-    // 실제 API 호출 대신 로컬 필터링
-    await new Promise(resolve => setTimeout(resolve, 500)) // 검색 딜레이 시뮬레이션
-    
-    let filteredProducts = mockProducts
+  // 상품 필터링
+  const filterProducts = useMemo(() => {
+    let filtered = mockProducts
 
     // 검색어로 필터링
-    if (query) {
-      filteredProducts = filteredProducts.filter(product =>
-        product.name.toLowerCase().includes(query.toLowerCase()) ||
-        product.description?.toLowerCase().includes(query.toLowerCase()) ||
-        product.category.toLowerCase().includes(query.toLowerCase()) ||
-        product.brand.toLowerCase().includes(query.toLowerCase())
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
     // 카테고리 필터
     if (selectedCategories.length > 0) {
-      filteredProducts = filteredProducts.filter(product =>
+      filtered = filtered.filter(product =>
         selectedCategories.includes(product.category)
       )
     }
 
     // 브랜드 필터
     if (selectedBrands.length > 0) {
-      filteredProducts = filteredProducts.filter(product =>
+      filtered = filtered.filter(product =>
         selectedBrands.includes(product.brand)
       )
     }
 
     // 상태 필터
     if (selectedConditions.length > 0) {
-      filteredProducts = filteredProducts.filter(product =>
+      filtered = filtered.filter(product =>
         selectedConditions.includes(product.condition)
       )
     }
 
     // 가격 필터
-    filteredProducts = filteredProducts.filter(product =>
+    filtered = filtered.filter(product =>
       product.price >= priceRange[0] && product.price <= priceRange[1]
     )
 
     // 정렬
-    filteredProducts.sort((a, b) => {
+    filtered.sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
           return a.price - b.price
@@ -292,23 +230,28 @@ function SearchContent() {
       }
     })
 
-    setProducts(filteredProducts)
-    setIsSearching(false)
-  }
+    return filtered
+  }, [searchQuery, selectedCategories, selectedBrands, selectedConditions, priceRange, sortBy])
+
+  // URL에서 검색어 가져오기
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q) {
+      setSearchQuery(decodeURIComponent(q))
+    }
+  }, [searchParams])
 
   // 검색어 변경 처리
   const handleSearchChange = (value: string) => {
     setSearchQuery(value)
-    if (value.trim()) {
-      const newUrl = `/search?q=${encodeURIComponent(value.trim())}`
-      router.push(newUrl, { scroll: false })
-    }
   }
 
   // 검색 실행
-  const handleSearch = () => {
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
     if (searchQuery.trim()) {
-      performSearch(searchQuery.trim())
+      const newUrl = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+      router.push(newUrl)
     }
   }
 
@@ -345,26 +288,11 @@ function SearchContent() {
     setPriceRange([0, 2000000])
   }
 
-  // 상품 클릭 처리
-  const handleProductClick = (productId: string) => {
-    router.push(`/products/${productId}`)
-  }
-
   // 좋아요 토글
   const toggleLike = (productId: string) => {
-    setProducts(prev => prev.map(product => 
-      product.id === productId 
-        ? { ...product, isLiked: !product.isLiked }
-        : product
-    ))
+    // TODO: 실제 API 호출
+    console.log('Toggle like for product:', productId)
   }
-
-  // 필터 적용할 때마다 검색 재실행
-  useEffect(() => {
-    if (searchQuery) {
-      performSearch(searchQuery)
-    }
-  }, [selectedCategories, selectedBrands, selectedConditions, priceRange, sortBy])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price) + '원'
@@ -372,7 +300,11 @@ function SearchContent() {
 
   const getConditionBadge = (condition: string) => {
     const conditionData = conditions.find(c => c.value === condition) || conditions[1]
-    return <Badge className={`text-xs ${conditionData.color}`}>{conditionData.label}</Badge>
+    return (
+      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${conditionData.color}`}>
+        {conditionData.label}
+      </span>
+    )
   }
 
   return (
@@ -388,7 +320,7 @@ function SearchContent() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="상품명, 브랜드, 카테고리를 검색하세요"
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -403,12 +335,12 @@ function SearchContent() {
 
           <div className="flex items-center justify-between text-sm text-gray-600">
             <p>
-              {query && (
+              {searchQuery && (
                 <>
-                  <span className="font-medium">"{query}"</span>에 대한 검색 결과 
+                  <span className="font-medium">"{searchQuery}"</span>에 대한 검색 결과 
                 </>
               )}
-              <span className="font-medium text-blue-600">{filteredProducts.length}개</span>의 상품
+              <span className="font-medium text-blue-600">{filterProducts.length}개</span>의 상품
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -423,7 +355,7 @@ function SearchContent() {
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid3X3 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
@@ -440,88 +372,65 @@ function SearchContent() {
           {/* Filters Sidebar */}
           <div className={`w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} lg:block`}>
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-              <h3 className="font-semibold text-gray-900 mb-4">필터</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900">필터</h3>
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  초기화
+                </button>
+              </div>
 
               {/* Category Filter */}
               <div className="mb-6">
-                <h4 className="font-medium text-gray-700 mb-2">카테고리</h4>
+                <h4 className="font-medium text-gray-700 mb-3">카테고리</h4>
                 <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="category"
-                      value=""
-                      checked={filters.category === ''}
-                      onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                      className="mr-2"
-                    />
-                    전체
-                  </label>
                   {categories.map(category => (
-                    <label key={category} className="flex items-center">
+                    <label key={category} className="flex items-center cursor-pointer">
                       <input
-                        type="radio"
-                        name="category"
-                        value={category}
-                        checked={filters.category === category}
-                        onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                        className="mr-2"
+                        type="checkbox"
+                        checked={selectedCategories.includes(category)}
+                        onChange={(e) => handleCategoryFilter(category, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 mr-2"
                       />
-                      {category}
+                      <span className="text-sm text-gray-700">{category}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Price Range */}
+              {/* Brand Filter */}
               <div className="mb-6">
-                <h4 className="font-medium text-gray-700 mb-2">가격대</h4>
+                <h4 className="font-medium text-gray-700 mb-3">브랜드</h4>
                 <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="200000"
-                    step="10000"
-                    value={filters.priceRange.max}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: { ...prev.priceRange, max: parseInt(e.target.value) }
-                    }))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>0원</span>
-                    <span>{formatPrice(filters.priceRange.max)}원</span>
-                  </div>
+                  {brands.map(brand => (
+                    <label key={brand} className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(brand)}
+                        onChange={(e) => handleBrandFilter(brand, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 mr-2"
+                      />
+                      <span className="text-sm text-gray-700">{brand}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              {/* Brand Filter */}
+              {/* Condition Filter */}
               <div className="mb-6">
-                <h4 className="font-medium text-gray-700 mb-2">브랜드</h4>
+                <h4 className="font-medium text-gray-700 mb-3">상품 상태</h4>
                 <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="brand"
-                      value=""
-                      checked={filters.brand === ''}
-                      onChange={(e) => setFilters(prev => ({ ...prev, brand: e.target.value }))}
-                      className="mr-2"
-                    />
-                    전체
-                  </label>
-                  {brands.map(brand => (
-                    <label key={brand} className="flex items-center">
+                  {conditions.map(condition => (
+                    <label key={condition.value} className="flex items-center cursor-pointer">
                       <input
-                        type="radio"
-                        name="brand"
-                        value={brand}
-                        checked={filters.brand === brand}
-                        onChange={(e) => setFilters(prev => ({ ...prev, brand: e.target.value }))}
-                        className="mr-2"
+                        type="checkbox"
+                        checked={selectedConditions.includes(condition.value)}
+                        onChange={(e) => handleConditionFilter(condition.value, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 mr-2"
                       />
-                      {brand}
+                      <span className="text-sm text-gray-700">{condition.label}</span>
                     </label>
                   ))}
                 </div>
@@ -529,17 +438,18 @@ function SearchContent() {
 
               {/* Sort Options */}
               <div>
-                <h4 className="font-medium text-gray-700 mb-2">정렬</h4>
+                <h4 className="font-medium text-gray-700 mb-3">정렬</h4>
                 <select
-                  value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as unknown }))}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 >
                   <option value="relevance">관련도순</option>
-                  <option value="price_low">낮은 가격순</option>
-                  <option value="price_high">높은 가격순</option>
+                  <option value="price-low">낮은 가격순</option>
+                  <option value="price-high">높은 가격순</option>
                   <option value="rating">평점순</option>
-                  <option value="newest">최신순</option>
+                  <option value="popular">인기순</option>
+                  <option value="latest">최신순</option>
                 </select>
               </div>
             </div>
@@ -547,7 +457,7 @@ function SearchContent() {
 
           {/* Results */}
           <div className="flex-1">
-            {filteredProducts.length === 0 ? (
+            {filterProducts.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                 <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
@@ -558,14 +468,14 @@ function SearchContent() {
                 ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' 
                 : 'space-y-4'
               }>
-                {filteredProducts.map(product => (
+                {filterProducts.map(product => (
                   <div key={product.id} className={`bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow ${
                     viewMode === 'list' ? 'flex' : ''
                   }`}>
                     <div className={viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}>
                       <Image
-                        src={product.imageUrl}
-                        alt={product.title}
+                        src={product.image}
+                        alt={product.name}
                         width={300}
                         height={300}
                         className={`object-cover ${
@@ -574,33 +484,51 @@ function SearchContent() {
                       />
                     </div>
                     <div className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
-                      <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                        {product.title}
-                      </h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-gray-900 line-clamp-2 flex-1">
+                          {product.name}
+                        </h3>
+                        <button 
+                          onClick={() => toggleLike(product.id)}
+                          className="ml-2 p-1"
+                        >
+                          <Heart className={`w-5 h-5 ${product.isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
+                        </button>
+                      </div>
+                      
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                         {product.description}
                       </p>
+                      
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex text-yellow-400 text-sm">
-                          {'★'.repeat(Math.floor(product.rating))}
-                          {'☆'.repeat(5 - Math.floor(product.rating))}
+                          {Array.from({length: 5}, (_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-200'}`} />
+                          ))}
                         </div>
                         <span className="text-sm text-gray-500">({product.reviewCount})</span>
+                        {getConditionBadge(product.condition)}
                       </div>
+                      
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {product.location}
+                      </div>
+                      
                       <div className="flex items-center justify-between">
                         <div>
-                          {product.discountPrice ? (
+                          {product.originalPrice && product.originalPrice > product.price ? (
                             <>
                               <span className="text-lg font-bold text-blue-600">
-                                {formatPrice(product.discountPrice)}원
+                                {formatPrice(product.price)}
                               </span>
                               <span className="text-sm text-gray-400 line-through ml-2">
-                                {formatPrice(product.price)}원
+                                {formatPrice(product.originalPrice)}
                               </span>
                             </>
                           ) : (
                             <span className="text-lg font-bold text-gray-900">
-                              {formatPrice(product.price)}원
+                              {formatPrice(product.price)}
                             </span>
                           )}
                         </div>
@@ -622,7 +550,7 @@ function SearchContent() {
 
       <Footer />
     </div>
-  );
+  )
 }
 
 export default function SearchPage() {
@@ -630,5 +558,5 @@ export default function SearchPage() {
     <Suspense fallback={<div>Loading...</div>}>
       <SearchContent />
     </Suspense>
-  );
+  )
 }

@@ -40,14 +40,14 @@ export default async function Page() {
       
       <Suspense 
         fallback={
-          <div className="min-h-screen bg-white">
+          <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
             <div className="max-w-[1450px] mx-auto px-6 py-8">
               <div className="animate-pulse space-y-4">
-                <div className="h-80 bg-gray-200 rounded-xl" />
-                <div className="h-32 bg-gray-200 rounded-xl" />
+                <div className="h-80 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+                <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl" />
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[...Array(8)].map((_, i) => (
-                    <div key={i} className="h-64 bg-gray-200 rounded-xl" />
+                    <div key={i} className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl" />
                   ))}
                 </div>
               </div>

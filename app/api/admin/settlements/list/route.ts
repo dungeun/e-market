@@ -3,7 +3,7 @@ import type { AppError } from '@/lib/types/common';
 // 정산 목록 조회 API
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {

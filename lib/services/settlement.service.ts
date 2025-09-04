@@ -2,7 +2,7 @@ import type { User, RequestContext } from '@/lib/types/common';
 // 자동 정산 서비스
 // npm install node-cron @types/node-cron 필요
 
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 export interface SettlementResult {
   success: boolean;

@@ -7,7 +7,7 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { prisma } from "@/lib/db";
+// import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 // 캐시 디렉토리 설정

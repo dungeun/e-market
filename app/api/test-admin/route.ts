@@ -1,7 +1,7 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 // 관리자 계정 확인 API
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export async function GET(request: NextRequest) {

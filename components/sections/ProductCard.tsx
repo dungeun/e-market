@@ -68,19 +68,45 @@ const ProductCard = React.memo(function ProductCard({
         alert('장바구니 추가에 실패했습니다.')
       }
     } catch (error) {
-
+      console.error('Cart error:', error)
       alert('장바구니 추가 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
   }
 
+  const addToWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id
+        }),
+      })
+
+      if (response.ok) {
+        alert('위시리스트에 추가되었습니다!')
+      } else {
+        alert('위시리스트 추가에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error)
+      alert('위시리스트 추가 중 오류가 발생했습니다.')
+    }
+  }
+
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative bg-gray-900 border border-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-red-600 transition-all duration-300">
+      <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-red-600 transition-all duration-300">
         {/* 랭킹 뱃지 */}
         {showRanking && (
-          <div className="absolute top-2 left-2 z-10 bg-black text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
             {showRanking}
           </div>
         )}
@@ -99,6 +125,16 @@ const ProductCard = React.memo(function ProductCard({
           </div>
         )}
 
+        {/* 인기/NEW 뱃지 - 이미지 위에 배치 */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+          {product.new && (
+            <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">NEW</span>
+          )}
+          {product.featured && (
+            <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">인기</span>
+          )}
+        </div>
+
         {/* 이미지 */}
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
@@ -109,18 +145,21 @@ const ProductCard = React.memo(function ProductCard({
           />
           
           {/* 호버 오버레이 */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
           
           {/* 빠른 액션 버튼 */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button 
               onClick={addToCart}
               disabled={loading || product.stock <= 0}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-500 rounded-full p-2 shadow-lg transition-colors"
+              className="bg-black hover:bg-gray-800 disabled:bg-gray-500 rounded-full p-2 shadow-lg transition-colors"
             >
               <ShoppingCart className="w-4 h-4 text-white" />
             </button>
-            <button className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors">
+            <button 
+              onClick={addToWishlist}
+              className="bg-black hover:bg-gray-800 rounded-full p-2 shadow-lg transition-colors"
+            >
               <Heart className="w-4 h-4 text-white" />
             </button>
             <button 
@@ -129,7 +168,7 @@ const ProductCard = React.memo(function ProductCard({
                 e.stopPropagation()
                 window.location.href = `/products/${product.slug}`
               }}
-              className="bg-red-600 hover:bg-red-700 rounded-full p-2 shadow-lg transition-colors"
+              className="bg-black hover:bg-gray-800 rounded-full p-2 shadow-lg transition-colors"
             >
               <Eye className="w-4 h-4 text-white" />
             </button>
@@ -138,7 +177,7 @@ const ProductCard = React.memo(function ProductCard({
 
         {/* 상품 정보 */}
         <div className="p-4">
-          <h3 className="font-medium text-white mb-1 line-clamp-2 group-hover:text-red-400 transition-colors">
+          <h3 className="font-medium text-gray-900 mb-1 line-clamp-1 truncate group-hover:text-red-600 transition-colors" title={product.name}>
             {product.name}
           </h3>
           
@@ -156,7 +195,7 @@ const ProductCard = React.memo(function ProductCard({
                   </svg>
                 ))}
               </div>
-              <span className="text-sm text-gray-400 ml-1">({product.rating})</span>
+              <span className="text-sm text-gray-600 ml-1">({product.rating})</span>
               {product.review_count && product.review_count > 0 && (
                 <span className="text-xs text-gray-500 ml-1">{product.review_count}개 리뷰</span>
               )}
@@ -166,30 +205,21 @@ const ProductCard = React.memo(function ProductCard({
           {/* 가격 */}
           <div className="flex items-end gap-2">
             {discountPercentage > 0 && (
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-sm text-gray-500 line-through">
                 {formatPrice(originalPrice)}
               </span>
             )}
-            <span className="text-lg font-bold text-white">
+            <span className="text-lg font-bold text-gray-900">
               {formatPrice(finalPrice)}
             </span>
           </div>
 
-          {/* 재고 및 뱃지 */}
-          <div className="flex gap-2 mt-2 text-xs">
-            {product.stock <= 0 && (
-              <span className="bg-red-600 text-white px-2 py-1 rounded">품절</span>
-            )}
-            {product.stock > 0 && product.stock < 5 && (
-              <span className="bg-orange-600 text-white px-2 py-1 rounded">재고부족</span>
-            )}
-            {product.new && (
-              <span className="bg-blue-600 text-white px-2 py-1 rounded">NEW</span>
-            )}
-            {product.featured && (
-              <span className="bg-green-600 text-white px-2 py-1 rounded">인기</span>
-            )}
-          </div>
+          {/* 품절 상태만 하단에 표시 */}
+          {product.stock <= 0 && (
+            <div className="mt-2">
+              <span className="bg-red-600 text-white px-2 py-1 rounded text-xs">품절</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

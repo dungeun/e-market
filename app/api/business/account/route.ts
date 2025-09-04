@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { b2bService } from '@/lib/services/business/b2b-service'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // 사업자 계정 조회
 export async function GET(request: NextRequest) {

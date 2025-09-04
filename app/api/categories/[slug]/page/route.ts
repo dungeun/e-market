@@ -1,6 +1,6 @@
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 
 // GET /api/categories/[slug]/page - 카테고리 슬러그로 페이지 정보 조회
 export async function GET(

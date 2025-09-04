@@ -1,0 +1,226 @@
+         table_name         |     column_name      |          data_type          
+----------------------------+----------------------+-----------------------------
+ boards                     | id                   | character varying
+ boards                     | code                 | character varying
+ boards                     | name                 | character varying
+ boards                     | description          | text
+ boards                     | type                 | USER-DEFINED
+ boards                     | visibility           | USER-DEFINED
+ boards                     | allow_comments       | boolean
+ boards                     | allow_attachments    | boolean
+ boards                     | require_login        | boolean
+ boards                     | allow_anonymous      | boolean
+ boards                     | max_attachment_size  | integer
+ boards                     | allowed_file_types   | ARRAY
+ boards                     | sort_order           | integer
+ boards                     | is_active            | boolean
+ boards                     | created_at           | timestamp with time zone
+ boards                     | updated_at           | timestamp with time zone
+ categories                 | id                   | character varying
+ categories                 | name                 | character varying
+ categories                 | slug                 | character varying
+ categories                 | description          | text
+ categories                 | icon                 | character varying
+ categories                 | parent_id            | character varying
+ categories                 | level                | integer
+ categories                 | path                 | text
+ categories                 | created_at           | timestamp without time zone
+ categories                 | updated_at           | timestamp without time zone
+ categories                 | deleted_at           | timestamp without time zone
+ comment_likes              | id                   | character varying
+ comment_likes              | comment_id           | character varying
+ comment_likes              | user_id              | character varying
+ comment_likes              | created_at           | timestamp with time zone
+ comments                   | id                   | character varying
+ comments                   | post_id              | character varying
+ comments                   | user_id              | character varying
+ comments                   | parent_id            | character varying
+ comments                   | content              | text
+ comments                   | is_anonymous         | boolean
+ comments                   | author_name          | character varying
+ comments                   | author_email         | character varying
+ comments                   | is_admin_reply       | boolean
+ comments                   | is_deleted           | boolean
+ comments                   | like_count           | integer
+ comments                   | created_at           | timestamp with time zone
+ comments                   | updated_at           | timestamp with time zone
+ language_metadata          | id                   | integer
+ language_metadata          | code                 | character varying
+ language_metadata          | name                 | character varying
+ language_metadata          | native_name          | character varying
+ language_metadata          | google_code          | character varying
+ language_metadata          | direction            | character varying
+ language_metadata          | flag_emoji           | character varying
+ language_metadata          | created_at           | timestamp with time zone
+ language_metadata          | updated_at           | timestamp with time zone
+ language_pack_keys         | id                   | uuid
+ language_pack_keys         | key_name             | character varying
+ language_pack_keys         | component_type       | character varying
+ language_pack_keys         | component_id         | character varying
+ language_pack_keys         | description          | text
+ language_pack_keys         | is_active            | boolean
+ language_pack_keys         | created_at           | timestamp without time zone
+ language_pack_keys         | updated_at           | timestamp without time zone
+ language_pack_translations | id                   | uuid
+ language_pack_translations | key_id               | uuid
+ language_pack_translations | language_code        | character varying
+ language_pack_translations | translation          | text
+ language_pack_translations | is_auto_translated   | boolean
+ language_pack_translations | translator_notes     | text
+ language_pack_translations | created_at           | timestamp without time zone
+ language_pack_translations | updated_at           | timestamp without time zone
+ language_settings          | id                   | integer
+ language_settings          | selected_languages   | jsonb
+ language_settings          | default_language     | character varying
+ language_settings          | max_languages        | integer
+ language_settings          | created_at           | timestamp with time zone
+ language_settings          | updated_at           | timestamp with time zone
+ popup_alerts               | id                   | uuid
+ popup_alerts               | title                | character varying
+ popup_alerts               | message              | text
+ popup_alerts               | type                 | character varying
+ popup_alerts               | is_active            | boolean
+ popup_alerts               | start_date           | timestamp without time zone
+ popup_alerts               | end_date             | timestamp without time zone
+ popup_alerts               | created_at           | timestamp without time zone
+ popup_alerts               | updated_at           | timestamp without time zone
+ post_attachments           | id                   | character varying
+ post_attachments           | post_id              | character varying
+ post_attachments           | file_name            | character varying
+ post_attachments           | original_name        | character varying
+ post_attachments           | file_path            | character varying
+ post_attachments           | file_size            | integer
+ post_attachments           | file_type            | character varying
+ post_attachments           | mime_type            | character varying
+ post_attachments           | download_count       | integer
+ post_attachments           | created_at           | timestamp with time zone
+ post_likes                 | id                   | character varying
+ post_likes                 | post_id              | character varying
+ post_likes                 | user_id              | character varying
+ post_likes                 | created_at           | timestamp with time zone
+ posts                      | id                   | character varying
+ posts                      | board_id             | character varying
+ posts                      | user_id              | character varying
+ posts                      | title                | character varying
+ posts                      | content              | text
+ posts                      | summary              | text
+ posts                      | status               | USER-DEFINED
+ posts                      | visibility           | USER-DEFINED
+ posts                      | is_pinned            | boolean
+ posts                      | is_featured          | boolean
+ posts                      | is_anonymous         | boolean
+ posts                      | author_name          | character varying
+ posts                      | author_email         | character varying
+ posts                      | author_phone         | character varying
+ posts                      | inquiry_status       | USER-DEFINED
+ posts                      | view_count           | integer
+ posts                      | like_count           | integer
+ posts                      | comment_count        | integer
+ posts                      | attachment_count     | integer
+ posts                      | tags                 | ARRAY
+ posts                      | metadata             | jsonb
+ posts                      | published_at         | timestamp with time zone
+ posts                      | created_at           | timestamp with time zone
+ posts                      | updated_at           | timestamp with time zone
+ product_images             | id                   | character varying
+ product_images             | product_id           | character varying
+ product_images             | url                  | text
+ product_images             | webp_url             | text
+ product_images             | file_name            | character varying
+ product_images             | file_size            | integer
+ product_images             | image_type           | character varying
+ product_images             | order_index          | integer
+ product_images             | created_at           | timestamp without time zone
+ products                   | id                   | character varying
+ products                   | name                 | character varying
+ products                   | slug                 | character varying
+ products                   | description          | text
+ products                   | price                | numeric
+ products                   | original_price       | numeric
+ products                   | condition            | character varying
+ products                   | category_id          | character varying
+ products                   | stock                | integer
+ products                   | rating               | numeric
+ products                   | review_count         | integer
+ products                   | featured             | boolean
+ products                   | new                  | boolean
+ products                   | status               | character varying
+ products                   | discount_rate        | integer
+ products                   | created_at           | timestamp without time zone
+ products                   | updated_at           | timestamp without time zone
+ products                   | deleted_at           | timestamp without time zone
+ products                   | usage_period         | text
+ products                   | purchase_date        | text
+ products                   | detailed_description | text
+ products                   | seller_name          | text
+ products                   | seller_location      | text
+ products                   | verified_seller      | boolean
+ products                   | defects              | text
+ products                   | delivery_method      | text
+ products_cache             | id                   | uuid
+ products_cache             | cache_key            | character varying
+ products_cache             | data                 | jsonb
+ products_cache             | expires_at           | timestamp without time zone
+ products_cache             | created_at           | timestamp without time zone
+ products_cache             | updated_at           | timestamp without time zone
+ public_settings            | id                   | uuid
+ public_settings            | key                  | character varying
+ public_settings            | value                | jsonb
+ public_settings            | created_at           | timestamp without time zone
+ public_settings            | updated_at           | timestamp without time zone
+ system_settings            | id                   | integer
+ system_settings            | key                  | character varying
+ system_settings            | value                | text
+ system_settings            | description          | text
+ system_settings            | created_at           | timestamp without time zone
+ system_settings            | updated_at           | timestamp without time zone
+ translation_cache          | id                   | integer
+ translation_cache          | source_text          | text
+ translation_cache          | source_language      | character varying
+ translation_cache          | target_language      | character varying
+ translation_cache          | translated_text      | text
+ translation_cache          | provider             | character varying
+ translation_cache          | created_at           | timestamp without time zone
+ ui_config                  | id                   | integer
+ ui_config                  | config_key           | character varying
+ ui_config                  | config_value         | jsonb
+ ui_config                  | config_type          | character varying
+ ui_config                  | created_at           | timestamp without time zone
+ ui_config                  | updated_at           | timestamp without time zone
+ ui_menus                   | id                   | uuid
+ ui_menus                   | type                 | character varying
+ ui_menus                   | sectionId            | character varying
+ ui_menus                   | content              | jsonb
+ ui_menus                   | visible              | boolean
+ ui_menus                   | order                | integer
+ ui_menus                   | createdAt            | timestamp with time zone
+ ui_menus                   | updatedAt            | timestamp with time zone
+ ui_sections                | id                   | character varying
+ ui_sections                | key                  | character varying
+ ui_sections                | type                 | character varying
+ ui_sections                | title                | character varying
+ ui_sections                | data                 | text
+ ui_sections                | order                | integer
+ ui_sections                | isActive             | boolean
+ ui_sections                | translations         | text
+ ui_sections                | createdAt            | timestamp without time zone
+ ui_sections                | updatedAt            | timestamp without time zone
+ users                      | id                   | character varying
+ users                      | email                | character varying
+ users                      | password             | character varying
+ users                      | name                 | character varying
+ users                      | type                 | character varying
+ users                      | role                 | character varying
+ users                      | status               | character varying
+ users                      | email_verified       | boolean
+ users                      | phone                | character varying
+ users                      | address              | text
+ users                      | city                 | character varying
+ users                      | state                | character varying
+ users                      | postal_code          | character varying
+ users                      | country              | character varying
+ users                      | created_at           | timestamp without time zone
+ users                      | updated_at           | timestamp without time zone
+ users                      | last_login_at        | timestamp without time zone
+(222 rows)
+

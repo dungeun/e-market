@@ -4,7 +4,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { query } from '@/lib/db';
 
 interface CacheConfig {

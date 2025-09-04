@@ -36,16 +36,14 @@ export async function getCachedLanguagePacks(): Promise<
     // language_packs 테이블에서 데이터 조회 - 점(.) 구분자 사용
     const sql = `
       SELECT 
-        namespace,
         key,
-        namespace || '.' || key as full_key,
-        MAX(CASE WHEN "languageCode" = 'ko' THEN value END) as ko,
-        MAX(CASE WHEN "languageCode" = 'en' THEN value END) as en,
-        MAX(CASE WHEN "languageCode" = 'ja' THEN value END) as ja,
-        namespace as category,
-        MAX(description) as description
+        key as full_key,
+        ko,
+        en,
+        ja,
+        'general' as category,
+        '' as description
       FROM language_packs
-      GROUP BY namespace, key
     `;
     
     const packsPromise = query(sql);
@@ -56,15 +54,15 @@ export async function getCachedLanguagePacks(): Promise<
     // 키-값 형태로 변환 - 점(.) 구분자로 통일
     const languagePacks = packs.reduce(
       (acc, pack) => {
-        // 콜론(:) 대신 점(.)을 사용하여 키 생성
-        const fullKey = pack.full_key || `${pack.namespace}.${pack.key}`;
+        // key를 직접 사용 (이미 점(.) 구분자 포함)
+        const fullKey = pack.key || pack.full_key;
         acc[fullKey] = {
           id: fullKey,
           key: fullKey,
           ko: pack.ko || '',
           en: pack.en || '',
           ja: pack.ja || '',
-          category: pack.category || undefined,
+          category: pack.category || 'general',
           description: pack.description || undefined,
         };
         return acc;

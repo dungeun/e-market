@@ -74,7 +74,7 @@ async function getRelatedProducts(categoryId: string | null, currentProductId: s
     const result = await query(`
       SELECT p.*, pi.url as image_url
       FROM products p
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
+      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.order_index = 0
       WHERE p.category_id = $1 AND p.id != $2 AND p.status = '판매중' AND p.deleted_at IS NULL
       ORDER BY p.created_at DESC
       LIMIT 4

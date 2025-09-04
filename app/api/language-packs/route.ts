@@ -66,38 +66,17 @@ export async function GET(request: NextRequest) {
     
     try {
       // Try to fetch from database first
-      const where: unknown = {};
-      
-      if (category) {
-        where.category = category;
-      }
-
-      let whereConditions: string[] = [];
       const params: unknown[] = [];
       
-      if (category) {
-        params.push(category);
-        whereConditions.push(`namespace = $${params.length}`);
-      }
-      
-      const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
-      
       const result = await query(`
-        SELECT DISTINCT
-          CASE 
-            WHEN key LIKE '%.%' THEN key
-            ELSE namespace || '.' || key
-          END as key,
-          namespace,
-          key as original_key,
-          MAX(CASE WHEN "languageCode" = 'ko' THEN value ELSE NULL END) as ko,
-          MAX(CASE WHEN "languageCode" = 'en' THEN value ELSE NULL END) as en,
-          MAX(CASE WHEN "languageCode" IN ('ja', 'jp') THEN value ELSE NULL END) as jp,
-          MAX(description) as description
+        SELECT 
+          key,
+          ko,
+          en,
+          ja as jp,
+          'general' as category
         FROM language_packs
-        ${whereClause}
-        GROUP BY namespace, key
-        ORDER BY namespace ASC, key ASC
+        ORDER BY key ASC
       `, params);
       
       const languagePacks = result.rows.map((row, index) => ({
@@ -106,8 +85,8 @@ export async function GET(request: NextRequest) {
         ko: row.ko,
         en: row.en,
         jp: row.jp,
-        category: row.namespace,
-        description: row.description
+        category: row.category || 'general',
+        description: null
       }));
 
       return NextResponse.json(languagePacks);

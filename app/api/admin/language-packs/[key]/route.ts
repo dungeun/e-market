@@ -1,7 +1,7 @@
 import type { AppError } from '@/lib/types/common';
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+// import { prisma } from '@/lib/db'
 import { requireAdminAuth } from '@/lib/admin-auth'
 import { translateText } from '@/lib/services/google-translate.service'
 import { invalidateLanguagePacksCache } from '@/lib/cache/language-packs'

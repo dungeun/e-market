@@ -2,7 +2,7 @@ import type { User, RequestContext } from '@/lib/types/common';
 import type { AppError } from '@/lib/types/common';
 // TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
