@@ -6,8 +6,8 @@ import { cookies } from 'next/headers';
 // ISR 설정 - 5분마다 재생성 (JSON 캐시 TTL과 동기화)
 export const revalidate = 300;
 
-// 정적 생성 우선
-export const dynamic = 'force-static';
+// 임시로 동적 렌더링으로 변경하여 빌드 에러 방지
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 export default async function Page() {
