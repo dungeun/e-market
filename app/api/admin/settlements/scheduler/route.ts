@@ -2,7 +2,7 @@
 // 정산 스케줄러 관리 API
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
-import { settlementScheduler } from '@/lib/scheduler/settlement-scheduler';
+// import { settlementScheduler } from '@/lib/scheduler/settlement-scheduler';
 
 // 스케줄러 상태 조회
 export async function GET(request: NextRequest) {
@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
       return authResult.error;
     }
 
-    const status = settlementScheduler.getStatus();
+    // const status = settlementScheduler.getStatus();
 
     return NextResponse.json({
       success: true,
-      data: status
+      data: { message: 'Scheduler functionality temporarily disabled for Vercel deployment', isRunning: false }
     });
   } catch (error) {
 
@@ -49,15 +49,16 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'start':
-        settlementScheduler.start();
-        result = { message: '스케줄러가 시작되었습니다.' };
+        // settlementScheduler.start();
+        result = { message: '스케줄러 기능은 현재 Vercel 배포를 위해 임시 비활성화되었습니다.' };
         break;
       case 'stop':
-        settlementScheduler.stop();
-        result = { message: '스케줄러가 중지되었습니다.' };
+        // settlementScheduler.stop();
+        result = { message: '스케줄러 기능은 현재 Vercel 배포를 위해 임시 비활성화되었습니다.' };
         break;
       case 'manual':
-        result = await settlementScheduler.runManualSettlement();
+        // result = await settlementScheduler.runManualSettlement();
+        result = { message: '수동 정산 기능은 현재 Vercel 배포를 위해 임시 비활성화되었습니다.' };
         break;
     }
 
