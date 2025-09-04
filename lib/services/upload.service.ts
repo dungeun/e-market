@@ -1,5 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { put } from '@vercel/blob'
 import { NextRequest } from 'next/server'
 import sharp from 'sharp'
 
@@ -18,17 +17,9 @@ export interface ImageResizeOptions {
 }
 
 export class UploadService {
-  private uploadDir = join(process.cwd(), 'public', 'uploads')
-
   constructor() {
-    this.ensureUploadDir()
-  }
-
-  private async ensureUploadDir() {
-    try {
-      await mkdir(this.uploadDir, { recursive: true })
-    } catch (error) {
-
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.warn('BLOB_READ_WRITE_TOKEN not found, upload service may not work properly')
     }
   }
 
@@ -50,13 +41,6 @@ export class UploadService {
       const extension = file.name.split('.').pop()?.toLowerCase()
       const filename = `${timestamp}_${randomString}.${extension}`
 
-      // 업로드 경로 설정
-      const uploadPath = subfolder 
-        ? join(this.uploadDir, subfolder)
-        : this.uploadDir
-
-      await mkdir(uploadPath, { recursive: true })
-
       let processedBuffer: Buffer = buffer
 
       // 이미지 파일인 경우 리사이징 처리
@@ -64,23 +48,24 @@ export class UploadService {
         processedBuffer = await this.resizeImage(buffer, options) as Buffer
       }
 
-      // 파일 저장
-      const filePath = join(uploadPath, filename)
-      await writeFile(filePath, processedBuffer)
+      // Vercel Blob Storage에 업로드
+      const pathname = subfolder 
+        ? `${subfolder}/${filename}`
+        : filename
 
-      // URL 생성
-      const url = subfolder 
-        ? `/uploads/${subfolder}/${filename}`
-        : `/uploads/${filename}`
+      const blob = await put(pathname, processedBuffer, {
+        access: 'public',
+        contentType: file.type,
+      })
 
       return {
-        url,
+        url: blob.url,
         filename,
         size: processedBuffer.length,
         type: file.type
       }
     } catch (error) {
-
+      console.error('File upload error:', error)
       throw new Error('파일 업로드에 실패했습니다.')
     }
   }
@@ -109,13 +94,6 @@ export class UploadService {
       const extension = mimeType.split('/')[1] || 'jpg'
       const filename = `${timestamp}_${randomString}.${extension}`
 
-      // 업로드 경로 설정
-      const uploadPath = subfolder 
-        ? join(this.uploadDir, subfolder)
-        : this.uploadDir
-
-      await mkdir(uploadPath, { recursive: true })
-
       let processedBuffer: Buffer = buffer
 
       // 이미지 리사이징 처리
@@ -123,23 +101,24 @@ export class UploadService {
         processedBuffer = await this.resizeImage(buffer, options) as Buffer
       }
 
-      // 파일 저장
-      const filePath = join(uploadPath, filename)
-      await writeFile(filePath, processedBuffer)
+      // Vercel Blob Storage에 업로드
+      const pathname = subfolder 
+        ? `${subfolder}/${filename}`
+        : filename
 
-      // URL 생성
-      const url = subfolder 
-        ? `/uploads/${subfolder}/${filename}`
-        : `/uploads/${filename}`
+      const blob = await put(pathname, processedBuffer, {
+        access: 'public',
+        contentType: mimeType,
+      })
 
       return {
-        url,
+        url: blob.url,
         filename,
         size: processedBuffer.length,
         type: mimeType
       }
     } catch (error) {
-
+      console.error('Base64 image upload error:', error)
       throw new Error('이미지 업로드에 실패했습니다.')
     }
   }

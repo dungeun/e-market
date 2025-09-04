@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import logger from '@/lib/utils/logger';
+import { logger } from '@/lib/logger';
 
 // Redis 클라이언트 인스턴스
 let redis: Redis | null = null;
@@ -133,5 +133,8 @@ export async function closeRedis(): Promise<void> {
   }
 }
 
+// Named export for redis instance
+export { redis };
+
 // 기본 내보내기
-export default getRedis();
+export default redis;

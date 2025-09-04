@@ -1,4 +1,4 @@
-import { redis } from '@/lib/db/redis';
+import { getRedis } from '@/lib/db/redis';
 import { logger } from '@/lib/logger';
 import { query } from '@/lib/db';
 
@@ -74,6 +74,7 @@ function saveToMemory(key: string, data: LanguagePackData[]): void {
  */
 async function getFromRedis(key: string): Promise<LanguagePackData[] | null> {
   try {
+    const redis = getRedis();
     if (!redis) {
       return null;
     }
@@ -96,6 +97,7 @@ async function getFromRedis(key: string): Promise<LanguagePackData[] | null> {
  */
 async function saveToRedis(key: string, data: LanguagePackData[]): Promise<void> {
   try {
+    const redis = getRedis();
     if (!redis) {
       return;
     }
@@ -264,6 +266,7 @@ export async function invalidateLanguageCache(category?: string): Promise<void> 
   
   // Redis 캐시 무효화
   try {
+    const redis = getRedis();
     if (redis) {
       if (category) {
         await redis.del(cacheKey);

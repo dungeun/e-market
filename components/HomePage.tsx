@@ -88,7 +88,7 @@ const ActiveProductsSection = dynamic(
   },
 );
 
-import { CriticalCSS } from "@/components/CriticalCSS";
+import CriticalCSS from "@/components/CriticalCSS";
 import Image from "next/image";
 import CampaignCard from "@/components/CampaignCard";
 
