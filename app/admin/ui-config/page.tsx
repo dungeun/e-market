@@ -8,12 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useUIConfigStore } from '@/lib/stores/ui-config.store';
 import { HeaderConfigDB } from '@/components/admin/ui-config/HeaderConfigDB';
-import { FooterConfigDB } from '@/components/admin/ui-config/FooterConfigDB';
 import { SectionsConfigTab } from '@/components/admin/ui-config/SectionsConfigTab';
 import { SectionManagerTab } from '@/components/admin/ui-config/SectionManagerTab';
-import { CategoryConfigTab } from '@/components/admin/ui-config/CategoryConfigTab';
+import { CacheManager } from '@/components/admin/cache/CacheManager';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Settings, Layout, List, Move, Tag } from 'lucide-react';
+import { Settings, Layout, List, Move, Tag, Database } from 'lucide-react';
 import { toast } from 'sonner';
 
 function UIConfigContent() {
@@ -24,19 +23,19 @@ function UIConfigContent() {
   
   // URL 파라미터에서 탭 읽기
   const tabParam = searchParams.get('tab');
-  const initialTab = (tabParam as 'header' | 'footer' | 'sections' | 'categories') || 'header';
-  const [activeTab, setActiveTab] = useState<'header' | 'footer' | 'sections' | 'categories'>(initialTab);
+  const initialTab = (tabParam as 'header' | 'sections' | 'cache') || 'header';
+  const [activeTab, setActiveTab] = useState<'header' | 'sections' | 'cache'>(initialTab);
 
   // URL 파라미터 변경 시 탭 업데이트
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['header', 'footer', 'sections', 'categories'].includes(tab)) {
-      setActiveTab(tab as unknown);
+    if (tab && ['header', 'sections', 'cache'].includes(tab)) {
+      setActiveTab(tab as 'header' | 'sections' | 'cache');
     }
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value as unknown);
+    setActiveTab(value as 'header' | 'sections' | 'cache');
     router.push(`/admin/ui-config?tab=${value}`);
   };
 
@@ -58,7 +57,7 @@ function UIConfigContent() {
       </div>
 
       {/* 통계 카드 */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">헤더 메뉴</CardTitle>
@@ -66,15 +65,6 @@ function UIConfigContent() {
           <CardContent>
             <div className="text-2xl font-bold">6</div>
             <p className="text-xs text-muted-foreground">활성 메뉴 수</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">푸터 섹션</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">활성 섹션 수</p>
           </CardContent>
         </Card>
         <Card>
@@ -88,11 +78,11 @@ function UIConfigContent() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">카테고리</CardTitle>
+            <CardTitle className="text-sm font-medium">캐시 상태</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">등록된 카테고리</p>
+            <div className="text-2xl font-bold">정상</div>
+            <p className="text-xs text-muted-foreground">최적화 상태</p>
           </CardContent>
         </Card>
       </div>
@@ -107,36 +97,29 @@ function UIConfigContent() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="header">
                 <Layout className="mr-2 h-4 w-4" />
-                헤더
-              </TabsTrigger>
-              <TabsTrigger value="footer">
-                <Layout className="mr-2 h-4 w-4" />
-                푸터
+                헤더 메뉴
               </TabsTrigger>
               <TabsTrigger value="sections">
                 <List className="mr-2 h-4 w-4" />
                 섹션 관리
               </TabsTrigger>
-              <TabsTrigger value="categories">
-                <Tag className="mr-2 h-4 w-4" />
-                카테고리
+              <TabsTrigger value="cache">
+                <Database className="mr-2 h-4 w-4" />
+                캐시 관리
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="header" className="mt-6">
               <HeaderConfigDB />
             </TabsContent>
-            <TabsContent value="footer" className="mt-6">
-              <FooterConfigDB />
-            </TabsContent>
             <TabsContent value="sections" className="mt-6">
               <SectionsConfigTab />
             </TabsContent>
-            <TabsContent value="categories" className="mt-6">
-              <CategoryConfigTab />
+            <TabsContent value="cache" className="mt-6">
+              <CacheManager />
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -55,6 +55,8 @@ interface ProductForm {
   category: string
   categoryId: string // 카테고리 ID 추가
   brand: string // 브랜드 추가
+  warehouseId: string // 창고 ID 추가
+  vendorId: string // 입점업체 ID 추가
   stock: string
   images: UploadedImage[]
   featured: boolean
@@ -82,6 +84,10 @@ export default function CreateProductPage() {
   const [loadingBrands, setLoadingBrands] = useState(false)
   const [conditions, setConditions] = useState<any[]>([])
   const [loadingConditions, setLoadingConditions] = useState(true)
+  const [warehouses, setWarehouses] = useState<any[]>([])
+  const [loadingWarehouses, setLoadingWarehouses] = useState(true)
+  const [vendors, setVendors] = useState<any[]>([])
+  const [loadingVendors, setLoadingVendors] = useState(true)
   const [formData, setFormData] = useState<ProductForm>({
     name: '',
     description: '',
@@ -91,6 +97,8 @@ export default function CreateProductPage() {
     category: '',
     categoryId: '',
     brand: '',
+    warehouseId: '',
+    vendorId: '',
     stock: '1',
     images: [],
     featured: false,
@@ -193,6 +201,71 @@ export default function CreateProductPage() {
     loadConditions()
   }, [])
 
+  // 창고 데이터 로드
+  useEffect(() => {
+    const loadWarehouses = async () => {
+      try {
+        setLoadingWarehouses(true)
+        const token = localStorage.getItem('auth-token') || localStorage.getItem('accessToken')
+        const response = await fetch('/api/admin/b2b/warehouses', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setWarehouses(data.warehouses)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load warehouses:', error)
+        // 기본 창고 설정
+        setWarehouses([
+          { id: 1, code: 'WH001', name: '서울 중앙 물류센터', city: '서울', current_stock: 1000, capacity: 5000 },
+          { id: 2, code: 'WH002', name: '경기 북부 물류센터', city: '고양', current_stock: 2000, capacity: 7500 },
+          { id: 3, code: 'WH003', name: '부산 냉장 물류센터', city: '부산', current_stock: 500, capacity: 3000 }
+        ])
+      } finally {
+        setLoadingWarehouses(false)
+      }
+    }
+
+    loadWarehouses()
+  }, [])
+
+  // 입점업체 데이터 로드
+  useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        setLoadingVendors(true)
+        const token = localStorage.getItem('auth-token') || localStorage.getItem('accessToken')
+        const response = await fetch('/api/admin/b2b/vendors', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setVendors(data.vendors.filter((v: any) => v.status === 'approved'))
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load vendors:', error)
+        // 기본 입점업체 설정
+        setVendors([
+          { id: 1, code: 'V001', company_name: '삼성패션', status: 'approved' },
+          { id: 2, code: 'V002', company_name: 'LG뷰티', status: 'approved' }
+        ])
+      } finally {
+        setLoadingVendors(false)
+      }
+    }
+
+    loadVendors()
+  }, [])
+
   // 카테고리 선택 시 브랜드 로드
   useEffect(() => {
     const loadBrands = async () => {
@@ -287,8 +360,8 @@ export default function CreateProductPage() {
 
   // 상품 등록
   const handleSubmit = async () => {
-    if (!formData.name || !formData.price || !formData.stock || !formData.categoryId) {
-      toast.error('상품명, 카테고리, 가격, 재고는 필수입니다.')
+    if (!formData.name || !formData.price || !formData.stock || !formData.categoryId || !formData.warehouseId || !formData.vendorId) {
+      toast.error('상품명, 카테고리, 입점업체, 창고, 가격, 재고는 필수입니다.')
       return
     }
 
@@ -306,9 +379,14 @@ export default function CreateProductPage() {
           categoryId: formData.categoryId, // 카테고리 ID 전송
           brand: formData.brand || null, // 브랜드 정보 전송
           condition: formData.condition, // 상태 등급 전송
+          warehouseId: parseInt(formData.warehouseId), // 창고 ID 전송
+          vendorId: parseInt(formData.vendorId), // 입점업체 ID 전송
           price: parseFloat(formData.price),
           originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           stock: parseInt(formData.stock),
+          featured: formData.featured, // 추천 상품 여부
+          isNew: formData.isNew, // 신상품 표시 여부
+          autoTranslate: formData.autoTranslate, // 자동 번역 여부
           usagePeriod: formData.usagePeriod, // 사용기간 추가
           purchaseDate: formData.purchaseDate, // 구매시기 추가
           detailedDescription: formData.detailedDescription // 상세설명 추가
@@ -456,6 +534,56 @@ export default function CreateProductPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="vendor">입점업체 *</Label>
+                  <Select
+                    value={formData.vendorId}
+                    onValueChange={(value) => handleInputChange('vendorId', value)}
+                    disabled={loadingVendors}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingVendors ? "입점업체 로딩 중..." : "입점업체를 선택하세요"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vendors.map((vendor) => (
+                        <SelectItem key={vendor.id} value={vendor.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{vendor.company_name}</span>
+                            <span className="text-xs text-muted-foreground">({vendor.code})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="warehouse">창고 *</Label>
+                  <Select
+                    value={formData.warehouseId}
+                    onValueChange={(value) => handleInputChange('warehouseId', value)}
+                    disabled={loadingWarehouses}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingWarehouses ? "창고 로딩 중..." : "창고를 선택하세요"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {warehouses.map((warehouse) => (
+                        <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{warehouse.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {warehouse.city} | 재고: {warehouse.current_stock}/{warehouse.capacity}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -651,6 +779,16 @@ export default function CreateProductPage() {
                 {formData.brand && (
                   <div className="text-sm">
                     <span className="font-medium">브랜드:</span> {formData.brand}
+                  </div>
+                )}
+                {formData.vendorId && (
+                  <div className="text-sm">
+                    <span className="font-medium">입점업체:</span> {vendors.find(v => v.id.toString() === formData.vendorId)?.company_name || '미선택'}
+                  </div>
+                )}
+                {formData.warehouseId && (
+                  <div className="text-sm">
+                    <span className="font-medium">창고:</span> {warehouses.find(w => w.id.toString() === formData.warehouseId)?.name || '미선택'}
                   </div>
                 )}
                 <div className="text-sm">

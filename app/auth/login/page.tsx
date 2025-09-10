@@ -44,8 +44,6 @@ function LoginContent() {
       const result = await login({ email: testEmail, password: testPassword });
       
       if (result.success) {
-        alert(t('login.welcome', `환영합니다!`));
-        
         // 관리자인 경우 admin 페이지로 리다이렉트
         const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
         if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.type === 'ADMIN') {
@@ -73,8 +71,6 @@ function LoginContent() {
       const result = await login({ email, password });
       
       if (result.success) {
-        alert(t('login.welcome', `환영합니다!`));
-        
         // 관리자인 경우 admin 페이지로 리다이렉트
         const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
         if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.type === 'ADMIN') {
@@ -238,6 +234,16 @@ function LoginContent() {
                   disabled={isLoading}
                 >
                   {t('login.admin_login', '🔧 관리자로 로그인 (admin@example.com)')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-8 bg-white hover:bg-green-100 border-green-200"
+                  onClick={() => quickLogin('user@example.com', 'user123')}
+                  disabled={isLoading}
+                >
+                  {t('login.user_login', '👤 사용자로 로그인 (user@example.com)')}
                 </Button>
               </div>
             </div>

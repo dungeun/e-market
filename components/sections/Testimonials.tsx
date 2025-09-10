@@ -51,7 +51,7 @@ const Testimonials = React.memo(function Testimonials({ config = {}, reviews = [
 
   return (
     <section className="py-12 px-4 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 헤더 */}
         <div className="text-center mb-8">
           {config?.title && (

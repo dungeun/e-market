@@ -127,7 +127,7 @@ export async function preloadHomePageData(): Promise<unknown> {
  */
 async function getProducts(): Promise<ProductWithImage[]> {
   try {
-    // 베스트셀러 상품 조회 (Prisma 스키마에 맞게 수정)
+    // 베스트셀러 상품 조회 (실제 DB 스키마에 맞게 수정)
     const productsResult = await query(`
       SELECT 
         p.id,
@@ -136,15 +136,15 @@ async function getProducts(): Promise<ProductWithImage[]> {
         p.price,
         p.description,
         p.category_id,
-        CASE WHEN p.status = 'ACTIVE' THEN true ELSE false END as featured,
-        CASE WHEN p."publishedAt" > NOW() - INTERVAL '7 days' THEN true ELSE false END as new,
-        0 as rating,
-        p."createdAt" as created_at,
+        p.featured,
+        p.new,
+        p.rating,
+        p.created_at,
         pi.url as image_url
       FROM products p
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.order_index = 0
       WHERE p.status = 'ACTIVE'
-      ORDER BY p."createdAt" DESC, p.name ASC
+      ORDER BY p.created_at DESC, p.name ASC
       LIMIT 20
     `);
     
@@ -169,11 +169,11 @@ async function getCategories(): Promise<CategoryRow[]> {
         description,
         icon as image_url,
         parent_id,
-        "order" as position,
-        is_active
+        level as position,
+        CASE WHEN deleted_at IS NULL THEN true ELSE false END as is_active
       FROM categories
-      WHERE is_active = true
-      ORDER BY "order" ASC, name ASC
+      WHERE deleted_at IS NULL
+      ORDER BY level ASC, name ASC
     `);
     
     const categories = categoriesResult.rows as CategoryRow[];

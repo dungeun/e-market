@@ -2,10 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { env } from '@/lib/config/env';
 import Redis from 'ioredis'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  maxRetriesPerRequest: 3,
+const redisUrl = process.env.REDIS_URL
+const redis = redisUrl
+  ? new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'rate-limiter'
+    })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'rate-limiter'
+    })
+
+redis.on('error', (err) => {
+  console.warn('Redis connection error (rate-limiter):', err.message)
 })
 
 interface RateLimitConfig {

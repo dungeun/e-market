@@ -53,7 +53,7 @@ const FlashSale = React.memo(function FlashSale({ config = {}, products = [] }: 
 
   return (
     <section className="py-12 px-4 bg-white text-gray-900">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 헤더 */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div className="flex items-center gap-3 mb-4 md:mb-0">

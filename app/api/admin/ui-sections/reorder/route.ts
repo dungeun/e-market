@@ -4,7 +4,7 @@ import { env } from '@/lib/config/env';
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { emitToAll } from '@/lib/socket';
+import { broadcastUIUpdate } from '@/lib/events/broadcaster';
 
 // PUT: 섹션 순서 업데이트
 export async function PUT(request: NextRequest) {
@@ -156,7 +156,7 @@ export async function PUT(request: NextRequest) {
     const validUpdates = updates.filter(update => update !== null);
 
     // 실시간 섹션 순서 변경 이벤트 발생
-    emitToAll('ui:section:reordered', {
+    broadcastUIUpdate('ui:section:reordered', {
       action: 'reordered',
       sections: validUpdates.map(section => ({
         id: section.id,

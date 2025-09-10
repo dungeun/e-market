@@ -42,6 +42,27 @@ interface SiteSettings {
       hotjarId: string
     }
   }
+  footer?: {
+    enabled: boolean
+    companyName: string
+    ceoName: string
+    businessNumber: string
+    address: string
+    customerServicePhone: string
+    operatingHours: string
+    copyrightText: string
+    socialLinks: {
+      facebook: string
+      instagram: string
+      twitter: string
+      youtube: string
+    }
+    footerLinks: Array<{
+      title: string
+      url: string
+      newWindow: boolean
+    }>
+  }
   payments?: {
     platformFeeRate: number
     minimumPayout: number
@@ -156,7 +177,8 @@ export function useSiteSettings() {
               ...defaultSettings.website.analytics,
               ...(data.settings?.website?.analytics || {})
             }
-          }
+          },
+          footer: data.settings?.footer || undefined
         }
         setSettings(mergedSettings)
       } else {

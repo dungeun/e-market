@@ -73,12 +73,24 @@ export default function LanguagePacksPage() {
   }, []);
 
   useEffect(() => {
-    const filtered = languagePacks.filter(pack =>
-      pack.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      Object.values(pack.translations).some(translation =>
-        translation.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
+    if (!languagePacks || !Array.isArray(languagePacks)) {
+      setFilteredPacks([]);
+      return;
+    }
+    
+    const filtered = languagePacks.filter(pack => {
+      if (!pack || !pack.key) return false;
+      
+      const matchesKey = pack.key.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTranslations = pack.translations && typeof pack.translations === 'object' 
+        ? Object.values(pack.translations).some(translation =>
+            typeof translation === 'string' && translation.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : false;
+      
+      return matchesKey || matchesTranslations;
+    });
+    
     setFilteredPacks(filtered);
   }, [languagePacks, searchTerm]);
 
@@ -89,12 +101,17 @@ export default function LanguagePacksPage() {
       const data = await response.json();
       
       if (data.success) {
-        setLanguagePacks(data.packs);
+        setLanguagePacks(data.packs || []);
+        setFilteredPacks(data.packs || []);
       } else {
         toast.error('언어팩 데이터를 불러오는데 실패했습니다.');
+        setLanguagePacks([]);
+        setFilteredPacks([]);
       }
     } catch (error) {
       toast.error('언어팩 데이터를 불러오는데 실패했습니다.');
+      setLanguagePacks([]);
+      setFilteredPacks([]);
     } finally {
       setLoading(false);
     }
@@ -102,15 +119,15 @@ export default function LanguagePacksPage() {
 
   const fetchSelectedLanguages = async () => {
     try {
-      const response = await fetch('/api/admin/ui-menus');
+      const response = await fetch('/api/admin/i18n/settings');
       const data = await response.json();
       
-      if (data.success && data.languages) {
-        setSelectedLanguages(data.languages);
+      if (data.selectedLanguages) {
+        setSelectedLanguages(data.selectedLanguages);
         
         // 새 번역 객체 초기화
         const initialTranslations: { [key: string]: string } = {};
-        data.languages.forEach((lang: Language) => {
+        data.selectedLanguages.forEach((lang: Language) => {
           initialTranslations[lang.code] = '';
         });
         setNewTranslations(initialTranslations);
@@ -369,17 +386,17 @@ export default function LanguagePacksPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPacks.length === 0 ? (
+                    {!filteredPacks || filteredPacks.length === 0 ? (
                       <TableRow>
                         <TableCell 
-                          colSpan={selectedLanguages.length + 2} 
+                          colSpan={(selectedLanguages?.length || 0) + 2} 
                           className="text-center py-8 text-gray-500"
                         >
                           {languagePacks.length === 0 ? '등록된 언어팩이 없습니다.' : '검색 결과가 없습니다.'}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPacks.map((pack) => (
+                      filteredPacks?.map((pack) => (
                         <TableRow key={pack.id}>
                           <TableCell className="font-mono text-sm">{pack.key}</TableCell>
                           {selectedLanguages.map((language) => (

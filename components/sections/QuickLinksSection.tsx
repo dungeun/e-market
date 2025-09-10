@@ -176,8 +176,34 @@ const QuickLinksSection = React.memo(function QuickLinksSection({ data, sectionI
     );
   }
 
+  // 링크가 없을 때 기본 링크 표시
   if (!links || links.length === 0) {
-    return null;
+    links = [
+      {
+        id: '1',
+        icon: '🛍️',
+        title: '모든 상품',
+        description: '상품 둘러보기',
+        link: '/products',
+        color: 'bg-blue-50 border-blue-200'
+      },
+      {
+        id: '2',
+        icon: '🆕',
+        title: '신상품',
+        description: '새로 입고된 상품',
+        link: '/products?sort=newest',
+        color: 'bg-green-50 border-green-200'
+      },
+      {
+        id: '3',
+        icon: '💰',
+        title: '특가 상품',
+        description: '할인 행사 중',
+        link: '/products?category=sale',
+        color: 'bg-red-50 border-red-200'
+      }
+    ];
   }
 
   return (

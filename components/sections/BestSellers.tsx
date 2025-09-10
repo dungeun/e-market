@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 
 import ProductCard from './ProductCard'
+import SectionLayout from '../ui/SectionLayout'
 import { Trophy, TrendingUp } from 'lucide-react'
 
 interface BestSellersProps {
@@ -141,64 +142,53 @@ const BestSellers = React.memo(function BestSellers({ config: propsConfig, produ
   }
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-[1450px] mx-auto px-0">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Trophy className="w-8 h-8 text-red-500" />
-            <h2 className="text-3xl font-bold text-gray-900">
-              베스트 상품
-            </h2>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <TrendingUp className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-600">
-              {getPeriodText()} 베스트
-            </span>
-          </div>
+    <SectionLayout
+      theme="light"
+      layout="grid"
+      columns={4}
+      responsive={{
+        mobile: 2,
+        tablet: 4,
+        desktop: 4
+      }}
+      header={{
+        title: config?.title || '베스트 상품',
+        subtitle: `${getPeriodText()} 베스트`,
+        icon: Trophy,
+        secondaryIcon: TrendingUp,
+        centerAlign: true
+      }}
+      loading={loading}
+      empty={!loading && products.length === 0}
+      emptyState={{
+        message: '베스트셀러 상품이 없습니다.',
+        description: '나중에 다시 확인해주세요.'
+      }}
+      skeleton={{
+        count: 4,
+        height: '300px',
+        showHeader: true
+      }}
+      cta={{
+        text: '베스트셀러 전체보기',
+        href: `/best-sellers?period=${config?.period || 'all'}`,
+        variant: 'outline'
+      }}
+      containerClassName="max-w-[1450px] px-0"
+      section={{
+        'aria-label': '베스트셀러 상품 목록'
+      }}
+    >
+      {products.slice(0, config?.limit || 4).map((product, index) => (
+        <div key={product.id} className="p-2">
+          <ProductCard
+            product={product}
+            showRanking={config?.showRanking ? index + 1 : undefined}
+            showSalesCount={config?.showSalesCount}
+          />
         </div>
-
-        {/* 상품 리스트 */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="animate-pulse p-2">
-                <div className="bg-gray-200 rounded-lg h-64"></div>
-                <div className="mt-2 h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="mt-1 h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
-            {products.slice(0, 4).map((product, index) => (
-              <div key={product.id} className="p-2">
-                <ProductCard
-                  product={product}
-                  showRanking={config?.showRanking ? index + 1 : undefined}
-                  showSalesCount={config?.showSalesCount}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-gray-500">
-            베스트셀러 상품이 없습니다.
-          </div>
-        )}
-
-        {/* 더보기 */}
-        <div className="text-center mt-8">
-          <a
-            href={`/best-sellers?period=${config?.period}`}
-            className="inline-block px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
-          >
-            베스트셀러 전체보기
-          </a>
-        </div>
-      </div>
-    </section>
+      ))}
+    </SectionLayout>
     )
 });
 

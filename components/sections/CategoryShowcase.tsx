@@ -32,7 +32,7 @@ const CategoryShowcase = React.memo(function CategoryShowcase({ config, data }: 
 
   return (
     <section className="py-16 px-4 bg-gray-50">
-      <div className="container mx-auto max-w-7xl">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

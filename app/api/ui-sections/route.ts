@@ -3,17 +3,47 @@ import type { AppError } from '@/lib/types/common';
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { emitToAll } from '@/lib/socket-client';
+import { broadcastUIUpdate } from '@/lib/events/broadcaster';
+import { uiSectionsCacheService } from '@/lib/services/ui-sections-cache';
 
-// GET: UISection 조회
+// GET: UISection 조회 (캐시 우선)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const sectionId = searchParams.get('sectionId');
     const type = searchParams.get('type');
     const visible = searchParams.get('visible');
+    const language = searchParams.get('language') || 'ko';
+    const useCache = searchParams.get('cache') !== 'false'; // 기본적으로 캐시 사용
 
-    // SQL 쿼리 구성
+    // 캐시 사용 및 필터링이 간단한 경우 캐시에서 조회
+    if (useCache && !sectionId && !type && visible !== 'false') {
+      try {
+        const isValid = await uiSectionsCacheService.isCacheValid();
+        if (isValid) {
+          const cacheData = await uiSectionsCacheService.readCache(language);
+          if (cacheData && cacheData.sections) {
+            logger.info(`Serving UI sections from cache for language: ${language}`);
+            return NextResponse.json({
+              sections: cacheData.sections,
+              success: true,
+              cached: true,
+              language: cacheData.language,
+              lastUpdated: cacheData.lastUpdated
+            });
+          }
+        } else {
+          // 캐시가 유효하지 않은 경우 백그라운드에서 재생성
+          uiSectionsCacheService.generateCache().catch(error => {
+            logger.error('Background cache regeneration failed:', error);
+          });
+        }
+      } catch (cacheError) {
+        logger.warn('Cache read failed, falling back to database:', cacheError);
+      }
+    }
+
+    // 데이터베이스에서 직접 조회
     let sqlQuery = 'SELECT * FROM ui_sections WHERE 1=1';
     const params = [];
     let paramIndex = 1;
@@ -49,7 +79,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       sections,
-      success: true 
+      success: true,
+      cached: false
     });
   } catch (error) {
     logger.error('Error fetching UI sections:', error);
@@ -81,10 +112,15 @@ export async function POST(request: NextRequest) {
          RETURNING *`,
         [sectionId, type, title, JSON.stringify(content), order, visible, JSON.stringify(translations || {})]
       );
-      // Socket.io 이벤트 발생: 섹션 업데이트
-      emitToAll('ui:section:updated', {
+      // SSE 이벤트 발생: 섹션 업데이트
+      broadcastUIUpdate({
         type: 'update',
         section: updateResult.rows[0]
+      });
+
+      // 캐시 무효화
+      uiSectionsCacheService.clearCache().catch(error => {
+        logger.error('Cache invalidation failed after section update:', error);
       });
       
       return NextResponse.json({ section: updateResult.rows[0] });
@@ -99,10 +135,15 @@ export async function POST(request: NextRequest) {
         [id, sectionId, type, title, JSON.stringify(content || {}), order || 0, visible !== false, JSON.stringify(translations || {})]
       );
       
-      // Socket.io 이벤트 발생: 섹션 생성
-      emitToAll('ui:section:updated', {
+      // SSE 이벤트 발생: 섹션 생성
+      broadcastUIUpdate({
         type: 'create',
         section: createResult.rows[0]
+      });
+
+      // 캐시 무효화
+      uiSectionsCacheService.clearCache().catch(error => {
+        logger.error('Cache invalidation failed after section create:', error);
       });
       
       return NextResponse.json({ section: createResult.rows[0] });
@@ -148,10 +189,15 @@ export async function PUT(request: NextRequest) {
       values
     );
 
-    // Socket.io 이벤트 발생: 섹션 업데이트
-    emitToAll('ui:section:updated', {
+    // SSE 이벤트 발생: 섹션 업데이트
+    broadcastUIUpdate({
       type: 'update',
       section: updateResult.rows[0]
+    });
+
+    // 캐시 무효화
+    uiSectionsCacheService.clearCache().catch(error => {
+      logger.error('Cache invalidation failed after section update:', error);
     });
 
     return NextResponse.json({ section: updateResult.rows[0] });
@@ -173,10 +219,15 @@ export async function DELETE(request: NextRequest) {
 
     await query('DELETE FROM ui_sections WHERE id = $1', [id]);
 
-    // Socket.io 이벤트 발생: 섹션 삭제
-    emitToAll('ui:section:updated', {
+    // SSE 이벤트 발생: 섹션 삭제
+    broadcastUIUpdate({
       type: 'delete',
       sectionId: id
+    });
+
+    // 캐시 무효화
+    uiSectionsCacheService.clearCache().catch(error => {
+      logger.error('Cache invalidation failed after section delete:', error);
     });
 
     return NextResponse.json({ success: true });

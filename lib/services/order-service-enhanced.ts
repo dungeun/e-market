@@ -7,10 +7,28 @@ import { inventoryService } from './inventory-service'
 import { paymentService } from './payment-service'
 import { cartService } from './cart-service'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD
+const redisUrl = process.env.REDIS_URL
+const redis = redisUrl
+  ? new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'order-service-enhanced'
+    })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'order-service-enhanced'
+    })
+
+redis.on('error', (err) => {
+  console.warn('Redis connection error (order service):', err.message)
 })
 
 export interface Order {

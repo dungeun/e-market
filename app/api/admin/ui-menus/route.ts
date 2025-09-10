@@ -9,7 +9,7 @@ import { translateText } from '@/lib/services/translation.service';
 async function getEnabledLanguages(): Promise<string[]> {
   try {
     const result = await query(`
-      SELECT code FROM language_metadata 
+      SELECT code FROM language_settings 
       WHERE enabled = true 
       ORDER BY is_default DESC, code ASC
     `);
@@ -29,55 +29,45 @@ export async function GET(req: NextRequest) {
     // 활성화된 언어 목록 조회
     const enabledLanguages = await getEnabledLanguages();
 
-    // ui_menus 테이블에서 메뉴 조회하고 언어팩 데이터 조인
+    // ui_menus 테이블에서 메뉴 조회
     const result = await query(`
       SELECT 
-        um.*,
-        COALESCE(
-          json_object_agg(
-            lpt.language_code, 
-            lpt.translation
-          ) FILTER (WHERE lpt.language_code IS NOT NULL),
-          '{}'
-        ) as language_pack_translations
+        um.*
       FROM ui_menus um
-      LEFT JOIN language_pack_keys lpk ON lpk.key_name = (um.content->>'languagePackKey')
-      LEFT JOIN language_pack_translations lpt ON lpk.id = lpt.key_id
-      WHERE um.type = $1 AND um.visible = true
-      GROUP BY um.id, um.type, um."sectionId", um.content, um.visible, um."order", um."createdAt", um."updatedAt"
+      WHERE um.visible = true
+        AND um.type = $1
       ORDER BY um."order" ASC
     `, [type]);
     
-    // 메뉴 데이터에 언어팩 정보 병합 (동적 언어 지원)
+    // 메뉴 데이터 반환 (ui_menus 스키마에 맞게)
     const menus = result.rows.map(menu => {
-      const content = menu.content || {};
-      const translations = menu.language_pack_translations || {};
-      
-      // 동적으로 content에 언어별 필드 추가
-      const updatedContent = { ...content };
-      
-      enabledLanguages.forEach(langCode => {
-        if (translations[langCode]) {
-          if (langCode === 'ko') {
-            // 기본 언어인 경우 label, name 필드 업데이트
-            updatedContent.label = translations[langCode];
-            updatedContent.name = translations[langCode];
-          } else {
-            // 다른 언어인 경우 label_{code} 형식으로 추가
-            updatedContent[`label_${langCode}`] = translations[langCode];
-          }
+      // content 필드가 이미 객체인지 JSON 문자열인지 확인
+      let menuContent = {};
+      try {
+        if (typeof menu.content === 'string') {
+          menuContent = JSON.parse(menu.content);
+        } else if (typeof menu.content === 'object' && menu.content !== null) {
+          menuContent = menu.content;
         }
-      });
+      } catch (e) {
+        menuContent = {};
+      }
       
       return {
-        ...menu,
-        content: updatedContent,
-        // 추가 정보로 번역 데이터 제공 (활성화된 언어만)
-        translations: Object.fromEntries(
-          Object.entries(translations).filter(([langCode]) => 
-            enabledLanguages.includes(langCode)
-          )
-        )
+        id: menu.id,
+        key: menu.sectionId, // sectionId를 key로 매핑
+        title: menuContent.name || menuContent.label || 'Unknown',
+        name: menuContent.name || menuContent.label || 'Unknown',
+        label: menuContent.name || menuContent.label || 'Unknown',
+        type: menu.type,
+        href: menuContent.href || menuContent.url || '/',
+        icon: menuContent.icon || null,
+        order: menu.order,
+        visible: menu.visible,
+        isActive: menu.visible, // visible을 isActive로 매핑
+        content: menuContent,
+        createdAt: menu.createdAt,
+        updatedAt: menu.updatedAt
       };
     });
 

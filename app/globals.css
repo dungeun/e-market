@@ -81,3 +81,75 @@
     color: var(--foreground);
   }
 }
+
+/* Admin Layout Fixes */
+@layer components {
+  /* Toast notifications */
+  [data-sonner-toaster] {
+    z-index: 100 !important;
+  }
+
+  /* Dialog/Modal fixes for proper layering */
+  [data-slot="dialog-overlay"] {
+    z-index: 9999 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  [data-slot="dialog-content"] {
+    z-index: 10000 !important;
+    background-color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  /* Ensure modal portal renders on top */
+  [data-slot="dialog-portal"] {
+    z-index: 9998 !important;
+  }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Horizontal scroll indicator for mobile */
+  .scroll-indicator {
+    position: relative;
+  }
+  
+  .scroll-indicator::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8));
+    pointer-events: none;
+  }
+}

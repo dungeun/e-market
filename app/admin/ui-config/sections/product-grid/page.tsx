@@ -90,15 +90,15 @@ function ProductGridConfigContent() {
         },
         body: JSON.stringify({
           title: formData.title,
-          isActive: formData.isActive,
-          data: {
-            subtitle: formData.subtitle,
-            sortBy: formData.sortBy,
-            itemsPerPage: formData.itemsPerPage,
-            categories: formData.categories,
-            showFilters: formData.showFilters,
-            showSearch: formData.showSearch,
-          }
+          visible: formData.isActive,
+          subtitle: formData.subtitle,
+          sortBy: formData.sortBy,
+          itemsPerPage: formData.itemsPerPage,
+          productCount: formData.itemsPerPage,
+          categories: formData.categories,
+          categoryFilter: formData.categories?.[0] || '',
+          showFilters: formData.showFilters,
+          showSearch: formData.showSearch
         }),
       });
 

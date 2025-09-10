@@ -37,7 +37,7 @@ const BannerGrid = React.memo(function BannerGrid({ config }: BannerGridProps) {
 
   return (
     <section className="py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           className={`grid ${getGridClass()} gap-${config?.spacing || 4}`}
         >

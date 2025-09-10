@@ -72,6 +72,71 @@ const DEFAULT_TEMPLATES: ProductTemplate[] = [
     usageCount: 15
   },
   {
+    id: 'template_electronics_refrigerator',
+    name: '냉장고 템플릿',
+    category: '전자제품',
+    condition: 'EXCELLENT',
+    priceRange: { min: 300000, max: 1500000 },
+    description: '깨끗한 중고 냉장고입니다. 냉각 기능 정상 작동하며 외관상 흠집이 거의 없는 상태입니다. 내부도 청결하게 관리되었습니다.',
+    tags: ['냉장고', '가전제품', '주방가전'],
+    featured: true,
+    autoTranslate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 25
+  },
+  {
+    id: 'template_electronics_washing_machine',
+    name: '세탁기 템플릿',
+    category: '전자제품',
+    condition: 'GOOD',
+    priceRange: { min: 200000, max: 1200000 },
+    description: '정상 작동하는 중고 세탁기입니다. 세탁 및 탈수 기능 모두 정상이며 일상적인 사용감은 있지만 성능상 문제없습니다.',
+    tags: ['세탁기', '가전제품', '생활가전'],
+    featured: false,
+    autoTranslate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 22
+  },
+  {
+    id: 'template_electronics_aircon',
+    name: '에어컨 템플릿',
+    category: '전자제품',
+    condition: 'GOOD',
+    priceRange: { min: 250000, max: 1000000 },
+    description: '냉방 성능 우수한 중고 에어컨입니다. 정기 청소를 통해 깔끔하게 관리되었으며 냉방 효율이 좋습니다.',
+    tags: ['에어컨', '냉방기', '가전제품'],
+    featured: false,
+    autoTranslate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 18
+  },
+  {
+    id: 'template_electronics_microwave',
+    name: '전자레인지 템플릿',
+    category: '전자제품',
+    condition: 'EXCELLENT',
+    priceRange: { min: 50000, max: 300000 },
+    description: '깨끗한 중고 전자레인지입니다. 가열 기능 정상 작동하며 내외부 모두 청결한 상태로 관리되었습니다.',
+    tags: ['전자레인지', '주방가전', '조리기구'],
+    featured: false,
+    autoTranslate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 12
+  },
+  {
+    id: 'template_electronics_rice_cooker',
+    name: '밥솥 템플릿',
+    category: '전자제품',
+    condition: 'GOOD',
+    priceRange: { min: 30000, max: 200000 },
+    description: '정상 작동하는 중고 전기밥솥입니다. 밥 짓기 기능 완벽하며 내솥 상태도 양호합니다.',
+    tags: ['밥솥', '전기밥솥', '주방가전'],
+    featured: false,
+    autoTranslate: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 14
+  },
+  {
     id: 'template_furniture_desk',
     name: '가구 템플릿',
     category: '중고 가구',
@@ -79,19 +144,19 @@ const DEFAULT_TEMPLATES: ProductTemplate[] = [
     priceRange: { min: 50000, max: 500000 },
     description: '실용적인 중고 가구입니다. 일상 사용감은 있으나 구조적으로 견고하며 기능상 문제없습니다.',
     tags: ['가구', '인테리어', '생활용품'],
-    featured: true,
+    featured: false,
     autoTranslate: true,
     createdAt: '2024-01-01T00:00:00Z',
     usageCount: 12
   },
   {
     id: 'template_appliance_tv',
-    name: '가전제품 템플릿',
-    category: '중고 가전제품',
+    name: 'TV 템플릿',
+    category: '전자제품',
     condition: 'EXCELLENT',
-    priceRange: { min: 100000, max: 800000 },
-    description: '깨끗한 중고 가전제품입니다. 정상 작동하며 외관상 흠집이 거의 없는 상태입니다.',
-    tags: ['가전제품', 'TV', '전자제품'],
+    priceRange: { min: 200000, max: 1500000 },
+    description: '화질 선명한 중고 TV입니다. 정상 작동하며 외관상 흠집이 거의 없는 상태입니다. 리모컨 포함.',
+    tags: ['TV', '텔레비전', '전자제품'],
     featured: false,
     autoTranslate: true,
     createdAt: '2024-01-01T00:00:00Z',
@@ -308,9 +373,9 @@ const ProductTemplateManager = React.memo(function ProductTemplateManager({
               <SelectTrigger>
                 <SelectValue placeholder="사용할 템플릿을 선택하세요" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-[300px] overflow-y-auto">
                 {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
+                  <SelectItem key={template.id} value={template.id} className="hover:bg-gray-50 focus:bg-gray-100">
                     <div className="flex items-center gap-2">
                       {template.featured && <Star className="h-3 w-3 text-yellow-500" />}
                       <span>{template.name}</span>

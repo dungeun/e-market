@@ -24,44 +24,44 @@ export async function GET(
 
     const section = result.rows[0];
     
-    // content 필드를 개별 필드로 분리
-    const content = typeof section.content === 'string' 
-      ? JSON.parse(section.content) 
-      : section.content || {};
+    // data 필드를 개별 필드로 분리
+    const content = typeof section.data === 'string' 
+      ? JSON.parse(section.data) 
+      : section.data || {};
 
     return NextResponse.json({
-      success: true,
-      section: {
-        id: section.id,
-        key: section.key,
-        type: section.type || content.type || 'best-sellers',
-        title: section.title,
-        subtitle: content.subtitle,
-        content: content.content || content.description || '',
-        buttonText: content.buttonText,
-        buttonLink: content.buttonLink,
-        backgroundColor: content.backgroundColor,
-        textColor: content.textColor,
-        layout: content.layout || 'grid',
-        visible: section.visible,
-        productCount: content.productCount || content.itemsPerPage || 8,
-        showPrice: content.showPrice !== false,
-        showRating: content.showRating !== false,
-        showBadge: content.showBadge !== false,
-        autoSlide: content.autoSlide || false,
-        slideDuration: content.slideDuration || 3000,
-        categoryFilter: content.categoryFilter || content.categories?.[0] || '',
-        sortBy: content.sortBy || 'popularity',
-        selectionMode: content.selectionMode || 'auto',
-        minSales: content.minSales || 10,
-        minRating: content.minRating || 4.0,
-        dateRange: content.dateRange || 30,
-        manualProducts: content.manualProducts || [],
-        images: content.images || {},
-        order: section.order,
-        created_at: section.created_at,
-        updated_at: section.updated_at
-      }
+      id: section.id,
+      key: section.key,
+      type: section.type || content.type || 'best-sellers',
+      title: section.title,
+      order: section.order,
+      isActive: section.isActive,
+      data: content,
+      // 하위 호환성을 위한 개별 필드들
+      subtitle: content.subtitle,
+      content: content.content || content.description || '',
+      buttonText: content.buttonText,
+      buttonLink: content.buttonLink,
+      backgroundColor: content.backgroundColor,
+      textColor: content.textColor,
+      layout: content.layout || 'grid',
+      visible: section.isActive,
+      productCount: content.productCount || content.itemsPerPage || 8,
+      showPrice: content.showPrice !== false,
+      showRating: content.showRating !== false,
+      showBadge: content.showBadge !== false,
+      autoSlide: content.autoSlide || false,
+      slideDuration: content.slideDuration || 3000,
+      categoryFilter: content.categoryFilter || content.categories?.[0] || '',
+      sortBy: content.sortBy || 'popularity',
+      selectionMode: content.selectionMode || 'auto',
+      minSales: content.minSales || 10,
+      minRating: content.minRating || 4.0,
+      dateRange: content.dateRange || 30,
+      manualProducts: content.manualProducts || [],
+      images: content.images || {},
+      created_at: section.createdAt,
+      updated_at: section.updatedAt
     });
   } catch (error) {
     logger.error('Error fetching section:', error);
@@ -130,16 +130,16 @@ export async function PUT(
       UPDATE ui_sections 
       SET 
         title = $1,
-        content = $2,
-        visible = $3,
+        data = $2,
+        "isActive" = $3,
         type = $4,
-        updated_at = NOW()
+        "updatedAt" = NOW()
       WHERE id = $5 OR key = $5
       RETURNING *
     `, [
       body.title || currentSection.title,
       JSON.stringify(content),
-      body.visible !== undefined ? body.visible : currentSection.visible,
+      body.visible !== undefined ? body.visible : currentSection.isActive,
       body.type || currentSection.type || 'best-sellers',
       sectionId
     ]);

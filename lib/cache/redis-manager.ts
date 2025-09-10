@@ -133,20 +133,33 @@ export class RedisCacheManager extends EventEmitter {
   private constructor() {
     super();
 
-    // Redis 클라이언트 초기화
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || "0"),
-      retryStrategy: (times) => {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      enableOfflineQueue: true,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-    });
+    // Redis 클라이언트 초기화 - REDIS_URL 우선 사용
+    const redisUrl = process.env.REDIS_URL;
+    this.redis = redisUrl
+      ? new Redis(redisUrl, {
+          retryStrategy: (times) => {
+            const delay = Math.min(times * 50, 2000);
+            return delay;
+          },
+          enableOfflineQueue: true,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectionName: 'redis-manager'
+        })
+      : new Redis({
+          host: process.env.REDIS_HOST || "localhost",
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+          password: process.env.REDIS_PASSWORD,
+          db: parseInt(process.env.REDIS_DB || "0"),
+          retryStrategy: (times) => {
+            const delay = Math.min(times * 50, 2000);
+            return delay;
+          },
+          enableOfflineQueue: true,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectionName: 'redis-manager'
+        });
 
     // Circuit Breaker 초기화
     this.circuitBreaker = new CircuitBreaker();

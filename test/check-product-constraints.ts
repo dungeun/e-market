@@ -13,7 +13,7 @@ async function checkProductConstraints() {
         WHERE typname = (
           SELECT SUBSTRING(data_type FROM 'USER-DEFINED\\((.*)\\)') 
           FROM information_schema.columns 
-          WHERE table_name = 'Product' AND column_name = 'status'
+          WHERE table_name = 'products' AND column_name = 'status'
         )
       )
     `)
@@ -23,7 +23,7 @@ async function checkProductConstraints() {
     })
     
     // Check if there are any existing products
-    const existingResult = await query('SELECT id, name, status FROM "Product" LIMIT 5')
+    const existingResult = await query('SELECT id, name, status FROM products LIMIT 5')
 
     existingResult.rows.forEach(row => {
       console.log(`  - ${row.id}: ${row.name} (${row.status})`)

@@ -5,11 +5,38 @@ import { Redis } from 'ioredis'
 import { v4 as uuidv4 } from 'uuid'
 import { productService } from './product-service'
 import { inventoryService } from './inventory-service'
+import { 
+  unifiedQueryService, 
+  findById, 
+  findByField, 
+  findByIds,
+  updateById,
+  deleteById,
+  CACHE_TTL 
+} from './unified-query-service'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD
+const redisUrl = process.env.REDIS_URL
+const redis = redisUrl
+  ? new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'cart-service'
+    })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'cart-service'
+    })
+
+redis.on('error', (err) => {
+  console.warn('Redis connection error (cart service):', err.message)
 })
 
 export interface Cart {
@@ -96,17 +123,18 @@ export class CartService {
   
   // Find existing cart
   private async findCart(identifier: string, isUserId: boolean): Promise<Cart | null> {
-    const whereClause = isUserId ? 'user_id = $1' : 'session_id = $1'
+    const field = isUserId ? 'user_id' : 'session_id'
     
-    const result = await query(`
+    // 통합 쿼리 서비스 사용으로 캐싱 자동 적용
+    const carts = await unifiedQueryService.executeRaw<Cart>(`
       SELECT * FROM carts
-      WHERE ${whereClause}
+      WHERE ${field} = $1
       AND (expires_at IS NULL OR expires_at > NOW())
       ORDER BY created_at DESC
       LIMIT 1
-    `, [identifier])
+    `, [identifier], { useCache: true, cacheTTL: CACHE_TTL.SHORT })
     
-    return result.rows[0] || null
+    return carts[0] || null
   }
   
   // Create new cart
@@ -137,17 +165,29 @@ export class CartService {
   
   // Load cart with items
   private async loadCartWithItems(cart: Cart): Promise<Cart> {
-    const itemsResult = await query(`
-      SELECT * FROM cart_items
-      WHERE cart_id = $1
-      ORDER BY created_at ASC
-    `, [cart.id])
+    // 통합 쿼리 서비스로 카트 아이템 조회 (캐싱 적용)
+    const cartItems = await unifiedQueryService.findByField<CartItem>(
+      'cart_items',
+      'cart_id',
+      cart.id,
+      { useCache: true, cacheTTL: CACHE_TTL.SHORT }
+    );
+    
+    if (!cartItems || cartItems.length === 0) {
+      return { ...cart, items: [] };
+    }
     
     const items: CartItem[] = []
     
-    for (const item of itemsResult.rows) {
-      // Get product details
-      const product = await productService.getProduct(item.product_id)
+    // 상품 ID 배치 조회로 N+1 문제 해결
+    const productIds = (cartItems as any[]).map(item => item.product_id);
+    const products = await findByIds('products', productIds, { 
+      useCache: true, 
+      cacheTTL: CACHE_TTL.MEDIUM 
+    });
+    
+    for (const item of cartItems as any[]) {
+      const product = products.get(item.product_id);
       
       if (product) {
         items.push({
@@ -186,16 +226,16 @@ export class CartService {
       throw new Error('Insufficient stock')
     }
     
-    // Check if item already in cart
-    const existingItemResult = await query(`
+    // 통합 쿼리로 기존 아이템 확인
+    const existingItem = await unifiedQueryService.executeRaw<CartItem>(`
       SELECT * FROM cart_items
       WHERE cart_id = $1 AND product_id = $2
-    `, [cart.id, productId])
+    `, [cart.id, productId], { useCache: false }); // 실시간 데이터 필요
     
-    if (existingItemResult.rows.length > 0) {
+    if (existingItem.length > 0) {
       // Update quantity
-      const existingItem = existingItemResult.rows[0]
-      const newQuantity = existingItem.quantity + quantity
+      const item = existingItem[0];
+      const newQuantity = (item as any).quantity + quantity;
       
       // Check stock for new quantity
       const hasStockForUpdate = await inventoryService.checkStock(productId, newQuantity)
@@ -203,20 +243,26 @@ export class CartService {
         throw new Error('Insufficient stock for requested quantity')
       }
       
-      await query(`
-        UPDATE cart_items
-        SET quantity = $3, updated_at = NOW()
-        WHERE cart_id = $1 AND product_id = $2
-      `, [cart.id, productId, newQuantity])
+      // 통합 쿼리로 업데이트
+      await updateById('cart_items', (item as any).id, {
+        quantity: newQuantity
+      }, { transaction: false });
+      
+      // 카트 캐시 무효화
+      await unifiedQueryService.invalidateTableCache('cart_items');
     } else {
-      // Add new item
+      // Add new item - 배치 삽입 활용
       const itemId = uuidv4()
-      await query(`
-        INSERT INTO cart_items (
-          id, cart_id, product_id, quantity,
-          price, metadata, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-      `, [itemId, cart.id, productId, quantity, product.price, metadata])
+      await unifiedQueryService.batchInsert('cart_items', [{
+        id: itemId,
+        cart_id: cart.id,
+        product_id: productId,
+        quantity: quantity,
+        price: product.price,
+        metadata: metadata || {},
+        created_at: new Date(),
+        updated_at: new Date()
+      }], { transaction: false });
     }
     
     // Update cart timestamp

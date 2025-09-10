@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { emitToAll } from '@/lib/socket-client';
+import { broadcastUIUpdate } from '@/lib/events/broadcaster';
 
 // POST: UISection 순서 변경
 export async function POST(request: NextRequest) {
@@ -62,11 +62,10 @@ export async function POST(request: NextRequest) {
       translations: typeof section.translations === 'string' ? JSON.parse(section.translations || '{}') : section.translations,
     }));
 
-    // Socket.io 이벤트 발생: 섹션 순서 변경
-    emitToAll('ui:section:reordered', {
+    // SSE 이벤트 발생: 섹션 순서 변경
+    broadcastUIUpdate({
       type: 'reorder',
-      sections: updatedSections,
-      sectionOrder
+      sections: updatedSections
     });
 
     return NextResponse.json({

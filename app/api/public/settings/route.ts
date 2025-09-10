@@ -1,8 +1,8 @@
-// TODO: Refactor to use createApiHandler from @/lib/api/handler
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // GET /api/public/settings - 공개 설정 조회 (인증 불필요)
 export async function GET(request: NextRequest) {
@@ -10,51 +10,61 @@ export async function GET(request: NextRequest) {
     // 공개적으로 접근 가능한 설정만 조회
     const publicSettingKeys = [
       'general',
-      'website'
+      'store',
+      'website',
+      'footer',
+      'seo'
     ]
 
     const settings: Record<string, any> = {}
     
     // 각 설정 키에 대해 DB 조회
     for (const key of publicSettingKeys) {
-      const result = await query(`
-        SELECT key, value FROM site_config WHERE key = $1
-      `, [key])
-      
-      const config = result.rows[0]
-      if (config) {
-        try {
-          settings[key] = JSON.parse(config.value)
-        } catch (e) {
-          // JSON 파싱 실패 시 문자열 그대로 사용
-          settings[key] = config.value
+      try {
+        const result = await query(
+          'SELECT value FROM site_settings WHERE key = $1',
+          [key]
+        )
+        
+        if (result.rows.length > 0) {
+          settings[key] = result.rows[0].value
         }
+      } catch (e) {
+        console.error(`Failed to fetch setting for key ${key}:`, e)
       }
     }
 
     // 설정이 없으면 기본값 사용
     const defaultSettings = {
       general: {
-        siteName: 'E-Market Korea',
-        siteDescription: '해외 노동자를 위한 중고 거래 플랫폼',
-        supportEmail: 'support@emarketkorea.com',
+        siteName: 'Commerce Store',
+        siteDescription: '최고의 온라인 쇼핑 경험을 제공합니다.',
+        supportEmail: 'support@example.com',
         maintenanceMode: false,
         registrationEnabled: true,
         emailVerificationRequired: true
       },
+      store: {
+        storeName: 'Commerce Store',
+        storeEmail: 'store@example.com',
+        storePhone: '02-1234-5678',
+        storeAddress: '서울시 강남구 테헤란로 123',
+        businessNumber: '123-45-67890',
+        ceoName: '홍길동',
+        onlineBusinessNumber: '2024-서울강남-1234',
+        facebook: 'https://facebook.com/commercestore',
+        instagram: 'https://instagram.com/commercestore',
+        twitter: 'https://twitter.com/commercestore',
+        youtube: 'https://youtube.com/commercestore'
+      },
       website: {
-        logo: '/logo.svg',
-        favicon: '/favicon.svg',
+        logo: '/logo.png',
+        favicon: '/favicon.ico',
         primaryColor: '#3B82F6',
         secondaryColor: '#10B981',
         footerEnabled: true,
-        footerText: '© 2024 E-Market Korea. All rights reserved.',
-        footerLinks: [
-          { title: '이용약관', url: '/terms', newWindow: false },
-          { title: '개인정보처리방침', url: '/privacy', newWindow: false },
-          { title: '고객지원', url: '/support', newWindow: false },
-          { title: '회사소개', url: '/about', newWindow: false }
-        ],
+        footerText: '© 2024 Commerce Store. All rights reserved.',
+        footerLinks: [],
         socialLinks: {
           facebook: '',
           twitter: '',
@@ -63,16 +73,23 @@ export async function GET(request: NextRequest) {
           linkedin: ''
         },
         seo: {
-          metaTitle: 'E-Market Korea - 해외 노동자를 위한 중고 거래 플랫폼',
-          metaDescription: '한국에서 생활하는 외국인 노동자들을 위한 필수품 중고 거래 플랫폼입니다.',
-          metaKeywords: '중고거래, 외국인노동자, 전자제품, 가전제품, 생활용품, 한국, 거래',
-          ogImage: '/og-image.svg'
+          metaTitle: 'Commerce Store',
+          metaDescription: '최고의 온라인 쇼핑 경험을 제공합니다.',
+          metaKeywords: '온라인쇼핑, 이커머스, 전자상거래',
+          ogImage: '/og-image.png'
         },
         analytics: {
           googleAnalyticsId: '',
           facebookPixelId: '',
           hotjarId: ''
         }
+      },
+      seo: {
+        enableSitemap: true,
+        enableRobots: true,
+        googleAnalytics: '',
+        naverWebmaster: '',
+        googleSearchConsole: ''
       }
     }
 
@@ -87,7 +104,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-
+    console.error('Failed to fetch public settings:', error)
     return NextResponse.json(
       { error: 'Failed to get settings' },
       { status: 500 }

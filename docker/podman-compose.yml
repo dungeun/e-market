@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: commerce-app
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://commerce:secure_password@postgres:5432/commerce_db

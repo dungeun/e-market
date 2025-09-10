@@ -6,14 +6,14 @@ import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { ChevronDown, User as UserIcon, LogOut, Settings, Menu, X, Bell } from 'lucide-react'
+import { ChevronDown, User as UserIcon, LogOut, Settings, Menu, X, Bell, ShoppingCart } from 'lucide-react'
 import { useUIConfigStore } from '@/lib/stores/ui-config.store'
 import LanguageSelector from './LanguageSelector'
 import PopupAlert from './PopupAlert'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 import Image from 'next/image'
-import { ThemeToggle } from './theme-toggle'
+import { useCartStore } from '@/stores/cart-store'
 
 interface HeaderProps {
   variant?: 'default' | 'transparent'
@@ -35,6 +35,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
   const { user, isAuthenticated, logout } = useAuth()
   const { t, currentLanguage } = useLanguage()
   const { settings: siteSettings } = useSiteSettings()
+  const cartItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0))
   
   const isTransparent = variant === 'transparent'
   
@@ -47,7 +48,10 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
   // 동적 메뉴 구성 (설정 기반)
   const [navigationMenus, setNavigationMenus] = useState<any[]>([])
   const brandText = siteSettings?.general?.siteName || config?.header?.logo?.text || 'THE ROW'
-  const logoImage = siteSettings?.website?.logo !== '/logo.svg' ? siteSettings?.website?.logo : null
+  // useImageLogo 설정 확인 후 로고 결정
+  const useImageLogo = siteSettings?.general?.useImageLogo || false
+  const logoImage = useImageLogo ? (siteSettings?.general?.logo || 
+                    (siteSettings?.website?.logo !== '/logo.svg' ? siteSettings?.website?.logo : null)) : null
 
   // DB에서 헤더 메뉴 가져오기
   useEffect(() => {
@@ -216,8 +220,15 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
 
               {/* Right: Actions */}
               <div className="flex items-center space-x-4 lg:space-x-6">
-                {/* Theme Toggle */}
-                <ThemeToggle />
+                {/* Cart Button - Always visible */}
+                <Link href="/cart" className="relative p-2 hover:opacity-60 transition-opacity">
+                  <ShoppingCart className="w-5 h-5 text-black dark:text-white" />
+                  {cartItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                      {cartItems > 99 ? '99+' : cartItems}
+                    </span>
+                  )}
+                </Link>
                 
                 {/* User Authentication Area */}
                 <div className="flex items-center space-x-4 text-sm">
@@ -229,29 +240,20 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
                       >
                         {t('menu.my', '마이페이지')}
                       </Link>
-                      <Link 
-                        href="/mypage" 
+                      <button
+                        onClick={handleLogout}
                         className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium"
                       >
-                        회원가입
-                      </Link>
-                      <div className="flex items-center space-x-1 text-black dark:text-white font-medium">
-                        <span>+2,000P</span>
-                      </div>
+                        {t('auth.logout', '로그아웃')}
+                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-4">
                       <Link href="/auth/login" className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium">
-                        로그인
+                        {t('auth.login', '로그인')}
                       </Link>
                       <Link href="/auth/register" className="text-black dark:text-white hover:opacity-60 transition-opacity font-medium">
-                        회원가입
-                      </Link>
-                      <Link href="/cart" className="relative p-2">
-                        <svg className="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
-                        </svg>
-                        <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        {t('auth.register', '회원가입')}
                       </Link>
                     </div>
                   )}
@@ -259,7 +261,7 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
 
                 {/* Language selector - hidden on mobile */}
                 {!pathname.startsWith('/admin') && (
-                  <div className="hidden lg:block">
+                  <div>
                     <LanguageSelector />
                   </div>
                 )}
@@ -414,6 +416,23 @@ const Header = React.memo(function Header({ variant = 'default' }: HeaderProps) 
 
               {/* Bottom Actions */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                {/* Cart Button */}
+                <Link 
+                  href="/cart" 
+                  className="flex items-center justify-between px-4 py-3 mb-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <ShoppingCart className="w-5 h-5 text-black dark:text-white" />
+                    <span className="text-black dark:text-white font-medium text-sm uppercase tracking-wider">CART</span>
+                  </div>
+                  {cartItems > 0 && (
+                    <span className="bg-black dark:bg-white text-white dark:text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                      {cartItems > 99 ? '99+' : cartItems}
+                    </span>
+                  )}
+                </Link>
+                
                 {isAuthenticated && user ? (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">

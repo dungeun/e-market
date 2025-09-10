@@ -1,5 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Bundle analyzer
+  webpack: (config, { isServer }) => {
+    if (process.env.ANALYZE === 'true' && !isServer) {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: './analyze/client.html',
+          openAnalyzer: false,
+        })
+      )
+    }
+    return config
+  },
   output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
@@ -84,15 +98,6 @@ const nextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
-      },
-    ]
-  },
-  async rewrites() {
-    return [
-      // Socket.io 프록시
-      {
-        source: '/socket.io/:path*',
-        destination: '/api/socket/:path*',
       },
     ]
   },

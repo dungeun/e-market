@@ -2,11 +2,42 @@ import { query } from '@/lib/db'
 import { env } from '@/lib/config/env';
 import { Redis } from 'ioredis'
 import { v4 as uuidv4 } from 'uuid'
+import { 
+  unifiedQueryService, 
+  findById, 
+  findByField,
+  findByIds,
+  updateById,
+  countByField,
+  CACHE_TTL 
+} from './unified-query-service'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD
+const redisUrl = process.env.REDIS_URL
+const redis = redisUrl 
+  ? new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'inventory-service'
+    })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'inventory-service'
+    })
+
+redis.on('error', (err) => {
+  console.warn('Redis connection error (inventory service):', err.message)
+})
+
+redis.on('connect', () => {
+  console.log('Redis connected (inventory service)')
 })
 
 export interface Inventory {
@@ -63,14 +94,8 @@ export class InventoryService {
   
   // Get inventory for a product
   async getInventory(productId: string): Promise<Inventory | null> {
-    // Try cache first
-    const cacheKey = `inventory:${productId}`
-    const cached = await redis.get(cacheKey)
-    if (cached) {
-      return JSON.parse(cached)
-    }
-    
-    const result = await query(`
+    // 통합 쿼리 서비스로 복합 쿼리 실행 (자동 캐싱)
+    const inventoryResults = await unifiedQueryService.executeRaw<Inventory>(`
       SELECT 
         i.*,
         w.name as warehouse_name,
@@ -86,29 +111,26 @@ export class InventoryService {
       FROM inventory i
       LEFT JOIN warehouses w ON i.warehouse_id = w.id
       WHERE i.product_id = $1
-    `, [productId])
+    `, [productId], { useCache: true, cacheTTL: CACHE_TTL.SHORT })
     
-    if (result.rows.length === 0) {
+    if (inventoryResults.length === 0) {
       // Create default inventory if not exists
       return await this.createInventory(productId)
     }
     
-    const inventory = result.rows[0]
+    const inventory = inventoryResults[0]
     
-    // Get reserved quantity
-    const reservedResult = await query(`
+    // 예약된 수량을 통합 쿼리로 조회 (캐싱 적용)
+    const reservedResult = await unifiedQueryService.executeRaw<{ reserved: string }>(`
       SELECT COALESCE(SUM(quantity), 0) as reserved
       FROM stock_reservations
       WHERE product_id = $1 
       AND status = 'active'
       AND expires_at > NOW()
-    `, [productId])
+    `, [productId], { useCache: true, cacheTTL: CACHE_TTL.SHORT })
     
-    inventory.reserved = parseInt(reservedResult.rows[0].reserved)
+    inventory.reserved = parseInt(reservedResult[0].reserved)
     inventory.available = inventory.quantity - inventory.reserved
-    
-    // Cache result
-    await redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(inventory))
     
     return inventory
   }
@@ -139,13 +161,53 @@ export class InventoryService {
     return inventory.available >= quantity
   }
   
-  // Check stock for multiple products
+  // Check stock for multiple products - N+1 문제 해결
   async checkBulkStock(items: Array<{ productId: string; quantity: number }>): Promise<Map<string, boolean>> {
     const results = new Map<string, boolean>()
     
+    if (items.length === 0) return results;
+    
+    // 배치로 재고 정보 조회
+    const productIds = items.map(item => item.productId);
+    const inventories = await findByIds<Inventory>('inventory', productIds, {
+      useCache: true,
+      cacheTTL: CACHE_TTL.SHORT
+    });
+    
+    // 각 상품별 예약된 수량도 배치 조회
+    const reservationsQuery = `
+      SELECT 
+        product_id, 
+        COALESCE(SUM(quantity), 0) as reserved
+      FROM stock_reservations
+      WHERE product_id = ANY($1) 
+      AND status = 'active'
+      AND expires_at > NOW()
+      GROUP BY product_id
+    `;
+    
+    const reservations = await unifiedQueryService.executeRaw<{
+      product_id: string;
+      reserved: number;
+    }>(reservationsQuery, [productIds], { 
+      useCache: true, 
+      cacheTTL: CACHE_TTL.SHORT 
+    });
+    
+    const reservationMap = new Map<string, number>();
+    reservations.forEach(r => reservationMap.set(r.product_id, r.reserved));
+    
+    // 배치 처리로 재고 확인
     for (const item of items) {
-      const hasStock = await this.checkStock(item.productId, item.quantity)
-      results.set(item.productId, hasStock)
+      const inventory = inventories.get(item.productId);
+      if (!inventory) {
+        results.set(item.productId, false);
+        continue;
+      }
+      
+      const reserved = reservationMap.get(item.productId) || 0;
+      const available = inventory.quantity - reserved;
+      results.set(item.productId, available >= item.quantity);
     }
     
     return results

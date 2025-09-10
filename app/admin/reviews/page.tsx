@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { 
   Search, 
   MoreVertical, 
@@ -42,93 +49,143 @@ import {
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-const reviews = [
-  {
-    id: 'REV-001',
-    product: '무선 이어폰 Pro',
-    productId: 'PRD-001',
-    customer: '김철수',
-    customerId: 'CUST-001',
-    rating: 5,
-    title: '정말 만족스러운 제품입니다',
-    content: '음질이 정말 좋고 노이즈 캔슬링 기능도 훌륭합니다. 배터리 수명도 길어서 하루 종일 사용해도 문제없네요.',
-    images: [],
-    helpful: 23,
-    status: 'approved',
-    verified: true,
-    date: '2024-01-14',
-    reply: null
-  },
-  {
-    id: 'REV-002',
-    product: '스마트 워치 Series 5',
-    productId: 'PRD-002',
-    customer: '이영희',
-    customerId: 'CUST-002',
-    rating: 4,
-    title: '대체로 만족합니다',
-    content: '기능은 다양하고 좋은데 배터리가 생각보다 빨리 닳아요. 그래도 운동할 때 유용하게 쓰고 있습니다.',
-    images: ['/placeholder.svg'],
-    helpful: 15,
-    status: 'approved',
-    verified: true,
-    date: '2024-01-13',
-    reply: '소중한 리뷰 감사합니다. 배터리 관련 피드백은 다음 제품 개선에 반영하겠습니다.'
-  },
-  {
-    id: 'REV-003',
-    product: '노트북 스탠드',
-    productId: 'PRD-003',
-    customer: '박민수',
-    customerId: 'CUST-003',
-    rating: 2,
-    title: '기대에 못 미치네요',
-    content: '플라스틱 재질이 약해서 무거운 노트북은 올려놓기 불안합니다. 가격 대비 품질이 아쉬워요.',
-    images: [],
-    helpful: 8,
-    status: 'pending',
-    verified: false,
-    date: '2024-01-12',
-    reply: null
-  },
-  {
-    id: 'REV-004',
-    product: 'USB-C 허브',
-    productId: 'PRD-004',
-    customer: '정수진',
-    customerId: 'CUST-004',
-    rating: 5,
-    title: '필수 아이템!',
-    content: '맥북 사용자라면 꼭 필요한 제품입니다. 포트도 다양하고 발열도 없어서 좋아요.',
-    images: [],
-    helpful: 34,
-    status: 'approved',
-    verified: true,
-    date: '2024-01-11',
-    reply: null
-  },
-  {
-    id: 'REV-005',
-    product: '블루투스 키보드',
-    productId: 'PRD-005',
-    customer: '최동현',
-    customerId: 'CUST-005',
-    rating: 1,
-    title: '불량 제품인 것 같습니다',
-    content: '연결이 자꾸 끊기고 키 입력도 제대로 안 됩니다. 환불 요청합니다.',
-    images: ['/placeholder.svg', '/placeholder.svg'],
-    helpful: 2,
-    status: 'flagged',
-    verified: true,
-    date: '2024-01-10',
-    reply: null
+interface Review {
+  id: string
+  product_id: string
+  product_name: string
+  user_id: string | null
+  customer_name: string
+  customer_email: string | null
+  rating: number
+  title: string
+  content: string
+  images: string[] | string
+  helpful: number
+  status: 'pending' | 'approved' | 'flagged' | 'rejected'
+  verified: boolean
+  reply: string | null
+  reply_date: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface ApiResponse {
+  success: boolean
+  reviews: Review[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
   }
-]
+  stats: {
+    total: number
+    approved: number
+    pending: number
+    flagged: number
+    rejected: number
+    verified: number
+    avgRating: number
+  }
+}
 
 export default function ReviewsPage() {
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [stats, setStats] = useState({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    flagged: 0,
+    rejected: 0,
+    verified: 0,
+    avgRating: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedReview, setSelectedReview] = useState<unknown>(null)
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [replyText, setReplyText] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const fetchReviews = async (page = 1, search = '', status = 'all') => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+        ...(search && { search }),
+        ...(status !== 'all' && { status })
+      })
+      
+      const response = await fetch(`/api/admin/reviews?${params}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviews')
+      }
+      
+      const data: ApiResponse = await response.json()
+      if (data.success) {
+        setReviews(data.reviews)
+        setStats(data.stats)
+        setError(null)
+      } else {
+        throw new Error('API returned error')
+      }
+    } catch (err) {
+      setError('리뷰를 불러오는데 실패했습니다.')
+      console.error('Error fetching reviews:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchReviews(currentPage, searchQuery, statusFilter)
+  }, [currentPage, searchQuery, statusFilter])
+
+  const updateReviewStatus = async (reviewId: string, status: string, reply?: string) => {
+    try {
+      const response = await fetch('/api/admin/reviews', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reviewId,
+          status,
+          ...(reply && { reply })
+        })
+      })
+      
+      if (response.ok) {
+        await fetchReviews(currentPage, searchQuery, statusFilter)
+        return true
+      } else {
+        throw new Error('Failed to update review')
+      }
+    } catch (err) {
+      console.error('Error updating review:', err)
+      return false
+    }
+  }
+
+  const deleteReview = async (reviewId: string) => {
+    try {
+      const response = await fetch(`/api/admin/reviews?reviewId=${reviewId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        await fetchReviews(currentPage, searchQuery, statusFilter)
+        return true
+      } else {
+        throw new Error('Failed to delete review')
+      }
+    } catch (err) {
+      console.error('Error deleting review:', err)
+      return false
+    }
+  }
 
   const getStatusBadge = (status: string) => {
     const statusConfig: unknown = {
@@ -164,45 +221,72 @@ export default function ReviewsPage() {
     )
   }
 
-  const handleReviewAction = (action: string, review: unknown) => {
+  const handleReviewAction = async (action: string, review: Review) => {
     switch(action) {
       case 'view':
         setSelectedReview(review)
         break
       case 'approve':
-        toast.success(`리뷰 ${review.id} 승인됨`)
+        const approveSuccess = await updateReviewStatus(review.id, 'approved')
+        if (approveSuccess) {
+          toast.success(`리뷰 ${review.id} 승인됨`)
+        } else {
+          toast.error('리뷰 승인에 실패했습니다.')
+        }
         break
       case 'reject':
-        toast.error(`리뷰 ${review.id} 거부됨`)
+        const rejectSuccess = await updateReviewStatus(review.id, 'rejected')
+        if (rejectSuccess) {
+          toast.error(`리뷰 ${review.id} 거부됨`)
+        } else {
+          toast.error('리뷰 거부에 실패했습니다.')
+        }
         break
       case 'reply':
         setSelectedReview(review)
         break
       case 'delete':
-        toast.error(`리뷰 ${review.id} 삭제됨`)
+        const deleteSuccess = await deleteReview(review.id)
+        if (deleteSuccess) {
+          toast.error(`리뷰 ${review.id} 삭제됨`)
+        } else {
+          toast.error('리뷰 삭제에 실패했습니다.')
+        }
         break
       case 'flag':
-        toast.warning(`리뷰 ${review.id} 신고 처리됨`)
+        const flagSuccess = await updateReviewStatus(review.id, 'flagged')
+        if (flagSuccess) {
+          toast.warning(`리뷰 ${review.id} 신고 처리됨`)
+        } else {
+          toast.error('리뷰 신고 처리에 실패했습니다.')
+        }
         break
     }
   }
 
-  const handleReplySubmit = () => {
-    if (replyText.trim()) {
-      toast.success('답변이 등록되었습니다.')
-      setReplyText('')
-      setSelectedReview(null)
+  const handleReplySubmit = async () => {
+    if (replyText.trim() && selectedReview) {
+      const success = await updateReviewStatus(selectedReview.id, selectedReview.status, replyText.trim())
+      if (success) {
+        toast.success('답변이 등록되었습니다.')
+        setReplyText('')
+        setSelectedReview(null)
+      } else {
+        toast.error('답변 등록에 실패했습니다.')
+      }
     }
   }
 
-  const stats = {
-    total: reviews.length,
-    average: (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1),
-    approved: reviews.filter(r => r.status === 'approved').length,
-    pending: reviews.filter(r => r.status === 'pending').length,
-    flagged: reviews.filter(r => r.status === 'flagged').length,
-    verified: reviews.filter(r => r.verified).length
-  }
+  // Convert images from JSON string to array if needed
+  const normalizedReviews = reviews.map(review => ({
+    ...review,
+    images: typeof review.images === 'string' 
+      ? JSON.parse(review.images) 
+      : (Array.isArray(review.images) ? review.images : []),
+    product: review.product_name,
+    customer: review.customer_name,
+    date: new Date(review.created_at).toLocaleDateString('ko-KR')
+  }))
 
   const ratingDistribution = [
     { rating: 5, count: reviews.filter(r => r.rating === 5).length },
@@ -211,6 +295,27 @@ export default function ReviewsPage() {
     { rating: 2, count: reviews.filter(r => r.rating === 2).length },
     { rating: 1, count: reviews.filter(r => r.rating === 1).length }
   ]
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <span className="ml-2">로딩 중...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-red-600">{error}</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -242,7 +347,7 @@ export default function ReviewsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold flex items-center gap-1">
-              {stats.average}
+              {stats.avgRating.toFixed(1)}
               <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
             </div>
             <p className="text-xs text-muted-foreground">5점 만점</p>
@@ -329,9 +434,18 @@ export default function ReviewsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="상태 필터" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  <SelectItem value="pending">검토중</SelectItem>
+                  <SelectItem value="approved">승인됨</SelectItem>
+                  <SelectItem value="flagged">신고됨</SelectItem>
+                  <SelectItem value="rejected">거부됨</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -350,7 +464,7 @@ export default function ReviewsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reviews.map((review) => (
+              {normalizedReviews.map((review) => (
                 <TableRow key={review.id}>
                   <TableCell>
                     <div className="max-w-xs">
@@ -364,10 +478,10 @@ export default function ReviewsPage() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{review.product}</TableCell>
+                  <TableCell className="text-sm">{review.product_name}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm">{review.customer}</span>
+                      <span className="text-sm">{review.customer_name}</span>
                       {review.verified && (
                         <Badge variant="outline" className="text-xs">
                           <CheckCircle className="mr-1 h-3 w-3" />
@@ -436,6 +550,34 @@ export default function ReviewsPage() {
               ))}
             </TableBody>
           </Table>
+          
+          {/* 페이지네이션 */}
+          <div className="flex items-center justify-between px-2 py-4">
+            <div className="text-sm text-muted-foreground">
+              전체 {stats.total}개 중 {(currentPage - 1) * 10 + 1}-{Math.min(currentPage * 10, stats.total)}개 표시
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                이전
+              </Button>
+              <span className="text-sm">
+                {currentPage} / {Math.ceil(stats.total / 10)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={currentPage >= Math.ceil(stats.total / 10)}
+              >
+                다음
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -455,11 +597,11 @@ export default function ReviewsPage() {
               <div className="flex items-start gap-3">
                 <Avatar>
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback>{selectedReview.customer[0]}</AvatarFallback>
+                  <AvatarFallback>{selectedReview.customer_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="font-medium">{selectedReview.customer}</p>
+                    <p className="font-medium">{selectedReview.customer_name}</p>
                     {selectedReview.verified && (
                       <Badge variant="outline" className="text-xs">
                         <CheckCircle className="mr-1 h-3 w-3" />
@@ -469,7 +611,7 @@ export default function ReviewsPage() {
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     {renderStars(selectedReview.rating)}
-                    <span className="text-sm text-muted-foreground">{selectedReview.date}</span>
+                    <span className="text-sm text-muted-foreground">{new Date(selectedReview.created_at).toLocaleDateString('ko-KR')}</span>
                   </div>
                   <h3 className="font-semibold mb-2">{selectedReview.title}</h3>
                   <p className="text-sm">{selectedReview.content}</p>
@@ -488,7 +630,7 @@ export default function ReviewsPage() {
                       도움이 됨 ({selectedReview.helpful})
                     </Button>
                     <span className="text-sm text-muted-foreground">
-                      상품: {selectedReview.product}
+                      상품: {selectedReview.product_name}
                     </span>
                   </div>
                 </div>

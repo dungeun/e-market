@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       languages,
+      selectedLanguages: languages, // 언어팩 페이지에서 사용하는 필드명
       activeCount,
       maxActiveLanguages: 3,
       defaultLanguage,

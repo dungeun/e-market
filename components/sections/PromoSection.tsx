@@ -23,17 +23,43 @@ interface PromoBanner {
 interface PromoSectionProps {
   sectionId?: string;
   className?: string;
+  data?: unknown;
 }
 
-const PromoSection = React.memo(function PromoSection({ sectionId = 'promo', className = '' }: PromoSectionProps) {
+const PromoSection = React.memo(function PromoSection({ sectionId = 'promo', className = '', data }: PromoSectionProps) {
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [sectionTitle, setSectionTitle] = useState('특별 혜택');
+  const [sectionSubtitle, setSectionSubtitle] = useState('놓치면 안 되는 특별한 이벤트와 할인 혜택');
   const { currentLanguage } = useLanguage();
 
   useEffect(() => {
     loadPromoData();
+    loadSectionMetadata();
   }, [sectionId, currentLanguage]);
+
+  const loadSectionMetadata = async () => {
+    try {
+      // ui-sections API에서 현재 섹션의 title 가져오기
+      const response = await fetch(`/api/ui-sections?sectionId=${sectionId}&cache=false`);
+      if (response.ok) {
+        const data = await response.json();
+        const section = data.sections?.find((s: any) => s.key === sectionId);
+        if (section) {
+          setSectionTitle(section.title || '특별 혜택');
+          // data 필드에서 subtitle이나 description 정보 확인
+          if (section.data && typeof section.data === 'object') {
+            const sectionData = section.data as any;
+            setSectionSubtitle(sectionData.subtitle || sectionData.description || '놓치면 안 되는 특별한 이벤트와 할인 혜택');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load section metadata:', error);
+      // 에러 시 기본값 유지
+    }
+  };
 
   const loadPromoData = async () => {
     try {
@@ -93,7 +119,7 @@ const PromoSection = React.memo(function PromoSection({ sectionId = 'promo', cla
   if (loading) {
     return (
       <div className={`w-full py-12 ${className}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(2)].map((_, i) => (
               <div key={i} className="bg-gray-100 animate-pulse rounded-xl h-64" />
@@ -110,10 +136,10 @@ const PromoSection = React.memo(function PromoSection({ sectionId = 'promo', cla
 
   return (
     <section className={`w-full py-12 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">특별 혜택</h2>
-          <p className="text-gray-600">놓치면 안 되는 특별한 이벤트와 할인 혜택</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{sectionTitle}</h2>
+          <p className="text-gray-600">{sectionSubtitle}</p>
         </div>
         
         <div className={`grid grid-cols-1 ${promoBanners.length >= 2 ? 'md:grid-cols-2' : ''} gap-6`}>

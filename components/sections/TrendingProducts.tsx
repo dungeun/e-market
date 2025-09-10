@@ -3,6 +3,7 @@
 import React from 'react';
 
 import ProductCard from './ProductCard'
+import SectionLayout from '../ui/SectionLayout'
 import { TrendingUp, Flame } from 'lucide-react'
 
 interface TrendingProductsProps {
@@ -19,51 +20,49 @@ interface TrendingProductsProps {
 }
 
 const TrendingProducts = React.memo(function TrendingProducts({ config = {}, products = [] }: TrendingProductsProps) {
+  const safeProducts = products && Array.isArray(products) ? products : [];
+  
   return (
-    <section className="py-12 px-4 bg-black">
-      <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Flame className="w-6 h-6 text-red-500" />
-            {config?.title && (
-              <h2 className="text-3xl font-bold text-white">
-                {config?.title}
-              </h2>
-            )}
-            <TrendingUp className="w-6 h-6 text-red-500" />
-          </div>
-          {config?.subtitle && (
-            <p className="text-gray-300">
-              {config?.subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* 상품 그리드 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {products && Array.isArray(products) && products.slice(0, config?.limit || 8).map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              showBadge={true}
-              badgeText={`HOT #${index + 1}`}
-              showViewCount={config?.showTrendingScore}
-            />
-          ))}
-        </div>
-
-        {/* 더보기 */}
-        <div className="text-center mt-8">
-          <a
-            href="/products/trending"
-            className="inline-block px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
-          >
-            트렌딩 상품 더보기
-          </a>
-        </div>
-      </div>
-    </section>
+    <SectionLayout
+      theme="dark"
+      layout="grid"
+      columns={4}
+      responsive={{
+        mobile: 2,
+        tablet: 4,
+        desktop: 4
+      }}
+      header={{
+        title: config?.title || '트렌딩 상품',
+        subtitle: config?.subtitle,
+        icon: Flame,
+        secondaryIcon: TrendingUp,
+        centerAlign: true
+      }}
+      empty={safeProducts.length === 0}
+      emptyState={{
+        message: '트렌딩 상품이 없습니다.',
+        description: '인기 상품이 곧 업데이트될 예정입니다.'
+      }}
+      cta={{
+        text: '트렌딩 상품 더보기',
+        href: '/products/trending',
+        variant: 'outline'
+      }}
+      section={{
+        'aria-label': '트렌딩 상품 목록'
+      }}
+    >
+      {safeProducts.slice(0, config?.limit || 8).map((product, index) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          showBadge={true}
+          badgeText={`HOT #${index + 1}`}
+          showViewCount={config?.showTrendingScore}
+        />
+      ))}
+    </SectionLayout>
     )
 });
 

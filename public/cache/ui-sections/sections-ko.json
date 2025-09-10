@@ -1,0 +1,457 @@
+{
+  "language": "ko",
+  "lastUpdated": "2025-09-10T02:42:02.014Z",
+  "sectionsCount": 11,
+  "sections": [
+    {
+      "id": "1",
+      "key": "hero",
+      "title": "Hero Section",
+      "type": "hero",
+      "order": 1,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "slides": [
+          {
+            "id": 1,
+            "link": "/products?category=used-appliances",
+            "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600",
+            "title": "중고 가전제품 특가",
+            "subtitle": "외국인 노동자를 위한 필수 생활가전",
+            "buttonText": "지금 구매하기",
+            "useFullImage": true,
+            "fullImageUrl": "/uploads/settings/hero_full_1756895759797____________2025-09-02_______2.56.14.webp",
+            "fullImageUrlEn": "/uploads/settings/hero_fullEn_1756895762291____________2025-09-02_______2.56.14.webp",
+            "fullImageUrlFr": "/uploads/settings/hero_fullFr_1756895765126____________2025-09-02_______2.56.14.webp"
+          },
+          {
+            "id": 2,
+            "link": "/products?category=used-furniture",
+            "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600",
+            "title": "가구 할인 이벤트",
+            "subtitle": "깨끗한 중고 가구 최대 70% 할인",
+            "buttonText": "할인 상품 보기",
+            "useFullImage": true,
+            "fullImageUrl": "/uploads/settings/hero_full_1756895769613____________2025-09-02_______2.56.22.webp",
+            "fullImageUrlEn": "/uploads/settings/hero_fullEn_1756895772182____________2025-09-02_______2.56.22.webp",
+            "fullImageUrlFr": "/uploads/settings/hero_fullFr_1756895775401____________2025-09-02_______2.56.22.webp"
+          },
+          {
+            "id": "1756895776710",
+            "title": {
+              "ko": "새 슬라이드",
+              "en": "New Slide",
+              "jp": "新しいスライド"
+            },
+            "subtitle": {
+              "ko": "부제목을 입력하세요",
+              "en": "Enter subtitle",
+              "jp": "サブタイトルを入力"
+            },
+            "tag": {
+              "ko": "NEW",
+              "en": "NEW",
+              "jp": "NEW"
+            },
+            "bgColor": "bg-gradient-to-br from-blue-600 to-cyan-600",
+            "visible": true,
+            "order": 3
+          },
+          {
+            "id": "1756895778035",
+            "title": {
+              "ko": "새 슬라이드",
+              "en": "New Slide",
+              "jp": "新しいスライド"
+            },
+            "subtitle": {
+              "ko": "부제목을 입력하세요",
+              "en": "Enter subtitle",
+              "jp": "サブタイトルを入力"
+            },
+            "tag": {
+              "ko": "NEW",
+              "en": "NEW",
+              "jp": "NEW"
+            },
+            "bgColor": "bg-gradient-to-br from-blue-600 to-cyan-600",
+            "visible": true,
+            "order": 4
+          }
+        ],
+        "translations": {}
+      },
+      "translations": {},
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-10T00:10:45.845Z",
+      "languagePackKey": "section.hero.title",
+      "language": "ko"
+    },
+    {
+      "id": "3",
+      "key": "category",
+      "title": "Category Section",
+      "type": "category",
+      "order": 2,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "categories": [
+          {
+            "id": "1",
+            "icon": "❄️",
+            "link": "/products?category=aircon",
+            "name": "에어컨",
+            "badge": "HOT",
+            "color": "text-blue-600"
+          },
+          {
+            "id": "2",
+            "icon": "🧊",
+            "link": "/products?category=refrigerator",
+            "name": "냉장고",
+            "color": "text-cyan-600"
+          },
+          {
+            "id": "3",
+            "icon": "🌀",
+            "link": "/products?category=washer",
+            "name": "세탁기",
+            "color": "text-purple-600"
+          },
+          {
+            "id": "4",
+            "icon": "📺",
+            "link": "/products?category=tv",
+            "name": "TV",
+            "badge": "SALE",
+            "color": "text-red-600"
+          },
+          {
+            "id": "5",
+            "icon": "🔥",
+            "link": "/products?category=microwave",
+            "name": "전자레인지",
+            "color": "text-orange-600"
+          },
+          {
+            "id": "6",
+            "icon": "🛏️",
+            "link": "/products?category=bed",
+            "name": "침대/매트리스",
+            "color": "text-indigo-600"
+          },
+          {
+            "id": "7",
+            "icon": "🪑",
+            "link": "/products?category=desk",
+            "name": "책상/의자",
+            "color": "text-green-600"
+          },
+          {
+            "id": "8",
+            "icon": "🍳",
+            "link": "/products?category=kitchen",
+            "name": "주방용품",
+            "color": "text-yellow-600"
+          }
+        ]
+      },
+      "translations": {},
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-03T22:42:17.321Z",
+      "languagePackKey": "section.category.title",
+      "language": "ko"
+    },
+    {
+      "id": "3532757e-6f43-443a-a66c-19f6127f4887",
+      "key": "베스트",
+      "title": "베스트",
+      "type": "best-sellers",
+      "order": 3,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "type": "best-sellers",
+        "subtitle": "인기상품",
+        "productCount": 12,
+        "itemsPerPage": 12,
+        "categoryFilter": "",
+        "categories": [],
+        "sortBy": "popular",
+        "manualProducts": [],
+        "images": {},
+        "showFilters": true,
+        "showSearch": true
+      },
+      "translations": {},
+      "createdAt": "2025-09-03T13:07:46.601Z",
+      "updatedAt": "2025-09-10T00:16:14.375Z",
+      "languagePackKey": "section.베스트.title",
+      "language": "ko"
+    },
+    {
+      "id": "4",
+      "key": "quicklinks",
+      "title": "Quick Links",
+      "type": "quicklinks",
+      "order": 4,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "links": [
+          {
+            "id": "1",
+            "icon": "💰",
+            "link": "/mypage/points",
+            "color": "bg-yellow-50 border-yellow-200",
+            "title": "포인트 적립",
+            "description": "구매 시 5% 적립"
+          },
+          {
+            "id": "2",
+            "icon": "🚚",
+            "link": "/info/shipping",
+            "color": "bg-blue-50 border-blue-200",
+            "title": "무료배송2",
+            "description": "30,000원 이상 구매 시"
+          },
+          {
+            "id": "3",
+            "icon": "💬",
+            "link": "/support",
+            "color": "bg-green-50 border-green-200",
+            "title": "고객지원",
+            "description": "24시간 언제든지"
+          }
+        ]
+      },
+      "translations": {
+        "en": {
+          "links": [
+            {
+              "id": "1",
+              "icon": "💰",
+              "link": "/mypage/points",
+              "color": "bg-yellow-50 border-yellow-200",
+              "title": "Earn points",
+              "description": "구매 시 5% 적립"
+            },
+            {
+              "id": "2",
+              "icon": "🚚",
+              "link": "/info/shipping",
+              "color": "bg-blue-50 border-blue-200",
+              "title": "Free Shipping 2",
+              "description": "30,000원 이상 구매 시"
+            },
+            {
+              "id": "3",
+              "icon": "💬",
+              "link": "/support",
+              "color": "bg-green-50 border-green-200",
+              "title": "Customer Support",
+              "description": "24시간 언제든지"
+            }
+          ]
+        },
+        "jp": {
+          "links": [
+            {
+              "id": "1",
+              "icon": "💰",
+              "link": "/mypage/points",
+              "color": "bg-yellow-50 border-yellow-200",
+              "title": "ポイント獲得",
+              "description": "구매 시 5% 적립"
+            },
+            {
+              "id": "2",
+              "icon": "🚚",
+              "link": "/info/shipping",
+              "color": "bg-blue-50 border-blue-200",
+              "title": "送料無料2",
+              "description": "30,000원 이상 구매 시"
+            },
+            {
+              "id": "3",
+              "icon": "💬",
+              "link": "/support",
+              "color": "bg-green-50 border-green-200",
+              "title": "カスタマーサポート",
+              "description": "24시간 언제든지"
+            }
+          ]
+        }
+      },
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-07T19:15:38.996Z",
+      "languagePackKey": "section.quicklinks.title",
+      "language": "ko"
+    },
+    {
+      "id": "2",
+      "key": "featured-products",
+      "title": "Featured Products",
+      "type": "featured-products",
+      "order": 5,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "badge": "SALE",
+        "title": "이달의 특가",
+        "products": [],
+        "subtitle": "놓치면 후회하는 특별 할인"
+      },
+      "translations": {},
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-03T22:42:17.324Z",
+      "languagePackKey": "section.featured-products.title",
+      "language": "ko"
+    },
+    {
+      "id": "5",
+      "key": "promo",
+      "title": "Promo Section",
+      "type": "promo",
+      "order": 6,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "title": "최저가!",
+        "subtitle": "",
+        "link": "",
+        "icon": "🎉",
+        "backgroundColor": "#D1FAE5",
+        "textColor": "#000000",
+        "backgroundImage": "",
+        "visible": true
+      },
+      "translations": {
+        "en": {
+          "title": "Lowest price!"
+        },
+        "jp": {
+          "title": "最安値！"
+        }
+      },
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-10T01:23:49.796Z",
+      "languagePackKey": "section.promo.title",
+      "language": "ko"
+    },
+    {
+      "id": "6",
+      "key": "ranking",
+      "title": "Ranking Section",
+      "type": "ranking",
+      "order": 7,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "title": "실시간 인기 상품",
+        "products": [],
+        "refreshInterval": 60000
+      },
+      "translations": {},
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-03T22:42:17.323Z",
+      "languagePackKey": "section.ranking.title",
+      "language": "ko"
+    },
+    {
+      "id": "7",
+      "key": "recommended",
+      "title": "Recommended Section",
+      "type": "recommended",
+      "order": 8,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "title": "추천 상품",
+        "products": [],
+        "subtitle": "고객님을 위한 맞춤 추천",
+        "algorithm": "collaborative_filtering"
+      },
+      "translations": {},
+      "createdAt": "2025-09-02T18:07:24.057Z",
+      "updatedAt": "2025-09-03T22:42:17.330Z",
+      "languagePackKey": "section.recommended.title",
+      "language": "ko"
+    },
+    {
+      "id": "best-sellers",
+      "key": "best-sellers",
+      "title": "베스트셀러 테스트",
+      "type": "product-grid",
+      "order": 9,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "subtitle": "수정된 부제목",
+        "sortBy": "rating",
+        "itemsPerPage": 12,
+        "categories": [],
+        "showFilters": false,
+        "showSearch": true
+      },
+      "translations": {
+        "en": {
+          "title": "Bestseller Test",
+          "categories": []
+        },
+        "jp": {
+          "title": "ベストセラーテスト",
+          "categories": []
+        }
+      },
+      "createdAt": "2025-09-03T12:52:23.034Z",
+      "updatedAt": "2025-09-03T22:42:17.328Z",
+      "languagePackKey": "section.best-sellers.title",
+      "language": "ko"
+    },
+    {
+      "id": "new-arrivals",
+      "key": "new-arrivals",
+      "title": "신상품",
+      "type": "product-grid",
+      "order": 10,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "subtitle": "새로 출시된 상품을 만나보세요",
+        "sortBy": "newest",
+        "itemsPerPage": 16,
+        "showFilters": true,
+        "showSearch": false
+      },
+      "translations": {},
+      "createdAt": "2025-09-03T12:52:23.034Z",
+      "updatedAt": "2025-09-03T22:42:17.331Z",
+      "languagePackKey": "section.new-arrivals.title",
+      "language": "ko"
+    },
+    {
+      "id": "used-products",
+      "key": "used-products",
+      "title": "중고 상품",
+      "type": "product-grid",
+      "order": 11,
+      "isActive": true,
+      "visible": true,
+      "data": {
+        "subtitle": "알뜰한 중고 상품을 찾아보세요",
+        "sortBy": "price-low",
+        "itemsPerPage": 8,
+        "showFilters": false,
+        "showSearch": true
+      },
+      "translations": {},
+      "createdAt": "2025-09-03T12:52:23.034Z",
+      "updatedAt": "2025-09-03T22:42:17.330Z",
+      "languagePackKey": "section.used-products.title",
+      "language": "ko"
+    }
+  ]
+}

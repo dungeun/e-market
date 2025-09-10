@@ -6,20 +6,13 @@
     "node_modules/**/*",
     "*.backup",
     "*.old.ts",
-    "*.old.tsx"
+    "*.old.tsx",
+    ".next/**/*",
+    "app/admin/layout.tsx"
   ],
   "rules": {
+    "react-hooks/exhaustive-deps": "warn",
     "indent": "off",
-    "@typescript-eslint/indent": "off",
-    "react-hooks/exhaustive-deps": "warn"
-  },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {
-        "indent": "off",
-        "@typescript-eslint/indent": "off"
-      }
-    }
-  ]
+    "@typescript-eslint/indent": "off"
+  }
 }

@@ -168,12 +168,12 @@ export function SectionsConfigTab() {
   const createDefaultSections = async () => {
     const defaultSections = [
       { key: 'hero', type: 'hero', title: '히어로 배너', order: 1, isActive: true },
-      { key: 'category', type: 'category', title: '카테고리 메뉴', order: 2, isActive: true },
-      { key: 'quicklinks', type: 'quicklinks', title: '바로가기 링크', order: 3, isActive: true },
-      { key: 'promo', type: 'promo', title: '프로모션 배너', order: 4, isActive: true },
+      { key: 'category', type: 'category', title: '카테고리', order: 2, isActive: true },
+      { key: 'quicklinks', type: 'quicklinks', title: '바로가기', order: 3, isActive: true },
+      { key: 'promo', type: 'promo', title: '프로모션', order: 4, isActive: true },
       { key: 'ranking', type: 'ranking', title: '실시간 랭킹', order: 5, isActive: true },
       { key: 'recommended', type: 'recommended', title: '추천 콘텐츠', order: 6, isActive: true },
-      { key: 'featured-products', type: 'featured-products', title: '이달의 특가', order: 7, isActive: true },
+      { key: 'featured-products', type: 'featured-products', title: '추천 상품', order: 7, isActive: true },
     ];
 
     for (const section of defaultSections) {
@@ -292,8 +292,12 @@ export function SectionsConfigTab() {
       promo: '/admin/ui-config/sections/promo',
       ranking: '/admin/ui-config/sections/ranking',
       recommended: '/admin/ui-config/sections/recommended',
-      'featured-products': '/admin/ui-config/sections/featured-products',
+      'featured-products': '/admin/ui-config/sections/product-grid',
       'product-grid': '/admin/ui-config/sections/product-grid',
+      'best-sellers': '/admin/ui-config/sections/product-grid',
+      'new-arrivals': '/admin/ui-config/sections/product-grid',
+      'trending-products': '/admin/ui-config/sections/product-grid',
+      'special-offers': '/admin/ui-config/sections/product-grid',
     };
     return urlMap[type] || '/admin/ui-config/sections/new';
   };

@@ -2,7 +2,7 @@
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { SortableMenuItemWithLanguagePack } from '@/components/admin/SortableMenuItemWithLanguagePack';
+import { SortableMenuItemWithLanguagePack } from '@/components/SortableMenuItemWithLanguagePack';
 import { useUIConfigStore } from '@/lib/stores/ui-config.store';
 import type { MenuItem } from '@/lib/stores/ui-config.store';
 

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
@@ -860,9 +861,9 @@ function HomePage({
              s.type === "products" || 
              s.type === "featured-items"
     );
-    if (!activeCampaignsSection?.data) return null;
+    if (!featuredProductsSection?.data) return null;
 
-    return <ActiveProductsSection data={activeCampaignsSection.data} />;
+    return <ActiveProductsSection data={featuredProductsSection.data} />;
   }, [sections]);
 
   return (
@@ -879,7 +880,7 @@ function HomePage({
               promo: renderPromoSection,
               ranking: renderRankingSection,
               recommended: renderRecommendedSection,
-              activeCampaigns: renderActiveCampaignsSection,
+              activeCampaigns: renderFeaturedProductsSection,
             }}
           </HomeSections>
         </main>

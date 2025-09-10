@@ -3,6 +3,13 @@ import { Pool, Client, QueryResult } from 'pg';
 import { promisify } from 'util';
 import { parseSupabaseConnectionString, logSSLConfig } from './ssl-config';
 
+// Drizzle ORM imports
+import { drizzle } from 'drizzle-orm/node-postgres';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { sql } from 'drizzle-orm';
+import * as schema from '../drizzle/migrations/schema';
+import * as relations from '../drizzle/migrations/relations';
+
 interface DatabaseConfig {
   connectionString?: string;
   host?: string;
@@ -14,11 +21,18 @@ interface DatabaseConfig {
   connectionTimeoutMillis?: number;
   idleTimeoutMillis?: number;
   max?: number;
+  min?: number;
+  acquireTimeoutMillis?: number;
+  createTimeoutMillis?: number;
+  destroyTimeoutMillis?: number;
+  reapIntervalMillis?: number;
+  createRetryIntervalMillis?: number;
 }
 
 class Database {
   private static instance: Database;
   private pool: Pool;
+  private drizzle: NodePgDatabase<typeof schema>;
   private isConnected: boolean = false;
 
   private constructor() {
@@ -43,7 +57,13 @@ class Database {
           ssl: ssl,
           connectionTimeoutMillis: 15000,
           idleTimeoutMillis: 30000,
-          max: 20,
+          acquireTimeoutMillis: 10000,
+          createTimeoutMillis: 10000,
+          destroyTimeoutMillis: 5000,
+          reapIntervalMillis: 1000,
+          createRetryIntervalMillis: 200,
+          max: 20,  // 최대 연결 수
+          min: 2,   // 최소 연결 수 유지
           // Important: Supabase pooling requires these settings
           application_name: 'commerce-nextjs',
           // Add Node.js specific timeout handling
@@ -65,7 +85,13 @@ class Database {
           } : false,
           connectionTimeoutMillis: 5000,
           idleTimeoutMillis: 30000,
-          max: 20,
+          acquireTimeoutMillis: 10000,
+          createTimeoutMillis: 10000,
+          destroyTimeoutMillis: 5000,
+          reapIntervalMillis: 1000,
+          createRetryIntervalMillis: 200,
+          max: 20,  // 최대 연결 수
+          min: 2,   // 최소 연결 수
         };
       }
     } else {
@@ -79,12 +105,19 @@ class Database {
         ssl: process.env.NODE_ENV === 'production',
         connectionTimeoutMillis: 5000,
         idleTimeoutMillis: 30000,
+        acquireTimeoutMillis: 10000,
+        createTimeoutMillis: 10000,
+        destroyTimeoutMillis: 5000,
+        reapIntervalMillis: 1000,
+        createRetryIntervalMillis: 200,
         max: 20, // 최대 연결 수
+        min: 2,  // 최소 연결 수
       };
       console.log('Database: Using individual env vars - Host:', config.host, 'Port:', config.port, 'Database:', config.database, 'User:', config.user);
     }
 
     this.pool = new Pool(config);
+    this.drizzle = drizzle(this.pool, { schema: { ...schema, ...relations } });
     this.setupEventHandlers();
   }
 
@@ -166,6 +199,10 @@ class Database {
     return await this.pool.connect();
   }
 
+  public getDrizzle(): NodePgDatabase<typeof schema> {
+    return this.drizzle;
+  }
+
   public async transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
@@ -200,6 +237,29 @@ class Database {
     }
   }
 
+  public async testDrizzleConnection(): Promise<{ success: boolean; message: string; tableCount?: number }> {
+    try {
+      const result = await this.drizzle.execute(sql`
+        SELECT COUNT(*) as table_count 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public'
+      `);
+      
+      const tableCount = parseInt(result.rows[0].table_count as string);
+      
+      return {
+        success: true,
+        message: `Drizzle 연결 성공 - ${tableCount}개 테이블 확인됨`,
+        tableCount
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Drizzle 연결 실패: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
   public async close(): Promise<void> {
     await this.pool.end();
     this.isConnected = false;
@@ -213,8 +273,10 @@ const db = Database.getInstance();
 // 유틸리티 함수들
 export const query = (text: string, params?: unknown[]) => db.query(text, params);
 export const getClient = () => db.getClient();
+export const getDrizzle = () => db.getDrizzle();
 export const transaction = <T>(callback: (client: unknown) => Promise<T>) => db.transaction(callback);
 export const healthCheck = () => db.healthCheck();
+export const testDrizzleConnection = () => db.testDrizzleConnection();
 export const connect = () => db.connect();
 export const close = () => db.close();
 

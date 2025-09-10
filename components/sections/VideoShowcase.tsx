@@ -40,7 +40,7 @@ const VideoShowcase = React.memo(function VideoShowcase({ config }: VideoShowcas
 
   return (
     <section className="py-12 px-4 bg-black">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 헤더 */}
         {config?.title && (
           <h2 className="text-3xl font-bold text-white text-center mb-8">

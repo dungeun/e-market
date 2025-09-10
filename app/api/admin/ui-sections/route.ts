@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { translateText } from '@/lib/services/translation.service';
-import { emitToAll } from '@/lib/socket';
+import { broadcastUIUpdate } from '@/lib/events/broadcaster';
 
 // GET: 모든 UI 섹션 가져오기
 export async function GET(request: NextRequest) {
@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
 
     const sections = result.rows.map(section => ({
       id: section.id,
-      key: section.key || section.name,
-      name: section.key || section.name,
-      title: section.title || section.name,
+      key: section.key,
+      name: section.key,
+      title: section.title || section.key,
       type: section.type,
       order: section.order,
       isActive: section.isActive,
@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 실시간 업데이트 이벤트 발생
-    emitToAll('ui:section:updated', {
-      action: 'created',
+    broadcastUIUpdate({
+      type: 'create',
       section: {
         ...section,
         content: typeof section.data === 'string' ? JSON.parse(section.data) : section.data,
@@ -223,8 +223,8 @@ export async function PUT(request: NextRequest) {
     }
 
     // 실시간 업데이트 이벤트 발생
-    emitToAll('ui:section:updated', {
-      action: 'updated',
+    broadcastUIUpdate({
+      type: 'update',
       section: {
         ...section,
         content: typeof section.data === 'string' ? JSON.parse(section.data) : section.data,
@@ -283,12 +283,9 @@ export async function DELETE(request: NextRequest) {
 
     // 실시간 업데이트 이벤트 발생
     if (result.rows.length > 0) {
-      emitToAll('ui:section:updated', {
-        action: 'deleted',
-        section: {
-          id: result.rows[0].id,
-          name: result.rows[0].name
-        }
+      broadcastUIUpdate({
+        type: 'delete',
+        sectionId: result.rows[0].id
       });
     }
 

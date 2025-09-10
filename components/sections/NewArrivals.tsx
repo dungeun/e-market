@@ -3,6 +3,7 @@
 import React from 'react';
 
 import ProductCard from './ProductCard'
+import SectionLayout from '../ui/SectionLayout'
 import { Sparkles } from 'lucide-react'
 
 interface NewArrivalsProps {
@@ -20,49 +21,45 @@ interface NewArrivalsProps {
 
 const NewArrivals = React.memo(function NewArrivals({ config = {}, products = [] }: NewArrivalsProps) {
   return (
-    <section className="py-12 px-4 bg-white">
-      <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-6 h-6 text-red-500" />
-            {config?.title && (
-              <h2 className="text-3xl font-bold text-gray-900">
-                {config?.title}
-              </h2>
-            )}
-            <Sparkles className="w-6 h-6 text-red-500" />
-          </div>
-          {config?.subtitle && (
-            <p className="text-gray-600">
-              {config?.subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* 상품 그리드 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {products.slice(0, config?.limit || 12).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              showBadge={true}
-              badgeText="NEW"
-            />
-          ))}
-        </div>
-
-        {/* 더보기 */}
-        <div className="text-center mt-8">
-          <a
-            href="/products?sort=newest"
-            className="inline-block px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
-          >
-            신상품 더보기
-          </a>
-        </div>
-      </div>
-    </section>
+    <SectionLayout
+      theme="light"
+      layout="grid"
+      columns={6}
+      responsive={{
+        mobile: 2,
+        tablet: 4,
+        desktop: 6
+      }}
+      header={{
+        title: config?.title || '신상품',
+        subtitle: config?.subtitle,
+        icon: Sparkles,
+        secondaryIcon: Sparkles,
+        centerAlign: true
+      }}
+      empty={products.length === 0}
+      emptyState={{
+        message: '신상품이 없습니다.',
+        description: '새로운 상품이 곧 출시될 예정입니다.'
+      }}
+      cta={{
+        text: '신상품 더보기',
+        href: '/products?sort=newest',
+        variant: 'outline'
+      }}
+      section={{
+        'aria-label': '신상품 목록'
+      }}
+    >
+      {products.slice(0, config?.limit || 12).map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          showBadge={true}
+          badgeText="NEW"
+        />
+      ))}
+    </SectionLayout>
     )
 });
 

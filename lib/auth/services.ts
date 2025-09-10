@@ -1,7 +1,6 @@
 import type { User, RequestContext } from '@/lib/types/common';
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { User } from '@/lib/auth'
 import { query, transaction } from '@/lib/db'
 import { JWT_SECRET, REFRESH_SECRET } from '@/lib/auth/constants'
 import { logger } from '@/lib/utils/logger'
@@ -257,7 +256,12 @@ class AuthServiceClass {
         id: user.id,
         email: user.email,
         name: user.name,
-        type: user.type as 'BUSINESS' | 'INFLUENCER' | 'ADMIN'
+        type: user.type as 'BUSINESS' | 'INFLUENCER' | 'ADMIN',
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        state: user.state,
+        postal_code: user.postal_code
       }
     } catch (error) {
       logger.error('Error fetching user:', error)

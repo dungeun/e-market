@@ -6,6 +6,11 @@ export interface User {
   name: string;
   type: 'ADMIN' | 'BUSINESS' | 'INFLUENCER';
   role?: 'ADMIN' | 'BUSINESS' | 'INFLUENCER'; // NextAuth 호환성
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
 }
 
 // NextAuth.js 호환을 위한 임시 authOptions

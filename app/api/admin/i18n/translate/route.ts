@@ -133,7 +133,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { keyId, sourceLanguage = 'ko', targetLanguages, sourceText, forceRetranslate = false } = body
+    const { text, keyId, sourceLanguage = 'ko', targetLanguages, sourceText, forceRetranslate = false } = body
+    
+    // 간단한 텍스트 번역 (팝업 알림 등)
+    if (text && !keyId) {
+      return handleSimpleTextTranslation(text, sourceLanguage, targetLanguages)
+    }
 
     if (!keyId) {
       return NextResponse.json(
@@ -357,6 +362,114 @@ export async function DELETE(request: NextRequest) {
       { error: error instanceof Error ? error.message : 'Failed to delete translation' },
       { status: 500 }
     )
+  }
+}
+
+// 간단한 텍스트 번역 처리 (팝업 알림 등)
+async function handleSimpleTextTranslation(text: string, sourceLanguage: string, targetLanguages: string[]) {
+  try {
+    const translations: { [key: string]: string } = {}
+    const errors: { [key: string]: string } = {}
+
+    // Google Translate API 키 확인
+    const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY
+    const hasGoogleAPI = !!apiKey
+
+    for (const targetLang of targetLanguages) {
+      try {
+        let translatedText = ''
+        
+        if (hasGoogleAPI) {
+          // Google Translate API 사용
+          translatedText = await translateWithGoogle(text, sourceLanguage, targetLang, apiKey)
+        } else {
+          // 시뮬레이션 번역 사용
+          translatedText = await simulateTranslation(text, sourceLanguage, targetLang)
+        }
+        
+        translations[targetLang] = translatedText
+      } catch (error) {
+        logger.error(`Translation failed for ${targetLang}:`, error)
+        errors[targetLang] = error instanceof Error ? error.message : 'Translation failed'
+      }
+    }
+
+    if (Object.keys(translations).length === 0) {
+      return NextResponse.json(
+        { 
+          error: '모든 번역이 실패했습니다.',
+          details: errors
+        },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      translations,
+      errors: Object.keys(errors).length > 0 ? errors : undefined
+    })
+  } catch (error) {
+    logger.error('Simple text translation error:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Translation failed' },
+      { status: 500 }
+    )
+  }
+}
+
+// Google Translate API를 사용한 번역
+async function translateWithGoogle(text: string, sourceLanguage: string, targetLanguage: string, apiKey: string): Promise<string> {
+  try {
+    // 언어 코드 매핑
+    const googleCodeMap: { [key: string]: string } = {
+      ko: 'ko',
+      en: 'en',
+      ja: 'ja',
+      jp: 'ja', // 별칭 처리
+      zh: 'zh-CN',
+      es: 'es',
+      fr: 'fr',
+      de: 'de',
+      pt: 'pt',
+      ru: 'ru',
+      ar: 'ar',
+      hi: 'hi',
+      vi: 'vi',
+      th: 'th',
+      id: 'id',
+      it: 'it'
+    }
+
+    const googleSourceCode = sourceLanguage === 'auto' ? undefined : (googleCodeMap[sourceLanguage] || sourceLanguage)
+    const googleTargetCode = googleCodeMap[targetLanguage] || targetLanguage
+
+    const response = await fetch(
+      `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          q: text,
+          source: googleSourceCode,
+          target: googleTargetCode,
+          format: 'text'
+        })
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error?.message || 'Translation failed')
+    }
+
+    const data = await response.json()
+    return data.data.translations[0].translatedText
+  } catch (error) {
+    logger.error('Google Translate API error:', error)
+    throw error
   }
 }
 

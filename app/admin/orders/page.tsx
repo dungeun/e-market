@@ -104,6 +104,15 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [shippingModal, setShippingModal] = useState<{ isOpen: boolean; order: Order | null; tab: 'direct' | 'courier' }>({
+    isOpen: false,
+    order: null,
+    tab: 'direct'
+  })
+  const [deliveryStatusModal, setDeliveryStatusModal] = useState<{ isOpen: boolean; order: Order | null }>({
+    isOpen: false,
+    order: null
+  })
 
   const fetchOrders = async () => {
     try {
@@ -196,39 +205,23 @@ export default function OrdersPage() {
           })
           const result = await response.json()
           if (result.success) {
-            toast.success(`주문 ${order.order_number} 처리 시작`)
+            toast.success(`주문 ${order.order_number}을(를) 수락했습니다.`)
             fetchOrders() // Refresh data
           } else {
-            toast.error('주문 상태 변경에 실패했습니다.')
+            toast.error('주문 수락에 실패했습니다.')
           }
         } catch (error) {
           toast.error('주문 상태 변경에 실패했습니다.')
         }
         break
       case 'ship':
-        const trackingNumber = prompt('송장번호를 입력하세요:')
-        if (trackingNumber) {
-          try {
-            const response = await fetch('/api/admin/orders', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderId: order.id,
-                status: 'shipped',
-                trackingNumber
-              })
-            })
-            const result = await response.json()
-            if (result.success) {
-              toast.success(`주문 ${order.order_number} 배송 시작`)
-              fetchOrders() // Refresh data
-            } else {
-              toast.error('주문 상태 변경에 실패했습니다.')
-            }
-          } catch (error) {
-            toast.error('주문 상태 변경에 실패했습니다.')
-          }
-        }
+        // 배송 모달 열기
+        console.log('Opening shipping modal for order:', order)
+        setShippingModal({
+          isOpen: true,
+          order: order,
+          tab: 'direct' // 직접배송이 기본 탭
+        })
         break
       case 'cancel':
         try {
@@ -242,10 +235,10 @@ export default function OrdersPage() {
           })
           const result = await response.json()
           if (result.success) {
-            toast.warning(`주문 ${order.order_number} 취소 처리`)
+            toast.warning(`주문 ${order.order_number}을(를) 거절/취소했습니다.`)
             fetchOrders() // Refresh data
           } else {
-            toast.error('주문 상태 변경에 실패했습니다.')
+            toast.error('주문 거절/취소에 실패했습니다.')
           }
         } catch (error) {
           toast.error('주문 상태 변경에 실패했습니다.')
@@ -257,6 +250,67 @@ export default function OrdersPage() {
     }
   }
 
+  const handleShipping = async (type: 'direct' | 'courier', trackingNumber?: string) => {
+    if (!shippingModal.order) return
+
+    try {
+      const response = await fetch('/api/admin/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: shippingModal.order.id,
+          status: 'shipped',
+          trackingNumber: type === 'courier' ? trackingNumber : null,
+          shippingType: type
+        })
+      })
+      const result = await response.json()
+      if (result.success) {
+        toast.success(
+          type === 'direct' 
+            ? `주문 ${shippingModal.order.order_number} 직접 배송 시작`
+            : `주문 ${shippingModal.order.order_number} 택배 배송 시작`
+        )
+        setShippingModal({ isOpen: false, order: null, tab: 'direct' })
+        fetchOrders()
+      } else {
+        toast.error('배송 처리에 실패했습니다.')
+      }
+    } catch (error) {
+      toast.error('배송 처리에 실패했습니다.')
+    }
+  }
+
+  const handleDeliveryStatus = async (status: 'delayed' | 'delivered', delayReason?: string) => {
+    if (!deliveryStatusModal.order) return
+
+    try {
+      const response = await fetch('/api/admin/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: deliveryStatusModal.order.id,
+          status: status === 'delivered' ? 'delivered' : 'shipped',
+          delayReason: status === 'delayed' ? delayReason : null
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        toast.success(
+          status === 'delivered'
+            ? `주문 ${deliveryStatusModal.order.order_number} 배송 완료`
+            : `주문 ${deliveryStatusModal.order.order_number} 배송 지연 처리`
+        )
+        setDeliveryStatusModal({ isOpen: false, order: null })
+        fetchOrders()
+      } else {
+        toast.error('상태 업데이트에 실패했습니다.')
+      }
+    } catch (error) {
+      toast.error('상태 업데이트에 실패했습니다.')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -375,14 +429,14 @@ export default function OrdersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>주문번호</TableHead>
-                <TableHead>고객</TableHead>
-                <TableHead>상품</TableHead>
-                <TableHead>결제금액</TableHead>
-                <TableHead>결제상태</TableHead>
-                <TableHead>주문상태</TableHead>
-                <TableHead>주문일시</TableHead>
-                <TableHead className="text-right">작업</TableHead>
+                <TableHead className="w-10 text-center">번호</TableHead>
+                <TableHead className="w-32">주문번호</TableHead>
+                <TableHead className="w-24">고객</TableHead>
+                <TableHead className="w-28">상품</TableHead>
+                <TableHead className="w-24 text-right">금액</TableHead>
+                <TableHead className="w-24">상태</TableHead>
+                <TableHead className="w-20">일시</TableHead>
+                <TableHead>작업</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -402,18 +456,25 @@ export default function OrdersPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
+                orders.map((order, index) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_number}</TableCell>
+                    <TableCell className="text-center text-sm">{orders.length - index}</TableCell>
+                    <TableCell>
+                      <div className="font-mono text-xs">
+                        {order.order_number}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{order.customer_name}</p>
-                        <p className="text-xs text-muted-foreground">{order.customer_email}</p>
+                        <p className="font-medium text-sm">{order.customer_name}</p>
+                        <p className="text-xs text-muted-foreground">{order.customer_phone?.slice(-4) || '****'}</p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>{order.items[0]?.current_product_name || order.items[0]?.product_name || 'N/A'}</p>
+                        <p className="truncate max-w-[120px]" title={order.items[0]?.current_product_name || order.items[0]?.product_name || 'N/A'}>
+                          {order.items[0]?.current_product_name || order.items[0]?.product_name || 'N/A'}
+                        </p>
                         {order.items.length > 1 && (
                           <p className="text-xs text-muted-foreground">
                             외 {order.items.length - 1}개
@@ -421,58 +482,109 @@ export default function OrdersPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>₩{order.total_amount.toLocaleString()}</TableCell>
-                    <TableCell>{getPaymentStatusBadge(order.payment_status)}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell className="text-sm">{new Date(order.created_at).toLocaleString('ko-KR')}</TableCell>
-                    <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
+                    <TableCell className="text-sm font-medium">
+                      ₩{order.total_amount.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        {getStatusBadge(order.status)}
+                        {order.payment_status === 'paid' && (
+                          <Badge className="bg-green-100 text-green-800 text-xs">결제완료</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {new Date(order.created_at).toLocaleDateString('ko-KR', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOrderAction('view', order)}
+                          className="h-8 px-2"
+                        >
+                          <Eye className="h-3 w-3" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>작업</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleOrderAction('view', order)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          상세 보기
-                        </DropdownMenuItem>
+                        
                         {order.status === 'pending' && (
-                          <DropdownMenuItem onClick={() => handleOrderAction('process', order)}>
-                            <Package className="mr-2 h-4 w-4" />
-                            주문 처리
-                          </DropdownMenuItem>
-                        )}
-                        {order.status === 'processing' && (
-                          <DropdownMenuItem onClick={() => handleOrderAction('ship', order)}>
-                            <Truck className="mr-2 h-4 w-4" />
-                            배송 시작
-                          </DropdownMenuItem>
-                        )}
-                        {(order.status === 'pending' || order.status === 'processing') && (
                           <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => handleOrderAction('cancel', order)}
-                              className="text-red-600"
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOrderAction('process', order)}
+                              className="h-8 px-2 text-green-600 hover:bg-green-50"
                             >
-                              <XCircle className="mr-2 h-4 w-4" />
-                              주문 취소
-                            </DropdownMenuItem>
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              수락
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOrderAction('cancel', order)}
+                              className="h-8 px-2 text-red-600 hover:bg-red-50"
+                            >
+                              <XCircle className="h-3 w-3 mr-1" />
+                              거절
+                            </Button>
                           </>
                         )}
-                        {order.paymentStatus === 'paid' && order.status !== 'cancelled' && (
-                          <DropdownMenuItem onClick={() => handleOrderAction('refund', order)}>
-                            <DollarSign className="mr-2 h-4 w-4" />
-                            환불 처리
-                          </DropdownMenuItem>
+                        
+                        {order.status === 'processing' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOrderAction('ship', order)}
+                            className="h-8 px-2 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Truck className="h-3 w-3 mr-1" />
+                            배송
+                          </Button>
                         )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                        
+                        {order.status === 'shipped' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setDeliveryStatusModal({ isOpen: true, order: order })}
+                            className="h-8 px-2 text-purple-600 hover:bg-purple-50"
+                            title="배송 상태 업데이트"
+                          >
+                            <Package className="h-3 w-3" />
+                          </Button>
+                        )}
+                        
+                        {order.status === 'processing' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOrderAction('cancel', order)}
+                            className="h-8 px-2 text-red-600 hover:bg-red-50"
+                            title="주문 취소"
+                          >
+                            <XCircle className="h-3 w-3" />
+                          </Button>
+                        )}
+                        
+                        {order.payment_status === 'paid' && order.status !== 'cancelled' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOrderAction('refund', order)}
+                            className="h-8 px-2 text-orange-600 hover:bg-orange-50"
+                            title="환불 처리"
+                          >
+                            <DollarSign className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
             </TableBody>
@@ -480,10 +592,159 @@ export default function OrdersPage() {
         </CardContent>
       </Card>
 
+      {/* 배송 모달 */}
+      {shippingModal.isOpen && shippingModal.order && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setShippingModal({ isOpen: false, order: null, tab: 'direct' })}>
+          <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl border" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>배송 처리: {shippingModal.order.order_number}</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setShippingModal({ isOpen: false, order: null, tab: 'direct' })}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* 탭 선택 */}
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant={shippingModal.tab === 'direct' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setShippingModal({ ...shippingModal, tab: 'direct' })}
+                >
+                  <Truck className="mr-2 h-4 w-4" />
+                  직접배송
+                </Button>
+                <Button
+                  variant={shippingModal.tab === 'courier' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setShippingModal({ ...shippingModal, tab: 'courier' })}
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  택배
+                </Button>
+              </div>
+
+              {/* 직접배송 탭 */}
+              {shippingModal.tab === 'direct' && (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">직접배송 정보</h4>
+                    <p className="text-sm text-gray-600 mb-2">판매자가 직접 구매자에게 배송합니다.</p>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>고객:</strong> {shippingModal.order.customer_name}</p>
+                      <p><strong>연락처:</strong> {shippingModal.order.customer_phone}</p>
+                      <p><strong>주소:</strong> {shippingModal.order.shipping_address}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleShipping('direct')}
+                  >
+                    직접 배송 시작
+                  </Button>
+                </div>
+              )}
+
+              {/* 택배 탭 */}
+              {shippingModal.tab === 'courier' && (
+                <div className="space-y-4">
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">택배 정보</h4>
+                    <p className="text-sm text-gray-600 mb-3">택배사를 통해 배송합니다.</p>
+                    <div className="space-y-1 text-sm mb-3">
+                      <p><strong>고객:</strong> {shippingModal.order.customer_name}</p>
+                      <p><strong>주소:</strong> {shippingModal.order.shipping_address}</p>
+                    </div>
+                    <Input
+                      id="trackingNumber"
+                      placeholder="송장번호 입력"
+                      className="mt-2"
+                    />
+                  </div>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      const trackingInput = document.getElementById('trackingNumber') as HTMLInputElement
+                      const trackingNumber = trackingInput?.value
+                      if (trackingNumber) {
+                        handleShipping('courier', trackingNumber)
+                      } else {
+                        toast.error('송장번호를 입력해주세요.')
+                      }
+                    }}
+                  >
+                    택배 배송 시작
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 배송 상태 모달 (배송중 -> 배송지연/배송완료) */}
+      {deliveryStatusModal.isOpen && deliveryStatusModal.order && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setDeliveryStatusModal({ isOpen: false, order: null })}>
+          <Card className="w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl border" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>배송 상태 업데이트: {deliveryStatusModal.order.order_number}</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setDeliveryStatusModal({ isOpen: false, order: null })}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">현재 배송 정보</h4>
+                <div className="space-y-1 text-sm">
+                  <p><strong>고객:</strong> {deliveryStatusModal.order.customer_name}</p>
+                  <p><strong>연락처:</strong> {deliveryStatusModal.order.customer_phone}</p>
+                  <p><strong>주소:</strong> {deliveryStatusModal.order.shipping_address}</p>
+                  {deliveryStatusModal.order.tracking_number && (
+                    <p><strong>송장번호:</strong> {deliveryStatusModal.order.tracking_number}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700" 
+                  onClick={() => handleDeliveryStatus('delivered')}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  배송 완료
+                </Button>
+                
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline"
+                    className="w-full border-orange-500 text-orange-600 hover:bg-orange-50" 
+                    onClick={() => {
+                      const reason = prompt('배송 지연 사유를 입력하세요:')
+                      if (reason) {
+                        handleDeliveryStatus('delayed', reason)
+                      }
+                    }}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    배송 지연
+                  </Button>
+                  <p className="text-xs text-gray-500 text-center">
+                    배송 지연 시 고객에게 안내 메시지가 발송됩니다
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* 주문 상세 모달 */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedOrder(null)}>
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setSelectedOrder(null)}>
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 shadow-2xl border" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>주문 상세: {selectedOrder.order_number}</CardTitle>

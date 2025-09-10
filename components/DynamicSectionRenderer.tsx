@@ -2,7 +2,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { useState, useEffect } from 'react';
-import { useSocket } from '@/hooks/useSocket';
+import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 
 // Lazy load all section components for better performance
 const HeroSection = lazy(() => import('@/components/sections/HeroSection'));
@@ -81,6 +81,7 @@ const sectionComponents: { [key: string]: React.ComponentType<unknown> } = {
   'seasonal-collection': SeasonalCollection,
   'brand-spotlight': BrandSpotlight,
   'featured-products': FeaturedProducts,
+  'product-grid': FeaturedProducts, // Use FeaturedProducts for product-grid
   'category-showcase': CategoryShowcase,
   'banner-grid': BannerGrid,
   newsletter: Newsletter,
@@ -99,27 +100,14 @@ const sectionComponents: { [key: string]: React.ComponentType<unknown> } = {
   categories: CategorySection, // Map 'categories' to CategorySection
   'popular-products': TrendingProducts, // Map to existing TrendingProducts
   'sale-products': SpecialOffers, // Map to existing SpecialOffers
+  'used-products': FeaturedProducts, // Map to FeaturedProducts for used products
 };
 
 const DynamicSectionRenderer = React.memo(function DynamicSectionRenderer({ className = '' }: DynamicSectionRendererProps) {
   const [sections, setSections] = useState<UISection[]>([]);
   const [loading, setLoading] = useState(true);
-  const { socket, isConnected } = useSocket();
-
-  useEffect(() => {
-    loadSections();
-  }, []);
-
-  // Socket.io 실시간 이벤트 리스너 설정
-  useEffect(() => {
-    if (!socket) return;
-
-    // 섹션 업데이트 이벤트 리스너
-    const handleSectionUpdated = (data: {
-      type: 'create' | 'update' | 'delete';
-      section?: UISection;
-      sectionId?: string;
-    }) => {
+  const { isConnected } = useRealTimeUpdates({
+    onUIUpdate: (data) => {
       console.log('Real-time section update received:', data);
       
       setSections(prevSections => {
@@ -148,56 +136,31 @@ const DynamicSectionRenderer = React.memo(function DynamicSectionRenderer({ clas
 
           case 'delete':
             // 섹션 삭제
-            const sectionId = data.sectionId || data.section?.id;
-            return prevSections.filter(section => section.id !== sectionId);
+            if (data.sectionId) {
+              return prevSections.filter(s => s.id !== data.sectionId);
+            }
+            return prevSections;
+
+          case 'reorder':
+            // 섹션 순서 변경
+            if (data.sections) {
+              return data.sections
+                .filter(s => s.isActive)
+                .sort((a, b) => a.order - b.order);
+            }
+            return prevSections;
 
           default:
             return prevSections;
         }
       });
-    };
+    }
+  });
 
-    // 섹션 순서 변경 이벤트 리스너
-    const handleSectionReordered = (data: {
-      type: 'reorder';
-      sections: UISection[];
-      sectionOrder: string[];
-    }) => {
-      console.log('Real-time section reorder received:', data);
-      
-      // 새로운 순서로 섹션 재정렬
-      setSections(prevSections => {
-        const reorderedSections = [...prevSections];
-        
-        // 순서 정보 업데이트
-        data.sections.forEach(updatedSection => {
-          const index = reorderedSections.findIndex(s => s.id === updatedSection.id);
-          if (index !== -1) {
-            reorderedSections[index] = {
-              ...reorderedSections[index],
-              order: updatedSection.order,
-              isActive: updatedSection.isActive
-            };
-          }
-        });
-        
-        // 활성화된 섹션만 필터링하고 새로운 순서로 정렬
-        return reorderedSections
-          .filter(s => s.isActive)
-          .sort((a, b) => a.order - b.order);
-      });
-    };
+  useEffect(() => {
+    loadSections();
+  }, []);
 
-    // 이벤트 리스너 등록
-    socket.on('ui:section:updated', handleSectionUpdated);
-    socket.on('ui:section:reordered', handleSectionReordered);
-
-    // 클린업 함수
-    return () => {
-      socket.off('ui:section:updated', handleSectionUpdated);
-      socket.off('ui:section:reordered', handleSectionReordered);
-    };
-  }, [socket]);
 
   const loadSections = async () => {
     try {
@@ -211,10 +174,18 @@ const DynamicSectionRenderer = React.memo(function DynamicSectionRenderer({ clas
           .filter((section: UISection) => section.isActive)
           .sort((a: UISection, b: UISection) => a.order - b.order);
         
+        console.log('Active sections loaded:', activeSections.map((s: UISection) => ({
+          key: s.key,
+          type: s.type,
+          title: s.title,
+          order: s.order
+        })));
+        console.log('Total active sections count:', activeSections.length);
+        
         setSections(activeSections);
       }
     } catch (error) {
-
+      console.error('Error loading sections:', error);
     } finally {
       setLoading(false);
     }
@@ -257,14 +228,16 @@ const DynamicSectionRenderer = React.memo(function DynamicSectionRenderer({ clas
             ? 'bg-green-100 text-green-800 border border-green-200' 
             : 'bg-red-100 text-red-800 border border-red-200'
         }`}>
-          {isConnected ? '🔄 실시간 동기화 활성' : '❌ 동기화 연결 끊김'}
+          {isConnected ? '🔄 SSE 실시간 동기화 활성' : '❌ SSE 동기화 연결 끊김'}
         </div>
       )}
       
       <div className="space-y-12">
         {sections.map((section) => {
+          console.log('Rendering section:', section.key, 'type:', section.type);
           // Support both kebab-case and camelCase
           let SectionComponent = sectionComponents[section.type];
+          console.log('Found component for', section.type, ':', !!SectionComponent);
           
           // Try camelCase if kebab-case not found
           if (!SectionComponent) {
@@ -279,7 +252,7 @@ const DynamicSectionRenderer = React.memo(function DynamicSectionRenderer({ clas
           }
           
           if (!SectionComponent) {
-            console.warn(`Unknown section type: ${section.type}`);
+            console.warn(`Unknown section type: ${section.type} for section: ${section.key}`);
             // Fallback to DynamicSection for unknown types
             const FallbackComponent = sectionComponents['dynamic'];
             if (FallbackComponent) {

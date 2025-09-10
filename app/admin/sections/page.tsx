@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { 
   HomeSection, 
   SectionType,
@@ -19,11 +22,192 @@ import {
 import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 
+interface SortableSectionProps {
+  section: HomeSection
+  index: number
+  onToggleEnabled: (sectionId: string) => void
+  onDelete: (sectionId: string) => void
+  onEdit: (sectionId: string | null) => void
+  editingSection?: string | null
+  onUpdateSection?: (sectionId: string, updates: Partial<HomeSection>) => void
+}
+
+function SortableSection({ 
+  section, 
+  index, 
+  onToggleEnabled, 
+  onDelete, 
+  onEdit,
+  editingSection,
+  onUpdateSection 
+}: SortableSectionProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: section.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white rounded-lg shadow-sm border ${
+        isDragging ? 'shadow-lg border-blue-500' : 'border-gray-200'
+      } ${!section.enabled ? 'opacity-60' : ''}`}
+    >
+      <div className="p-4 flex items-center justify-between">
+        {/* 드래그 핸들 */}
+        <div 
+          {...attributes}
+          {...listeners}
+          className="cursor-move"
+        >
+          <GripVertical className="w-5 h-5 text-gray-400" />
+        </div>
+
+        {/* 섹션 정보 */}
+        <div className="flex-1 ml-4">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">#{index + 1}</span>
+            <h3 className="font-semibold text-gray-900">
+              {section.name}
+            </h3>
+            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {section.type}
+            </span>
+          </div>
+        </div>
+
+        {/* 액션 버튼들 */}
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => onToggleEnabled(section.id)}
+            size="sm"
+            variant="ghost"
+          >
+            {section.enabled ? (
+              <Eye className="w-4 h-4 text-green-600" />
+            ) : (
+              <EyeOff className="w-4 h-4 text-gray-400" />
+            )}
+          </Button>
+          
+          <Button
+            onClick={() => onEdit(section.id)}
+            size="sm"
+            variant="ghost"
+          >
+            <Settings className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            onClick={() => onDelete(section.id)}
+            size="sm"
+            variant="ghost"
+          >
+            <Trash2 className="w-4 h-4 text-red-500" />
+          </Button>
+        </div>
+      </div>
+
+      {/* 섹션 설정 편집 폼 */}
+      {editingSection === section.id && (
+        <div className="border-t bg-gray-50 p-4">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                섹션 이름
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={section.name}
+                onChange={(e) => {
+                  onUpdateSection?.(section.id, { name: e.target.value })
+                }}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                섹션 타입
+              </label>
+              <select
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={section.type}
+                onChange={(e) => {
+                  const newType = e.target.value as SectionType
+                  onUpdateSection?.(section.id, { 
+                    type: newType,
+                    config: createDefaultSectionConfig(newType)
+                  })
+                }}
+              >
+                {Object.values(SectionType).map(type => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={() => onEdit(null)}
+                size="sm"
+                variant="outline"
+              >
+                취소
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/admin/sections/${section.id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(section)
+                    })
+
+                    if (response.ok) {
+                      toast.success('섹션 설정 저장 완료')
+                      onEdit(null)
+                    }
+                  } catch (error) {
+                    toast.error('섹션 설정 저장 실패')
+                  }
+                }}
+              >
+                저장
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminSectionsPage() {
   const [sections, setSections] = useState<HomeSection[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editingSection, setEditingSection] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   useEffect(() => {
     fetchSections()
@@ -41,20 +225,20 @@ export default function AdminSectionsPage() {
     }
   }
 
-  const handleDragEnd = (result: unknown) => {
-    if (!result.destination) return
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
 
-    const items = Array.from(sections)
-    const [reorderedItem] = items.splice(result.source.index, 1)
-    items.splice(result.destination.index, 0, reorderedItem)
-
-    // 순서 업데이트
-    const updatedSections = items.map((item, index) => ({
-      ...item,
-      order: index + 1
-    }))
-
-    setSections(updatedSections)
+    setSections((sections) => {
+      const oldIndex = sections.findIndex((section) => section.id === active.id)
+      const newIndex = sections.findIndex((section) => section.id === over.id)
+      
+      const reorderedSections = arrayMove(sections, oldIndex, newIndex)
+      return reorderedSections.map((item, index) => ({
+        ...item,
+        order: index + 1
+      }))
+    })
   }
 
   const toggleSectionEnabled = async (sectionId: string) => {
@@ -131,6 +315,14 @@ export default function AdminSectionsPage() {
     setSections([...sections, newSection])
   }
 
+  const updateSection = (sectionId: string, updates: Partial<HomeSection>) => {
+    setSections(sections.map(s =>
+      s.id === sectionId 
+        ? { ...s, ...updates }
+        : s
+    ))
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -166,176 +358,28 @@ export default function AdminSectionsPage() {
         </div>
 
         {/* 섹션 리스트 */}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="sections">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="space-y-4"
-              >
-                {sections.map((section, index) => (
-                  <Draggable 
-                    key={section.id} 
-                    draggableId={section.id} 
-                    index={index}
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`bg-white rounded-lg shadow-sm border ${
-                          snapshot.isDragging ? 'shadow-lg border-blue-500' : 'border-gray-200'
-                        } ${!section.enabled ? 'opacity-60' : ''}`}
-                      >
-                        <div className="p-4 flex items-center justify-between">
-                          {/* 드래그 핸들 */}
-                          <div 
-                            {...provided.dragHandleProps}
-                            className="cursor-move"
-                          >
-                            <GripVertical className="w-5 h-5 text-gray-400" />
-                          </div>
-
-                          {/* 섹션 정보 */}
-                          <div className="flex-1 ml-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm text-gray-500">#{index + 1}</span>
-                              <h3 className="font-semibold text-gray-900">
-                                {section.name}
-                              </h3>
-                              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {section.type}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* 액션 버튼 */}
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => toggleSectionEnabled(section.id)}
-                              className={`p-2 rounded hover:bg-gray-100 ${
-                                section.enabled ? 'text-green-600' : 'text-gray-400'
-                              }`}
-                              title={section.enabled ? '표시됨' : '숨김'}
-                            >
-                              {section.enabled ? (
-                                <Eye className="w-5 h-5" />
-                              ) : (
-                                <EyeOff className="w-5 h-5" />
-                              )}
-                            </button>
-
-                            <button
-                              onClick={() => setEditingSection(section.id)}
-                              className="p-2 rounded hover:bg-gray-100 text-gray-600"
-                              title="설정"
-                            >
-                              <Settings className="w-5 h-5" />
-                            </button>
-
-                            <button
-                              onClick={() => deleteSection(section.id)}
-                              className="p-2 rounded hover:bg-gray-100 text-red-600"
-                              title="삭제"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* 설정 패널 (확장 가능) */}
-                        {editingSection === section.id && (
-                          <div className="border-t border-gray-200 p-4 bg-gray-50">
-                            <div className="space-y-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  섹션 이름
-                                </label>
-                                <input
-                                  type="text"
-                                  value={section.name}
-                                  onChange={(e) => {
-                                    setSections(sections.map(s =>
-                                      s.id === section.id
-                                        ? { ...s, name: e.target.value }
-                                        : s
-                                    ))
-                                  }}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  섹션 타입
-                                </label>
-                                <select
-                                  value={section.type}
-                                  onChange={(e) => {
-                                    const newType = e.target.value as SectionType
-                                    setSections(sections.map(s =>
-                                      s.id === section.id
-                                        ? { 
-                                            ...s, 
-                                            type: newType,
-                                            config: createDefaultSectionConfig(newType)
-                                          }
-                                        : s
-                                    ))
-                                  }}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                  {Object.values(SectionType).map(type => (
-                                    <option key={type} value={type}>
-                                      {type}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setEditingSection(null)}
-                                >
-                                  취소
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(`/api/admin/sections/${section.id}`, {
-                                        method: 'PATCH',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(section)
-                                      })
-
-                                      if (response.ok) {
-                                        toast.success('섹션 설정 저장 완료')
-                                        setEditingSection(null)
-                                      }
-                                    } catch (error) {
-                                      toast.error('섹션 설정 저장 실패')
-                                    }
-                                  }}
-                                >
-                                  저장
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-4">
+              {sections.map((section, index) => (
+                <SortableSection 
+                  key={section.id} 
+                  section={section}
+                  index={index}
+                  onToggleEnabled={toggleSectionEnabled}
+                  onDelete={deleteSection}
+                  onEdit={setEditingSection}
+                  editingSection={editingSection}
+                  onUpdateSection={updateSection}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
         {/* 미리보기 링크 */}
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">

@@ -128,10 +128,10 @@ const ProductCard = React.memo(function ProductCard({
         {/* 인기/NEW 뱃지 - 이미지 위에 배치 */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
           {product.new && (
-            <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">NEW</span>
+            <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-md">NEW</span>
           )}
           {product.featured && (
-            <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">인기</span>
+            <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-md">추천</span>
           )}
         </div>
 

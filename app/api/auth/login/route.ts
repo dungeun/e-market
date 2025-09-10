@@ -37,7 +37,12 @@ export async function POST(request: NextRequest) {
     
     const { email, password } = body
     
-
+    // 디버깅 로그 추가
+    console.log('=== 로그인 요청 디버깅 ===');
+    console.log('Email:', email);
+    console.log('Password length:', password ? password.length : 'undefined');
+    console.log('Body keys:', Object.keys(body));
+    
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -52,8 +57,16 @@ export async function POST(request: NextRequest) {
       WHERE u.email = $1
     `, [email])
     const user = userResult.rows[0]
+    
+    console.log('User found:', !!user);
+    if (user) {
+      console.log('User email:', user.email);
+      console.log('User status:', user.status);
+      console.log('Password hash exists:', !!user.password);
+    }
 
     if (!user) {
+      console.log('❌ User not found in database');
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }
@@ -61,8 +74,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 비밀번호 확인
+    console.log('🔐 Comparing passwords...');
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log('Password validation result:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ Password validation failed');
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }

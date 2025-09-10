@@ -1,0 +1,4370 @@
+{
+  "API_GET__api_wishlist_route": {
+    "pattern_name": "API_GET__api_wishlist_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_wishlist_route": {
+    "pattern_name": "API_POST__api_wishlist_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_wishlist_route": {
+    "pattern_name": "API_DELETE__api_wishlist_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_upload_route": {
+    "pattern_name": "API_POST__api_upload_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_upload_route.improved": {
+    "pattern_name": "API_POST__api_upload_route.improved",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_ui-config_route": {
+    "pattern_name": "API_GET__api_ui-config_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_ui-sections_route": {
+    "pattern_name": "API_GET__api_ui-sections_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_ui-sections_route": {
+    "pattern_name": "API_POST__api_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_ui-sections_route": {
+    "pattern_name": "API_PUT__api_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_ui-sections_route": {
+    "pattern_name": "API_DELETE__api_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_test-main-page-integration_route": {
+    "pattern_name": "API_GET__api_test-main-page-integration_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_test-language-switching_route": {
+    "pattern_name": "API_GET__api_test-language-switching_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_test-admin_route": {
+    "pattern_name": "API_GET__api_test-admin_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_test-admin_route": {
+    "pattern_name": "API_POST__api_test-admin_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_test-db_route": {
+    "pattern_name": "API_GET__api_test-db_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_settings_route": {
+    "pattern_name": "API_GET__api_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_setup_route": {
+    "pattern_name": "API_GET__api_setup_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_search_route": {
+    "pattern_name": "API_GET__api_search_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_search_route": {
+    "pattern_name": "API_POST__api_search_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_recommendations_route": {
+    "pattern_name": "API_GET__api_recommendations_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_recommendations_route": {
+    "pattern_name": "API_POST__api_recommendations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_products_route": {
+    "pattern_name": "API_GET__api_products_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_products_route": {
+    "pattern_name": "API_POST__api_products_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_posts_route": {
+    "pattern_name": "API_GET__api_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_posts_route": {
+    "pattern_name": "API_POST__api_posts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_route": {
+    "pattern_name": "API_POST__api_payments_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_payments_route": {
+    "pattern_name": "API_GET__api_payments_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_orders_route": {
+    "pattern_name": "API_GET__api_orders_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_orders_route": {
+    "pattern_name": "API_POST__api_orders_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_notifications_route": {
+    "pattern_name": "API_GET__api_notifications_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_notifications_route": {
+    "pattern_name": "API_POST__api_notifications_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_notifications_route": {
+    "pattern_name": "API_DELETE__api_notifications_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_logs_route": {
+    "pattern_name": "API_POST__api_logs_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_logs_route": {
+    "pattern_name": "API_GET__api_logs_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_language-packs_route": {
+    "pattern_name": "API_GET__api_language-packs_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_health_route": {
+    "pattern_name": "API_GET__api_health_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_checkout_route": {
+    "pattern_name": "API_POST__api_checkout_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_checkout_route": {
+    "pattern_name": "API_GET__api_checkout_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_cart_route": {
+    "pattern_name": "API_GET__api_cart_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_cart_route": {
+    "pattern_name": "API_POST__api_cart_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_cart_route": {
+    "pattern_name": "API_PATCH__api_cart_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_cart_route": {
+    "pattern_name": "API_DELETE__api_cart_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_campaigns_route": {
+    "pattern_name": "API_GET__api_campaigns_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_route": {
+    "pattern_name": "API_GET__api_boards_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_application-templates_route": {
+    "pattern_name": "API_GET__api_application-templates_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_application-templates_route": {
+    "pattern_name": "API_POST__api_application-templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_application-templates_route": {
+    "pattern_name": "API_PATCH__api_application-templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_application-templates_route": {
+    "pattern_name": "API_DELETE__api_application-templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_users_[id]_route": {
+    "pattern_name": "API_GET__api_users_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_users_[id]_route": {
+    "pattern_name": "API_PUT__api_users_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_users_[id]_route": {
+    "pattern_name": "API_DELETE__api_users_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_upload_image_route": {
+    "pattern_name": "API_POST__api_upload_image_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_ui-sections_reorder_route": {
+    "pattern_name": "API_POST__api_ui-sections_reorder_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_ui-sections_[id]_route": {
+    "pattern_name": "API_GET__api_ui-sections_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_user_social-profile-image_route": {
+    "pattern_name": "API_GET__api_user_social-profile-image_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_user_social-accounts_route": {
+    "pattern_name": "API_GET__api_user_social-accounts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_user_social-accounts_route": {
+    "pattern_name": "API_POST__api_user_social-accounts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_user_social-accounts_route": {
+    "pattern_name": "API_DELETE__api_user_social-accounts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_user_sns-connect_route": {
+    "pattern_name": "API_GET__api_user_sns-connect_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_user_sns-connect_route": {
+    "pattern_name": "API_POST__api_user_sns-connect_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_user_sns-connect_route": {
+    "pattern_name": "API_PUT__api_user_sns-connect_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_test_scraper_route": {
+    "pattern_name": "API_GET__api_test_scraper_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_test_scraper_route": {
+    "pattern_name": "API_POST__api_test_scraper_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_reviews_request_route": {
+    "pattern_name": "API_GET__api_reviews_request_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_reviews_request_route": {
+    "pattern_name": "API_POST__api_reviews_request_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_reviews_request_route": {
+    "pattern_name": "API_PATCH__api_reviews_request_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_search_popular_route": {
+    "pattern_name": "API_GET__api_search_popular_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_search_autocomplete_route": {
+    "pattern_name": "API_GET__api_search_autocomplete_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_search_analytics_route": {
+    "pattern_name": "API_GET__api_search_analytics_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_recommendations_item-based_route": {
+    "pattern_name": "API_GET__api_recommendations_item-based_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_public_settings_route": {
+    "pattern_name": "API_GET__api_public_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_public_language-packs_route": {
+    "pattern_name": "API_GET__api_public_language-packs_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_public_language-packs_route": {
+    "pattern_name": "API_POST__api_public_language-packs_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_products_special-offers_route": {
+    "pattern_name": "API_GET__api_products_special-offers_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_products_best-sellers_route": {
+    "pattern_name": "API_GET__api_products_best-sellers_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_products_[id]_route": {
+    "pattern_name": "API_GET__api_products_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_products_[id]_route": {
+    "pattern_name": "API_PUT__api_products_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_products_[id]_route": {
+    "pattern_name": "API_DELETE__api_products_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_posts_[id]_route": {
+    "pattern_name": "API_GET__api_posts_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_posts_[id]_route": {
+    "pattern_name": "API_PUT__api_posts_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_posts_[id]_route": {
+    "pattern_name": "API_DELETE__api_posts_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payment_webhook_route": {
+    "pattern_name": "API_POST__api_payment_webhook_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_payment_status_route": {
+    "pattern_name": "API_GET__api_payment_status_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payment_refund_route": {
+    "pattern_name": "API_POST__api_payment_refund_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payment_create_route": {
+    "pattern_name": "API_POST__api_payment_create_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payment_confirm_route": {
+    "pattern_name": "API_POST__api_payment_confirm_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_test-complete_route": {
+    "pattern_name": "API_POST__api_payments_test-complete_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_prepare_route": {
+    "pattern_name": "API_POST__api_payments_prepare_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_direct_route": {
+    "pattern_name": "API_POST__api_payments_direct_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_orders_[id]_route": {
+    "pattern_name": "API_GET__api_orders_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_orders_[id]_route": {
+    "pattern_name": "API_PATCH__api_orders_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_mypage_liked-campaigns_route": {
+    "pattern_name": "API_GET__api_mypage_liked-campaigns_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_legal_terms_route": {
+    "pattern_name": "API_GET__api_legal_terms_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_legal_privacy_route": {
+    "pattern_name": "API_GET__api_legal_privacy_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_inventory_realtime_route": {
+    "pattern_name": "API_GET__api_inventory_realtime_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_inventory_realtime_route": {
+    "pattern_name": "API_POST__api_inventory_realtime_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_inventory_realtime_route": {
+    "pattern_name": "API_PUT__api_inventory_realtime_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_inventory_realtime_route": {
+    "pattern_name": "API_PATCH__api_inventory_realtime_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_inventory_reserve_route": {
+    "pattern_name": "API_POST__api_inventory_reserve_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_inventory_[id]_route": {
+    "pattern_name": "API_GET__api_inventory_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_languages_available_route": {
+    "pattern_name": "API_GET__api_languages_available_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_home_statistics_route": {
+    "pattern_name": "API_GET__api_home_statistics_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_home_sections_route": {
+    "pattern_name": "API_GET__api_home_sections_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_home_products_route": {
+    "pattern_name": "API_GET__api_home_products_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_home_content_route": {
+    "pattern_name": "API_GET__api_home_content_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_home_campaigns_route": {
+    "pattern_name": "API_GET__api_home_campaigns_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_debug_env_route": {
+    "pattern_name": "API_GET__api_debug_env_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_display_templates_route": {
+    "pattern_name": "API_GET__api_display_templates_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_display_templates_route": {
+    "pattern_name": "API_POST__api_display_templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_display_templates_route": {
+    "pattern_name": "API_PUT__api_display_templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_display_templates_route": {
+    "pattern_name": "API_DELETE__api_display_templates_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_display_sections_route": {
+    "pattern_name": "API_GET__api_display_sections_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_display_sections_route": {
+    "pattern_name": "API_POST__api_display_sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_display_sections_route": {
+    "pattern_name": "API_PUT__api_display_sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_display_analytics_route": {
+    "pattern_name": "API_GET__api_display_analytics_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_display_analytics_route": {
+    "pattern_name": "API_POST__api_display_analytics_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_display_analytics_route": {
+    "pattern_name": "API_PATCH__api_display_analytics_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_display_ab-tests_route": {
+    "pattern_name": "API_GET__api_display_ab-tests_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_display_ab-tests_route": {
+    "pattern_name": "API_POST__api_display_ab-tests_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_display_ab-tests_route": {
+    "pattern_name": "API_PATCH__api_display_ab-tests_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_display_ab-tests_route": {
+    "pattern_name": "API_PUT__api_display_ab-tests_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_campaigns_simple_route": {
+    "pattern_name": "API_GET__api_campaigns_simple_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_business_verify_route": {
+    "pattern_name": "API_POST__api_business_verify_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_business_account_route": {
+    "pattern_name": "API_GET__api_business_account_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_business_account_route": {
+    "pattern_name": "API_POST__api_business_account_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_business_account_route": {
+    "pattern_name": "API_PUT__api_business_account_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_cache_invalidate_route": {
+    "pattern_name": "API_POST__api_cache_invalidate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_[code]_route": {
+    "pattern_name": "API_GET__api_boards_[code]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_auth_refresh_route": {
+    "pattern_name": "API_POST__api_auth_refresh_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_auth_register_route": {
+    "pattern_name": "API_POST__api_auth_register_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_auth_me_route": {
+    "pattern_name": "API_GET__api_auth_me_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_auth_logout_route": {
+    "pattern_name": "API_POST__api_auth_logout_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_auth_login_route": {
+    "pattern_name": "API_POST__api_auth_login_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_auth_demo-accounts_route": {
+    "pattern_name": "API_GET__api_auth_demo-accounts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_users_route": {
+    "pattern_name": "API_GET__api_admin_users_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_users_route": {
+    "pattern_name": "API_PATCH__api_admin_users_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_upload_route": {
+    "pattern_name": "API_POST__api_admin_upload_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_upload_route": {
+    "pattern_name": "API_DELETE__api_admin_upload_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_update-ui-localization_route": {
+    "pattern_name": "API_POST__api_admin_update-ui-localization_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_update-ui-localization_route": {
+    "pattern_name": "API_GET__api_admin_update-ui-localization_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-sections_route": {
+    "pattern_name": "API_POST__api_admin_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_ui-sections_route": {
+    "pattern_name": "API_DELETE__api_admin_ui-sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-menus_route": {
+    "pattern_name": "API_GET__api_admin_ui-menus_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-menus_route": {
+    "pattern_name": "API_POST__api_admin_ui-menus_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-menus_route": {
+    "pattern_name": "API_PUT__api_admin_ui-menus_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_ui-menus_route": {
+    "pattern_name": "API_DELETE__api_admin_ui-menus_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-config_route": {
+    "pattern_name": "API_GET__api_admin_ui-config_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-config_route": {
+    "pattern_name": "API_POST__api_admin_ui-config_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_translations_route": {
+    "pattern_name": "API_GET__api_admin_translations_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translations_route": {
+    "pattern_name": "API_POST__api_admin_translations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_translations_route": {
+    "pattern_name": "API_PUT__api_admin_translations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_translations_route": {
+    "pattern_name": "API_DELETE__api_admin_translations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_translate-settings_route": {
+    "pattern_name": "API_GET__api_admin_translate-settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translate-settings_route": {
+    "pattern_name": "API_POST__api_admin_translate-settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_translate-settings_route": {
+    "pattern_name": "API_PUT__api_admin_translate-settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_translate-settings_route": {
+    "pattern_name": "API_DELETE__api_admin_translate-settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_test_route": {
+    "pattern_name": "API_GET__api_admin_test_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_top-products_route": {
+    "pattern_name": "API_GET__api_admin_top-products_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_tax-invoices_route": {
+    "pattern_name": "API_GET__api_admin_tax-invoices_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_tax-invoices_route": {
+    "pattern_name": "API_POST__api_admin_tax-invoices_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_stats_route": {
+    "pattern_name": "API_GET__api_admin_stats_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settlements_route": {
+    "pattern_name": "API_GET__api_admin_settlements_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_settlements_route": {
+    "pattern_name": "API_POST__api_admin_settlements_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settings_route": {
+    "pattern_name": "API_GET__api_admin_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_settings_route": {
+    "pattern_name": "API_PUT__api_admin_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_sections_route": {
+    "pattern_name": "API_GET__api_admin_sections_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_sections_route": {
+    "pattern_name": "API_POST__api_admin_sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_revenue_route": {
+    "pattern_name": "API_GET__api_admin_revenue_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_revenue_route": {
+    "pattern_name": "API_POST__api_admin_revenue_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_sales-data_route": {
+    "pattern_name": "API_GET__api_admin_sales-data_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_reports_route": {
+    "pattern_name": "API_GET__api_admin_reports_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_reports_route": {
+    "pattern_name": "API_POST__api_admin_reports_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_recent-orders_route": {
+    "pattern_name": "API_GET__api_admin_recent-orders_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_products_route": {
+    "pattern_name": "API_POST__api_admin_products_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_products_route": {
+    "pattern_name": "API_GET__api_admin_products_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_products_route": {
+    "pattern_name": "API_PUT__api_admin_products_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_products_route": {
+    "pattern_name": "API_DELETE__api_admin_products_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_regenerate-cache_route": {
+    "pattern_name": "API_POST__api_admin_regenerate-cache_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_regenerate-cache_route": {
+    "pattern_name": "API_GET__api_admin_regenerate-cache_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_popup-alerts_route": {
+    "pattern_name": "API_GET__api_admin_popup-alerts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_popup-alerts_route": {
+    "pattern_name": "API_POST__api_admin_popup-alerts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_popup-alerts_route": {
+    "pattern_name": "API_PUT__api_admin_popup-alerts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_popup-alerts_route": {
+    "pattern_name": "API_DELETE__api_admin_popup-alerts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_orders_route": {
+    "pattern_name": "API_GET__api_admin_orders_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_orders_route": {
+    "pattern_name": "API_PUT__api_admin_orders_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_payments_route": {
+    "pattern_name": "API_GET__api_admin_payments_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_monitoring_route": {
+    "pattern_name": "API_GET__api_admin_monitoring_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_monitoring_route": {
+    "pattern_name": "API_POST__api_admin_monitoring_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_languages_route": {
+    "pattern_name": "API_GET__api_admin_languages_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_languages_route": {
+    "pattern_name": "API_POST__api_admin_languages_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_languages_route": {
+    "pattern_name": "API_DELETE__api_admin_languages_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_languages_route": {
+    "pattern_name": "API_PUT__api_admin_languages_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_invalidate-cache_route": {
+    "pattern_name": "API_POST__api_admin_invalidate-cache_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_invalidate-cache_route": {
+    "pattern_name": "API_GET__api_admin_invalidate-cache_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_language-pack-keys_route": {
+    "pattern_name": "API_GET__api_admin_language-pack-keys_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_language-packs_route": {
+    "pattern_name": "API_GET__api_admin_language-packs_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_language-packs_route": {
+    "pattern_name": "API_POST__api_admin_language-packs_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_language-packs_route": {
+    "pattern_name": "API_PUT__api_admin_language-packs_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_language-packs_route": {
+    "pattern_name": "API_DELETE__api_admin_language-packs_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_dashboard_route": {
+    "pattern_name": "API_GET__api_admin_dashboard_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_corporate-payments_route": {
+    "pattern_name": "API_GET__api_admin_corporate-payments_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_corporate-payments_route": {
+    "pattern_name": "API_POST__api_admin_corporate-payments_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_content_route": {
+    "pattern_name": "API_GET__api_admin_content_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_campaigns_route": {
+    "pattern_name": "API_GET__api_admin_campaigns_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_campaigns_route": {
+    "pattern_name": "API_POST__api_admin_campaigns_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_category-pages_route": {
+    "pattern_name": "API_GET__api_admin_category-pages_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_category-pages_route": {
+    "pattern_name": "API_POST__api_admin_category-pages_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api-config_route": {
+    "pattern_name": "API_GET__api-config_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api-config_route": {
+    "pattern_name": "API_POST__api-config_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api-config_route": {
+    "pattern_name": "API_DELETE__api-config_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_boards_route": {
+    "pattern_name": "API_GET__api_admin_boards_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_boards_route": {
+    "pattern_name": "API_POST__api_admin_boards_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_analytics_route": {
+    "pattern_name": "API_GET__api_admin_analytics_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_posts_[id]_comments_route": {
+    "pattern_name": "API_POST__api_posts_[id]_comments_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_posts_[id]_like_route": {
+    "pattern_name": "API_POST__api_posts_[id]_like_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_toss_confirm_route": {
+    "pattern_name": "API_POST__api_payments_toss_confirm_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_payments_toss_cancel_route": {
+    "pattern_name": "API_POST__api_payments_toss_cancel_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_payments_callback_success_route": {
+    "pattern_name": "API_GET__api_payments_callback_success_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_payments_callback_fail_route": {
+    "pattern_name": "API_GET__api_payments_callback_fail_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_orders_[id]_complete_route": {
+    "pattern_name": "API_PATCH__api_orders_[id]_complete_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_content_[id]_media_route": {
+    "pattern_name": "API_POST__api_content_[id]_media_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_categories_[slug]_page_route": {
+    "pattern_name": "API_GET__api_categories_[slug]_page_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_categories_[slug]_campaigns_route": {
+    "pattern_name": "API_GET__api_categories_[slug]_campaigns_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_inquiry_posts_route": {
+    "pattern_name": "API_GET__api_boards_inquiry_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_boards_inquiry_posts_route": {
+    "pattern_name": "API_POST__api_boards_inquiry_posts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_faq_posts_route": {
+    "pattern_name": "API_GET__api_boards_faq_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_community_posts_route": {
+    "pattern_name": "API_GET__api_boards_community_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_[code]_posts_route": {
+    "pattern_name": "API_GET__api_boards_[code]_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_boards_[code]_posts_route": {
+    "pattern_name": "API_POST__api_boards_[code]_posts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_application-templates_[id]_use_route": {
+    "pattern_name": "API_POST__api_application-templates_[id]_use_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_users_[id]_route": {
+    "pattern_name": "API_GET__api_admin_users_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_users_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_users_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-sections_sync-visibility_route": {
+    "pattern_name": "API_POST__api_admin_ui-sections_sync-visibility_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-sections_sync-order_route": {
+    "pattern_name": "API_POST__api_admin_ui-sections_sync-order_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_reorder_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_reorder_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_recommended_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_recommended_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_recommended_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_recommended_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_ranking_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_ranking_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_ranking_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_ranking_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_quicklinks_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_quicklinks_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_quicklinks_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_quicklinks_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_hero_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_hero_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_hero_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_hero_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_hero_debug": {
+    "pattern_name": "API_GET__api_admin_ui-sections_hero_debug",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_featured-products_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_featured-products_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_featured-products_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_featured-products_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_promo_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_promo_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_promo_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_promo_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_category_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_category_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_category_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_category_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_[sectionId]_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_[sectionId]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-sections_[sectionId]_route": {
+    "pattern_name": "API_PUT__api_admin_ui-sections_[sectionId]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_ui-sections_[sectionId]_route": {
+    "pattern_name": "API_DELETE__api_admin_ui-sections_[sectionId]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ui-config_sections_route": {
+    "pattern_name": "API_POST__api_admin_ui-config_sections_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_translations_settings_route": {
+    "pattern_name": "API_GET__api_admin_translations_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translations_settings_route": {
+    "pattern_name": "API_POST__api_admin_translations_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_translations_settings_route": {
+    "pattern_name": "API_PUT__api_admin_translations_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translations_batch_route": {
+    "pattern_name": "API_POST__api_admin_translations_batch_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translations_auto_route": {
+    "pattern_name": "API_POST__api_admin_translations_auto_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_translations_auto_route": {
+    "pattern_name": "API_PUT__api_admin_translations_auto_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_translations_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_translations_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_translate_google_route": {
+    "pattern_name": "API_POST__api_admin_translate_google_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_translate_google_route": {
+    "pattern_name": "API_GET__api_admin_translate_google_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settlements_scheduler_route": {
+    "pattern_name": "API_GET__api_admin_settlements_scheduler_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_settlements_scheduler_route": {
+    "pattern_name": "API_POST__api_admin_settlements_scheduler_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settlements_list_route": {
+    "pattern_name": "API_GET__api_admin_settlements_list_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settlements_config_route": {
+    "pattern_name": "API_GET__api_admin_settlements_config_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_settlements_config_route": {
+    "pattern_name": "API_PUT__api_admin_settlements_config_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_settlements_[id]_route": {
+    "pattern_name": "API_GET__api_admin_settlements_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_settlements_[id]_route": {
+    "pattern_name": "API_PATCH__api_admin_settlements_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_sections_order_route": {
+    "pattern_name": "API_PUT__api_admin_sections_order_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_sections_[id]_route": {
+    "pattern_name": "API_PATCH__api_admin_sections_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_sections_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_sections_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_reports_[id]_route": {
+    "pattern_name": "API_GET__api_admin_reports_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_reports_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_reports_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_products_trash_route": {
+    "pattern_name": "API_GET__api_admin_products_trash_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_products_trash_route": {
+    "pattern_name": "API_POST__api_admin_products_trash_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_products_trash_route": {
+    "pattern_name": "API_DELETE__api_admin_products_trash_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_products_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_products_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_products_[id]_route": {
+    "pattern_name": "API_GET__api_admin_products_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_products_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_products_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_payments_[id]_route": {
+    "pattern_name": "API_GET__api_admin_payments_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_payments_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_payments_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_posts_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_posts_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_open-banking_accounts_route": {
+    "pattern_name": "API_GET__api_admin_open-banking_accounts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_open-banking_accounts_route": {
+    "pattern_name": "API_POST__api_admin_open-banking_accounts_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_languages_switch_route": {
+    "pattern_name": "API_POST__api_admin_languages_switch_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_languages_switch_route": {
+    "pattern_name": "API_GET__api_admin_languages_switch_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_languages_settings_route": {
+    "pattern_name": "API_GET__api_admin_languages_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_languages_settings_route": {
+    "pattern_name": "API_POST__api_admin_languages_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_languages_settings_route": {
+    "pattern_name": "API_PUT__api_admin_languages_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_languages_settings_route": {
+    "pattern_name": "API_DELETE__api_admin_languages_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_languages_replace_route": {
+    "pattern_name": "API_POST__api_admin_languages_replace_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_language-packs_translate_route": {
+    "pattern_name": "API_POST__api_admin_language-packs_translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_language-packs_translate_route": {
+    "pattern_name": "API_PUT__api_admin_language-packs_translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_language-packs_auto-translate_route": {
+    "pattern_name": "API_POST__api_admin_language-packs_auto-translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_language-packs_auto-translate_route": {
+    "pattern_name": "API_PUT__api_admin_language-packs_auto-translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_language-packs_[key]_route": {
+    "pattern_name": "API_GET__api_admin_language-packs_[key]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_language-packs_[key]_route": {
+    "pattern_name": "API_PUT__api_admin_language-packs_[key]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_language-packs_[key]_route": {
+    "pattern_name": "API_DELETE__api_admin_language-packs_[key]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ecount_orders_route": {
+    "pattern_name": "API_GET__api_admin_ecount_orders_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_orders_route": {
+    "pattern_name": "API_POST__api_admin_ecount_orders_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ecount_items_route": {
+    "pattern_name": "API_GET__api_admin_ecount_items_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_items_route": {
+    "pattern_name": "API_POST__api_admin_ecount_items_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ecount_inventory_route": {
+    "pattern_name": "API_GET__api_admin_ecount_inventory_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_inventory_route": {
+    "pattern_name": "API_POST__api_admin_ecount_inventory_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ecount_customers_route": {
+    "pattern_name": "API_GET__api_admin_ecount_customers_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_customers_route": {
+    "pattern_name": "API_POST__api_admin_ecount_customers_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_connection-test_route": {
+    "pattern_name": "API_POST__api_admin_ecount_connection-test_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ecount_connection-test_route": {
+    "pattern_name": "API_GET__api_admin_ecount_connection-test_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_i18n_translate_route": {
+    "pattern_name": "API_GET__api_admin_i18n_translate_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_i18n_translate_route": {
+    "pattern_name": "API_POST__api_admin_i18n_translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_i18n_translate_route": {
+    "pattern_name": "API_PUT__api_admin_i18n_translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_i18n_translate_route": {
+    "pattern_name": "API_DELETE__api_admin_i18n_translate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_i18n_settings_route": {
+    "pattern_name": "API_GET__api_admin_i18n_settings_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_i18n_settings_route": {
+    "pattern_name": "API_POST__api_admin_i18n_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_i18n_settings_route": {
+    "pattern_name": "API_PUT__api_admin_i18n_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_i18n_settings_route": {
+    "pattern_name": "API_DELETE__api_admin_i18n_settings_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_i18n_content_route": {
+    "pattern_name": "API_GET__api_admin_i18n_content_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_i18n_content_route": {
+    "pattern_name": "API_POST__api_admin_i18n_content_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_i18n_content_route": {
+    "pattern_name": "API_PUT__api_admin_i18n_content_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_i18n_content_route": {
+    "pattern_name": "API_DELETE__api_admin_i18n_content_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_content_[id]_route": {
+    "pattern_name": "API_GET__api_admin_content_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_content_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_content_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_categories_[id]_route": {
+    "pattern_name": "API_GET__api_admin_categories_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_categories_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_categories_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_categories_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_categories_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_campaigns_[id]_route": {
+    "pattern_name": "API_GET__api_admin_campaigns_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_campaigns_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_campaigns_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_campaigns_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_campaigns_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_category-pages_[id]_route": {
+    "pattern_name": "API_GET__api_admin_category-pages_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_category-pages_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_category-pages_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_category-pages_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_category-pages_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_businesses_find-or-create_route": {
+    "pattern_name": "API_POST__api_admin_businesses_find-or-create_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_boards_[id]_route": {
+    "pattern_name": "API_PATCH__api_admin_boards_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_boards_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_boards_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_boards_[code]_posts_[id]_route": {
+    "pattern_name": "API_GET__api_boards_[code]_posts_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_boards_[code]_posts_[id]_route": {
+    "pattern_name": "API_PUT__api_boards_[code]_posts_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_boards_[code]_posts_[id]_route": {
+    "pattern_name": "API_DELETE__api_boards_[code]_posts_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-sections_hero_test_route": {
+    "pattern_name": "API_GET__api_admin_ui-sections_hero_test_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_ui-config_sections_[id]_route": {
+    "pattern_name": "API_GET__api_admin_ui-config_sections_[id]_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_ui-config_sections_[id]_route": {
+    "pattern_name": "API_PUT__api_admin_ui-config_sections_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_DELETE__api_admin_ui-config_sections_[id]_route": {
+    "pattern_name": "API_DELETE__api_admin_ui-config_sections_[id]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 DELETE API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "delete"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_tax-invoices_[id]_issue_route": {
+    "pattern_name": "API_POST__api_admin_tax-invoices_[id]_issue_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_tax-invoices_[id]_cancel_route": {
+    "pattern_name": "API_POST__api_admin_tax-invoices_[id]_cancel_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_products_[id]_translations_route": {
+    "pattern_name": "API_GET__api_admin_products_[id]_translations_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_products_[id]_translations_route": {
+    "pattern_name": "API_PUT__api_admin_products_[id]_translations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_products_[id]_translations_route": {
+    "pattern_name": "API_POST__api_admin_products_[id]_translations_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_posts_[id]_status_route": {
+    "pattern_name": "API_PATCH__api_admin_posts_[id]_status_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_corporate-payments_[id]_match_route": {
+    "pattern_name": "API_POST__api_admin_corporate-payments_[id]_match_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_corporate-payments_[id]_find-matches_route": {
+    "pattern_name": "API_GET__api_admin_corporate-payments_[id]_find-matches_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_ecount_sync_[type]_route": {
+    "pattern_name": "API_POST__api_admin_ecount_sync_[type]_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_campaigns_[id]_status_route": {
+    "pattern_name": "API_PUT__api_admin_campaigns_[id]_status_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_campaigns_[id]_reject_route": {
+    "pattern_name": "API_POST__api_admin_campaigns_[id]_reject_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_campaigns_[id]_payment-status_route": {
+    "pattern_name": "API_PUT__api_admin_campaigns_[id]_payment-status_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_campaigns_[id]_fee-rate_route": {
+    "pattern_name": "API_PUT__api_admin_campaigns_[id]_fee-rate_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_POST__api_admin_campaigns_[id]_approve_route": {
+    "pattern_name": "API_POST__api_admin_campaigns_[id]_approve_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 POST API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "post"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PATCH__api_admin_boards_[id]_status_route": {
+    "pattern_name": "API_PATCH__api_admin_boards_[id]_status_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PATCH API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "patch"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_boards_[id]_posts_route": {
+    "pattern_name": "API_GET__api_admin_boards_[id]_posts_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_open-banking_accounts_[id]_transactions_route": {
+    "pattern_name": "API_GET__api_admin_open-banking_accounts_[id]_transactions_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_GET__api_admin_open-banking_accounts_[id]_balance_route": {
+    "pattern_name": "API_GET__api_admin_open-banking_accounts_[id]_balance_route",
+    "reuse_score": 0.7999999999999999,
+    "description": "재사용 가능한 GET API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "get"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  },
+  "API_PUT__api_admin_campaigns_[id]_applications_[applicationId]_status_route": {
+    "pattern_name": "API_PUT__api_admin_campaigns_[id]_applications_[applicationId]_status_route",
+    "reuse_score": 0.7,
+    "description": "재사용 가능한 PUT API 패턴",
+    "applicable_contexts": [
+      "api",
+      "backend",
+      "put"
+    ],
+    "source_context": "nextjs-contest-2025-09-07T00-49-38-818Z",
+    "usage_count": 1
+  }
+}

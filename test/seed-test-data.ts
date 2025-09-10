@@ -41,13 +41,13 @@ async function seedTestData() {
     for (const product of products) {
       // 기존 제품 확인 (Product 테이블 사용)
       const existing = await query(
-        'SELECT id FROM "Product" WHERE id = $1',
+        'SELECT id FROM products WHERE id = $1',
         [product.id]
       )
       
       if (existing.rows.length === 0) {
         await query(`
-          INSERT INTO "Product" (id, name, slug, description, price, stock, status, "createdAt", "updatedAt")
+          INSERT INTO products (id, name, slug, description, price, stock, status, created_at, updated_at)
           VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
         `, [
           product.id,
@@ -62,8 +62,8 @@ async function seedTestData() {
       } else {
         // 제품 업데이트
         await query(`
-          UPDATE "Product" 
-          SET stock = $2, price = $3, "updatedAt" = NOW()
+          UPDATE products 
+          SET stock = $2, price = $3, updated_at = NOW()
           WHERE id = $1
         `, [product.id, product.stock, product.price])
 

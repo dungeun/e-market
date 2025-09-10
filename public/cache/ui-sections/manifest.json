@@ -1,0 +1,76 @@
+{
+  "lastUpdated": "2025-09-10T02:42:02.055Z",
+  "languages": [
+    "ko",
+    "en",
+    "fr"
+  ],
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "order": 1,
+      "isActive": true,
+      "lastModified": "2025-09-10T00:10:45.845Z"
+    },
+    "category": {
+      "type": "category",
+      "order": 2,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.321Z"
+    },
+    "베스트": {
+      "type": "best-sellers",
+      "order": 3,
+      "isActive": true,
+      "lastModified": "2025-09-10T00:16:14.375Z"
+    },
+    "quicklinks": {
+      "type": "quicklinks",
+      "order": 4,
+      "isActive": true,
+      "lastModified": "2025-09-07T19:15:38.996Z"
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "order": 5,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.324Z"
+    },
+    "promo": {
+      "type": "promo",
+      "order": 6,
+      "isActive": true,
+      "lastModified": "2025-09-10T01:23:49.796Z"
+    },
+    "ranking": {
+      "type": "ranking",
+      "order": 7,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.323Z"
+    },
+    "recommended": {
+      "type": "recommended",
+      "order": 8,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.330Z"
+    },
+    "best-sellers": {
+      "type": "product-grid",
+      "order": 9,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.328Z"
+    },
+    "new-arrivals": {
+      "type": "product-grid",
+      "order": 10,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.331Z"
+    },
+    "used-products": {
+      "type": "product-grid",
+      "order": 11,
+      "isActive": true,
+      "lastModified": "2025-09-03T22:42:17.330Z"
+    }
+  }
+}

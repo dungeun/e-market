@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSocket } from '@/hooks/useSocket';
+import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 
 // 동적 언어 타입 - 하드코딩 제거
 type Language = string;
@@ -66,7 +66,24 @@ export function LanguageProvider({ children, initialLanguagePacks = {} }: Langua
   const [languagePacks, setLanguagePacks] = useState<Record<string, LanguagePack>>(initialLanguagePacks);
   const [isLoading, setIsLoading] = useState(!Object.keys(initialLanguagePacks).length);
   const queryClient = useQueryClient();
-  const { socket, isConnected } = useSocket();
+  const { isConnected } = useRealTimeUpdates({
+    onLanguageUpdate: (data) => {
+      console.log('언어팩 업데이트 감지:', data);
+      if (data.type === 'language-changed' && data.language !== currentLanguage) {
+        setCurrentLanguageState(data.language);
+        loadLanguagePacks();
+        loadAvailableLanguages();
+      } else if (data.type === 'languagepack-updated') {
+        setLanguagePacks(prev => ({
+          ...prev,
+          [data.key]: {
+            ...prev[data.key],
+            ...data.translations
+          } as LanguagePack
+        }));
+      }
+    }
+  });
   
   // 클라이언트에서만 실제 언어 설정 적용
   useEffect(() => {
@@ -153,41 +170,6 @@ export function LanguageProvider({ children, initialLanguagePacks = {} }: Langua
     }
   }, [loadLanguagePacks, loadAvailableLanguages]);
 
-  // Socket.io 실시간 언어 변경 감지
-  useEffect(() => {
-    if (!socket || !isConnected) return;
-
-    const handleLanguageChanged = (data: { language: Language; userId?: string }) => {
-      console.log('언어 변경 감지:', data);
-      // 다른 사용자의 언어 변경이면 현재 언어 업데이트
-      if (data.language && data.language !== currentLanguage) {
-        setCurrentLanguageState(data.language);
-        // 언어팩도 다시 로드
-        loadLanguagePacks();
-        loadAvailableLanguages();
-      }
-    };
-
-    const handleLanguagePackUpdated = (data: { key: string; translations: Record<string, string> }) => {
-      console.log('언어팩 업데이트 감지:', data);
-      // 언어팩 업데이트 시 캐시 새로고침
-      setLanguagePacks(prev => ({
-        ...prev,
-        [data.key]: {
-          ...prev[data.key],
-          ...data.translations
-        } as LanguagePack
-      }));
-    };
-
-    socket.on('language:changed', handleLanguageChanged);
-    socket.on('languagePack:updated', handleLanguagePackUpdated);
-
-    return () => {
-      socket.off('language:changed', handleLanguageChanged);
-      socket.off('languagePack:updated', handleLanguagePackUpdated);
-    };
-  }, [socket, isConnected, currentLanguage, loadLanguagePacks, loadAvailableLanguages]);
 
   // 언어 설정 함수
   const setLanguage = useCallback((lang: Language) => {
@@ -203,16 +185,9 @@ export function LanguageProvider({ children, initialLanguagePacks = {} }: Langua
       // React Query 캐시 무효화 - 모든 쿼리 재실행
       queryClient.invalidateQueries();
       
-      // Socket.io를 통한 실시간 언어 변경 알림
-      if (socket && isConnected) {
-        socket.emit('language:changed', {
-          language: lang,
-          timestamp: new Date().toISOString(),
-          userId: 'current-user' // 실제로는 사용자 ID 사용
-        });
-      }
+      // SSE를 통한 실시간 언어 변경 알림은 server-side에서 처리
     }
-  }, [loadLanguagePacks, queryClient, socket, isConnected]);
+  }, [loadLanguagePacks, queryClient]);
 
   // 언어 목록 새로고침 함수 (언어팩 관리에서 사용)
   const refreshLanguages = useCallback(async () => {

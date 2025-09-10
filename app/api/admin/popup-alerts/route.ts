@@ -36,9 +36,10 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const isAdmin = searchParams.get('admin') === 'true';
+    const language = searchParams.get('lang') || 'ko';
 
     if (isAdmin) {
-      // 어드민용: 모든 팝업 조회
+      // 어드민용: 모든 팝업 조회 with translations
       const authResult = await verifyAuth(req);
       if (!authResult.isAuthenticated || authResult.user?.type !== 'ADMIN') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -46,22 +47,31 @@ export async function GET(req: NextRequest) {
 
       const result = await query(`
         SELECT 
-          id, 
-          message_ko, 
-          message_en, 
-          message_jp,
-          "isActive", 
-          "backgroundColor", 
-          "textColor", 
-          template, 
-          "showCloseButton",
-          "startDate",
-          "endDate",
-          priority,
-          "createdAt", 
-          "updatedAt"
-        FROM popup_alerts 
-        ORDER BY priority DESC, "createdAt" DESC
+          pa.id, 
+          pa."isActive", 
+          pa."backgroundColor", 
+          pa."textColor", 
+          pa.template, 
+          pa."showCloseButton",
+          pa."startDate",
+          pa."endDate",
+          pa.priority,
+          pa."createdAt", 
+          pa."updatedAt",
+          pa.message_ko,
+          pa.message_en, 
+          pa.message_jp,
+          COALESCE(
+            json_object_agg(
+              pat.language_code, 
+              pat.message
+            ) FILTER (WHERE pat.language_code IS NOT NULL),
+            '{}'::json
+          ) as messages
+        FROM popup_alerts pa
+        LEFT JOIN popup_alert_translations pat ON pa.id = pat.popup_alert_id
+        GROUP BY pa.id
+        ORDER BY pa.priority DESC, pa."createdAt" DESC
       `);
 
       return NextResponse.json({ 
@@ -74,24 +84,32 @@ export async function GET(req: NextRequest) {
       
       const result = await query(`
         SELECT 
-          id, 
-          message_ko, 
-          message_en, 
-          message_jp,
-          "backgroundColor", 
-          "textColor", 
-          template, 
-          "showCloseButton",
-          "startDate",
-          "endDate",
-          priority
-        FROM popup_alerts 
-        WHERE "isActive" = true
-          AND ("startDate" IS NULL OR "startDate" <= $1)
-          AND ("endDate" IS NULL OR "endDate" >= $1)
-        ORDER BY priority DESC, "createdAt" DESC
+          pa.id, 
+          pa."backgroundColor", 
+          pa."textColor", 
+          pa.template, 
+          pa."showCloseButton",
+          pa."startDate",
+          pa."endDate",
+          pa.priority,
+          pat.message,
+          json_build_object(
+            $2, pat.message,
+            'ko', pat_ko.message,
+            'en', pat_en.message,
+            'ja', pat_ja.message
+          ) as messages
+        FROM popup_alerts pa
+        LEFT JOIN popup_alert_translations pat ON pa.id = pat.popup_alert_id AND pat.language_code = $2
+        LEFT JOIN popup_alert_translations pat_ko ON pa.id = pat_ko.popup_alert_id AND pat_ko.language_code = 'ko'
+        LEFT JOIN popup_alert_translations pat_en ON pa.id = pat_en.popup_alert_id AND pat_en.language_code = 'en'
+        LEFT JOIN popup_alert_translations pat_ja ON pa.id = pat_ja.popup_alert_id AND pat_ja.language_code = 'ja'
+        WHERE pa."isActive" = true
+          AND (pa."startDate" IS NULL OR pa."startDate" <= $1)
+          AND (pa."endDate" IS NULL OR pa."endDate" >= $1)
+        ORDER BY pa.priority DESC, pa."createdAt" DESC
         LIMIT 1
-      `, [now]);
+      `, [now, language]);
 
       // 캐싱 헤더 추가 (5분)
       const headers = new Headers();
@@ -121,9 +139,10 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      message_ko,
-      message_en,
-      message_jp,
+      messages = {},
+      message_ko, // 하위 호환성
+      message_en, // 하위 호환성
+      message_jp, // 하위 호환성
       template = 'info', 
       backgroundColor, 
       textColor, 
@@ -134,12 +153,28 @@ export async function POST(req: NextRequest) {
       priority = 0
     } = body;
 
+    // 메시지 처리 (하위 호환성 유지)
+    let finalMessages = messages;
+    if (Object.keys(messages).length === 0 && (message_ko || message_en || message_jp)) {
+      finalMessages = {
+        ko: message_ko || '',
+        en: message_en || '',
+        ja: message_jp || ''
+      };
+    }
+
     // 필수 필드 검증
-    if (!message_ko || !message_en || !message_jp) {
+    const hasValidMessage = Object.values(finalMessages).some(msg => msg && msg.trim() !== '');
+    if (!hasValidMessage) {
       return NextResponse.json({ 
-        error: 'All language messages are required (message_ko, message_en, message_jp)' 
+        error: '최소 하나의 언어 메시지가 필요합니다.' 
       }, { status: 400 });
     }
+
+    // 언어별 메시지 준비 (기존 컬럼과의 호환성을 위해)
+    const messageKo = finalMessages.ko || Object.values(finalMessages)[0] || '';
+    const messageEn = finalMessages.en || '';
+    const messageJp = finalMessages.ja || '';
 
     // 템플릿 색상 적용 또는 커스텀 색상 사용
     const templateColors = POPUP_TEMPLATES[template as keyof typeof POPUP_TEMPLATES] || POPUP_TEMPLATES.custom;
@@ -178,9 +213,9 @@ export async function POST(req: NextRequest) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
       RETURNING *
     `, [
-      message_ko, 
-      message_en, 
-      message_jp, 
+      messageKo, 
+      messageEn, 
+      messageJp, 
       isActive, 
       finalBackgroundColor, 
       finalTextColor, 
@@ -190,6 +225,19 @@ export async function POST(req: NextRequest) {
       endDate,
       priority
     ]);
+
+    // 동적 언어 번역 추가
+    const alertId = result.rows[0].id;
+    for (const [langCode, message] of Object.entries(finalMessages)) {
+      if (message && message.trim() !== '') {
+        await query(`
+          INSERT INTO popup_alert_translations (popup_alert_id, language_code, message)
+          VALUES ($1, $2, $3)
+          ON CONFLICT (popup_alert_id, language_code) 
+          DO UPDATE SET message = EXCLUDED.message, updated_at = NOW()
+        `, [alertId, langCode, message]);
+      }
+    }
 
     return NextResponse.json({ alert: result.rows[0] }, { status: 201 });
   } catch (error) {
@@ -212,9 +260,10 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { 
       id, 
-      message_ko,
-      message_en,
-      message_jp,
+      messages = {},
+      message_ko, // 하위 호환성
+      message_en, // 하위 호환성
+      message_jp, // 하위 호환성
       template, 
       backgroundColor, 
       textColor, 
@@ -228,6 +277,21 @@ export async function PUT(req: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: 'Alert ID is required' }, { status: 400 });
     }
+
+    // 메시지 처리 (하위 호환성 유지)
+    let finalMessages = messages;
+    if (Object.keys(messages).length === 0 && (message_ko !== undefined || message_en !== undefined || message_jp !== undefined)) {
+      finalMessages = {
+        ko: message_ko || '',
+        en: message_en || '',
+        ja: message_jp || ''
+      };
+    }
+
+    // 언어별 메시지 준비 (기존 컬럼과의 호환성을 위해)
+    const messageKo = finalMessages.ko !== undefined ? finalMessages.ko : message_ko;
+    const messageEn = finalMessages.en !== undefined ? finalMessages.en : message_en;
+    const messageJp = finalMessages.ja !== undefined ? finalMessages.ja : message_jp;
 
     // 템플릿 색상 적용
     let finalBackgroundColor = backgroundColor;
@@ -287,9 +351,9 @@ export async function PUT(req: NextRequest) {
       RETURNING *
     `, [
       id, 
-      message_ko,
-      message_en,
-      message_jp,
+      messageKo,
+      messageEn,
+      messageJp,
       isActive, 
       finalBackgroundColor, 
       finalTextColor, 
@@ -302,6 +366,29 @@ export async function PUT(req: NextRequest) {
 
     if (result.rows.length === 0) {
       return NextResponse.json({ error: 'Alert not found' }, { status: 404 });
+    }
+
+    // 동적 언어 번역 업데이트
+    const alertId = result.rows[0].id;
+    if (Object.keys(finalMessages).length > 0) {
+      for (const [langCode, message] of Object.entries(finalMessages)) {
+        if (message !== undefined) {
+          if (message && message.trim() !== '') {
+            await query(`
+              INSERT INTO popup_alert_translations (popup_alert_id, language_code, message)
+              VALUES ($1, $2, $3)
+              ON CONFLICT (popup_alert_id, language_code) 
+              DO UPDATE SET message = EXCLUDED.message, updated_at = NOW()
+            `, [alertId, langCode, message]);
+          } else {
+            // 빈 메시지는 삭제
+            await query(`
+              DELETE FROM popup_alert_translations 
+              WHERE popup_alert_id = $1 AND language_code = $2
+            `, [alertId, langCode]);
+          }
+        }
+      }
     }
 
     return NextResponse.json({ alert: result.rows[0] });

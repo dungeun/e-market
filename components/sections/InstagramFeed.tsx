@@ -78,7 +78,7 @@ const InstagramFeed = React.memo(function InstagramFeed({ config }: InstagramFee
 
   return (
     <section className="py-12 px-4 bg-gradient-to-br from-purple-50 to-pink-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 헤더 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">

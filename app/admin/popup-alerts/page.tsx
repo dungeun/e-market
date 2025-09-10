@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff, X, Calendar, Globe } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, X, Calendar, Globe, Languages } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PopupAlert {
   id: string;
-  message_ko: string;
-  message_en: string;
-  message_jp: string;
+  messages: { [key: string]: string }; // 동적 언어 지원
   isActive: boolean;
   backgroundColor: string;
   textColor: string;
@@ -18,6 +17,15 @@ interface PopupAlert {
   priority: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface Language {
+  code: string;
+  name: string;
+  native_name?: string;
+  enabled: boolean;
+  is_default?: boolean;
+  flag_emoji?: string;
 }
 
 interface PopupTemplate {
@@ -36,11 +44,10 @@ export default function PopupAlertsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAlert, setEditingAlert] = useState<PopupAlert | null>(null);
-  const [activeTab, setActiveTab] = useState<'ko' | 'en' | 'jp'>('ko');
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('ko');
   const [formData, setFormData] = useState({
-    message_ko: '',
-    message_en: '',
-    message_jp: '',
+    messages: {} as { [key: string]: string },
     template: 'info',
     backgroundColor: '',
     textColor: '',
@@ -50,22 +57,51 @@ export default function PopupAlertsPage() {
     endDate: '',
     priority: 0
   });
+  const [isTranslating, setIsTranslating] = useState(false);
 
   // 데이터 fetch
   useEffect(() => {
     fetchAlerts();
+    fetchLanguages();
   }, []);
+
+  const fetchLanguages = async () => {
+    try {
+      const response = await fetch('/api/admin/i18n/settings');
+      const data = await response.json();
+      if (data.selectedLanguages) {
+        setLanguages(data.selectedLanguages);
+        if (data.selectedLanguages.length > 0) {
+          setActiveTab(data.selectedLanguages[0].code);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching languages:', error);
+      toast.error('언어 목록을 불러오는데 실패했습니다.');
+    }
+  };
 
   const fetchAlerts = async () => {
     try {
       const response = await fetch('/api/admin/popup-alerts?admin=true');
       const data = await response.json();
       
-      setAlerts(data.alerts || []);
+      // 기존 데이터 변환 (message_ko, message_en, message_jp -> messages)
+      const convertedAlerts = (data.alerts || []).map((alert: any) => ({
+        ...alert,
+        messages: {
+          ko: alert.message_ko || '',
+          en: alert.message_en || '',
+          ja: alert.message_jp || '',
+          ...alert.messages
+        }
+      }));
+      
+      setAlerts(convertedAlerts);
       setTemplates(data.templates || {});
     } catch (error) {
       console.error('Error fetching alerts:', error);
-      alert('팝업 알림을 불러오는데 실패했습니다.');
+      toast.error('팝업 알림을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -76,9 +112,7 @@ export default function PopupAlertsPage() {
     if (alert) {
       setEditingAlert(alert);
       setFormData({
-        message_ko: alert.message_ko,
-        message_en: alert.message_en,
-        message_jp: alert.message_jp,
+        messages: alert.messages || {},
         template: alert.template,
         backgroundColor: alert.backgroundColor,
         textColor: alert.textColor,
@@ -90,10 +124,12 @@ export default function PopupAlertsPage() {
       });
     } else {
       setEditingAlert(null);
+      const initialMessages: { [key: string]: string } = {};
+      languages.forEach(lang => {
+        initialMessages[lang.code] = '';
+      });
       setFormData({
-        message_ko: '',
-        message_en: '',
-        message_jp: '',
+        messages: initialMessages,
         template: 'info',
         backgroundColor: '',
         textColor: '',
@@ -104,7 +140,9 @@ export default function PopupAlertsPage() {
         priority: 0
       });
     }
-    setActiveTab('ko');
+    if (languages.length > 0) {
+      setActiveTab(languages[0].code);
+    }
     setShowModal(true);
   };
 
@@ -124,12 +162,54 @@ export default function PopupAlertsPage() {
     }));
   };
 
+  // 자동 번역 함수
+  const handleAutoTranslate = async (sourceCode: string) => {
+    if (!formData.messages[sourceCode]) {
+      toast.error('번역할 원본 텍스트를 입력해주세요.');
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const targetCodes = languages
+        .filter(lang => lang.code !== sourceCode)
+        .map(lang => lang.code);
+
+      const response = await fetch('/api/admin/i18n/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: formData.messages[sourceCode],
+          sourceLanguage: sourceCode,
+          targetLanguages: targetCodes
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const newMessages = { ...formData.messages };
+        Object.entries(data.translations).forEach(([code, translation]) => {
+          newMessages[code] = translation as string;
+        });
+        setFormData(prev => ({ ...prev, messages: newMessages }));
+        toast.success('자동 번역이 완료되었습니다.');
+      } else {
+        toast.error(data.error || '자동 번역에 실패했습니다.');
+      }
+    } catch (error) {
+      toast.error('자동 번역에 실패했습니다.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   // 팝업 저장
   const handleSave = async () => {
     try {
-      // 모든 언어 메시지 필수 검증
-      if (!formData.message_ko || !formData.message_en || !formData.message_jp) {
-        alert('모든 언어의 메시지를 입력해주세요.');
+      // 최소 하나의 언어 메시지 필수 검증
+      const hasMessage = Object.values(formData.messages).some(msg => msg && msg.trim() !== '');
+      if (!hasMessage) {
+        toast.error('최소 하나의 언어 메시지를 입력해주세요.');
         return;
       }
 
@@ -291,12 +371,19 @@ export default function PopupAlertsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="max-w-md">
-                        <p className="text-sm text-gray-900 truncate" title={alert.message_ko}>
-                          {alert.message_ko}
-                        </p>
-                        <div className="flex gap-2 mt-1">
-                          <span className="text-xs text-gray-500">EN: {alert.message_en.substring(0, 30)}...</span>
-                        </div>
+                        {Object.entries(alert.messages).slice(0, 2).map(([code, message], index) => {
+                          const lang = languages.find(l => l.code === code);
+                          return (
+                            <div key={code} className={index > 0 ? 'mt-1' : ''}>
+                              <span className="text-xs text-gray-500 mr-1">
+                                {lang?.flag_emoji || '🌐'} {lang?.name || code}:
+                              </span>
+                              <span className="text-sm text-gray-900" title={message}>
+                                {message.length > 50 ? message.substring(0, 50) + '...' : message}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -359,40 +446,49 @@ export default function PopupAlertsPage() {
 
               {/* 언어 탭 */}
               <div className="flex gap-2 mb-4 border-b">
-                {(['ko', 'en', 'jp'] as const).map((lang) => (
+                {languages.map((lang) => (
                   <button
-                    key={lang}
-                    onClick={() => setActiveTab(lang)}
+                    key={lang.code}
+                    onClick={() => setActiveTab(lang.code)}
                     className={`px-4 py-2 font-medium ${
-                      activeTab === lang 
+                      activeTab === lang.code 
                         ? 'text-blue-600 border-b-2 border-blue-600' 
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <Globe className="w-4 h-4 inline-block mr-1" />
-                    {lang === 'ko' ? '한국어' : lang === 'en' ? 'English' : '日本語'}
+                    <span className="mr-1">{lang.flag_emoji || '🌐'}</span>
+                    {lang.native_name || lang.name}
                   </button>
                 ))}
               </div>
 
               {/* 메시지 입력 */}
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  메시지 ({activeTab === 'ko' ? '한국어' : activeTab === 'en' ? 'English' : '日本語'}) *
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium">
+                    메시지 ({languages.find(l => l.code === activeTab)?.native_name || languages.find(l => l.code === activeTab)?.name}) *
+                  </label>
+                  <button
+                    onClick={() => handleAutoTranslate(activeTab)}
+                    disabled={isTranslating || !formData.messages[activeTab]}
+                    className="flex items-center gap-1 px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                  >
+                    <Languages className="w-4 h-4" />
+                    자동 번역
+                  </button>
+                </div>
                 <textarea
-                  value={formData[`message_${activeTab}`]}
+                  value={formData.messages[activeTab] || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
-                    [`message_${activeTab}`]: e.target.value
+                    messages: {
+                      ...prev.messages,
+                      [activeTab]: e.target.value
+                    }
                   }))}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
-                  placeholder={
-                    activeTab === 'ko' ? '팝업에 표시될 메시지를 입력하세요' :
-                    activeTab === 'en' ? 'Enter the message to display in the popup' :
-                    'ポップアップに表示するメッセージを入力してください'
-                  }
+                  placeholder="팝업에 표시될 메시지를 입력하세요"
                 />
               </div>
 
@@ -535,7 +631,7 @@ export default function PopupAlertsPage() {
                   }}
                 >
                   <span className="text-sm">
-                    {formData[`message_${activeTab}`] || '메시지를 입력하세요'}
+                    {formData.messages[activeTab] || '메시지를 입력하세요'}
                   </span>
                   {formData.showCloseButton && (
                     <X className="w-4 h-4 opacity-70" />

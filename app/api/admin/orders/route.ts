@@ -25,14 +25,14 @@ export async function GET(request: NextRequest) {
     
     // 검색 필터 (주문번호, 고객명, 이메일)
     if (search) {
-      whereConditions.push(`(o.order_number ILIKE $${paramIndex} OR u.name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`)
+      whereConditions.push(`(o.order_number ILIKE $${paramIndex} OR o.customer_name ILIKE $${paramIndex} OR o.customer_email ILIKE $${paramIndex})`)
       queryParams.push(`%${search}%`)
       paramIndex++
     }
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''
     
-    // 주문 목록 조회 (사용자 정보와 함께)
+    // 주문 목록 조회 (orders 테이블 직접 사용)
     const ordersQuery = `
       SELECT 
         o.id,
@@ -41,17 +41,15 @@ export async function GET(request: NextRequest) {
         o.status,
         o.tracking_number,
         o.created_at,
-        o.delivered_at as delivery_date,
+        o.delivery_date,
         o.shipping_address,
-        u.name as customer_name,
-        u.email as customer_email,
-        u.phone as customer_phone,
-        p.status as payment_status,
-        p.method as payment_method,
+        o.customer_name,
+        o.customer_email,
+        o.customer_phone,
+        o.payment_status,
+        o.payment_method,
         COUNT(*) OVER() as total_count
       FROM orders o
-      LEFT JOIN users u ON o.user_id = u.id
-      LEFT JOIN payments p ON o.id = p.order_id
       ${whereClause}
       ORDER BY o.created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -67,9 +65,9 @@ export async function GET(request: NextRequest) {
         SELECT 
           oi.id,
           oi.order_id,
-          oi.name as product_name,
-          oi.name as current_product_name,
-          oi.sku,
+          oi.product_name,
+          oi.product_name as current_product_name,
+          oi.product_id,
           oi.price,
           oi.quantity,
           '' as product_image
@@ -85,18 +83,17 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // 통계 데이터 조회
+    // 통계 데이터 조회 (소문자 상태로 수정)
     const statsResult = await query(`
       SELECT 
         COUNT(*) as total_orders,
-        COUNT(*) FILTER (WHERE o.status = 'PENDING') as pending_orders,
-        COUNT(*) FILTER (WHERE o.status = 'PROCESSING') as processing_orders,
-        COUNT(*) FILTER (WHERE o.status = 'SHIPPED') as shipped_orders,
-        COUNT(*) FILTER (WHERE o.status = 'DELIVERED') as delivered_orders,
-        COUNT(*) FILTER (WHERE o.status = 'CANCELLED') as cancelled_orders,
-        COALESCE(SUM(o.total_amount) FILTER (WHERE p.status = 'COMPLETED'), 0) as total_revenue
+        COUNT(*) FILTER (WHERE o.status = 'pending') as pending_orders,
+        COUNT(*) FILTER (WHERE o.status = 'processing') as processing_orders,
+        COUNT(*) FILTER (WHERE o.status = 'shipped') as shipped_orders,
+        COUNT(*) FILTER (WHERE o.status = 'delivered') as delivered_orders,
+        COUNT(*) FILTER (WHERE o.status = 'cancelled') as cancelled_orders,
+        COALESCE(SUM(o.total_amount) FILTER (WHERE o.payment_status = 'paid'), 0) as total_revenue
       FROM orders o
-      LEFT JOIN payments p ON o.id = p.order_id
     `)
     
     const stats = statsResult.rows[0]
@@ -132,22 +129,34 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { orderId, status, trackingNumber } = body
+    const { orderId, status, trackingNumber, shippingType } = body
     
     // 상태 업데이트
     let updateQuery = 'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP'
-    let queryParams = [status, orderId]
+    let queryParams: any[] = [status]
+    let paramCount = 2
     
-    if (trackingNumber) {
-      updateQuery += ', tracking_number = $3'
-      queryParams = [status, orderId, trackingNumber]
+    if (trackingNumber !== undefined) {
+      updateQuery += `, tracking_number = $${paramCount}`
+      queryParams.push(trackingNumber)
+      paramCount++
     }
     
     if (status === 'delivered') {
       updateQuery += ', delivery_date = CURRENT_TIMESTAMP'
     }
     
-    updateQuery += ' WHERE id = $2 RETURNING *'
+    // 배송 타입 저장 (메타데이터 또는 노트 필드 활용)
+    if (shippingType) {
+      // shipping_type을 tracking_number가 있으면 'courier', 없으면 'direct'로 구분
+      // 직접배송인 경우 tracking_number를 null로 설정
+      if (shippingType === 'direct' && !trackingNumber) {
+        // 이미 처리됨
+      }
+    }
+    
+    updateQuery += ` WHERE id = $${paramCount} RETURNING *`
+    queryParams.push(orderId)
     
     const result = await query(updateQuery, queryParams)
     

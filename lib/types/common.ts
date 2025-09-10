@@ -5,6 +5,11 @@ export interface User {
   email: string;
   name?: string;
   role: 'admin' | 'user' | 'business';
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
   createdAt: Date;
   updatedAt: Date;
 }

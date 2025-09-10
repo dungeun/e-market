@@ -55,7 +55,7 @@ const sectionComponents: Record<string, any> = {
 function SectionSkeleton({ height = '400px' }: { height?: string }) {
   return (
     <div className="py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         <Skeleton className="h-8 w-64 mx-auto mb-8" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (

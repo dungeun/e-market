@@ -16,6 +16,10 @@ export default function LanguageAddForm({ onSuccess }: LanguageAddFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const koreanLanguageMap = {
+    '영어': { code: 'en', name: 'English', nativeName: 'English', googleCode: 'en', flag: '🇺🇸' },
+    '미국': { code: 'en', name: 'English', nativeName: 'English', googleCode: 'en', flag: '🇺🇸' },
+    '일본어': { code: 'ja', name: 'Japanese', nativeName: '日本語', googleCode: 'ja', flag: '🇯🇵' },
+    '일본': { code: 'ja', name: 'Japanese', nativeName: '日本語', googleCode: 'ja', flag: '🇯🇵' },
     '스페인어': { code: 'es', name: 'Spanish', nativeName: 'Español', googleCode: 'es', flag: '🇪🇸' },
     '스페인': { code: 'es', name: 'Spanish', nativeName: 'Español', googleCode: 'es', flag: '🇪🇸' },
     '프랑스어': { code: 'fr', name: 'French', nativeName: 'Français', googleCode: 'fr', flag: '🇫🇷' },
@@ -24,7 +28,7 @@ export default function LanguageAddForm({ onSuccess }: LanguageAddFormProps) {
     '독일': { code: 'de', name: 'German', nativeName: 'Deutsch', googleCode: 'de', flag: '🇩🇪' },
     '중국어': { code: 'zh', name: 'Chinese', nativeName: '中文', googleCode: 'zh', flag: '🇨🇳' },
     '중국': { code: 'zh', name: 'Chinese', nativeName: '中文', googleCode: 'zh', flag: '🇨🇳' },
-    '러시아어': { code: 'ru', name: 'Russian', nativeName: 'Русский', googleCode: 'ru', flag: '🇷🇺' },
+    '러시아어': { code: 'ru', name: 'Russian', nativeName: 'Русský', googleCode: 'ru', flag: '🇷🇺' },
     '아랍어': { code: 'ar', name: 'Arabic', nativeName: 'العربية', googleCode: 'ar', flag: '🇸🇦', direction: 'rtl' }
   };
 
@@ -123,6 +127,8 @@ export default function LanguageAddForm({ onSuccess }: LanguageAddFormProps) {
           <Label className="text-sm font-medium">인기 언어 빠른 추가</Label>
           <div className="grid grid-cols-2 gap-2">
             {[
+              ['영어', koreanLanguageMap['영어']],
+              ['일본어', koreanLanguageMap['일본어']],
               ['스페인어', koreanLanguageMap['스페인어']],
               ['프랑스어', koreanLanguageMap['프랑스어']],
               ['독일어', koreanLanguageMap['독일어']],

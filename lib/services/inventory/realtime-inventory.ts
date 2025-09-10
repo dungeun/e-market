@@ -3,11 +3,29 @@
  * 동시접속 1만명 처리를 위한 엔터프라이즈급 재고 관리
  */
 
-import { PrismaClient } from '@/lib/db'
+import { query } from '@/lib/db'
 import { EventEmitter } from 'events'
 import Redis from 'ioredis'
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+// Redis configuration with proper error handling
+const redisConfig = process.env.REDIS_URL || 'redis://localhost:6379'
+const redis = new Redis(redisConfig, {
+  retryDelayOnFailover: 100,
+  enableReadyCheck: false,
+  maxRetriesPerRequest: null,
+  lazyConnect: true,
+  connectionName: 'inventory-service'
+})
+
+// Handle Redis connection errors gracefully
+redis.on('error', (err) => {
+  console.warn('Redis connection error (inventory service):', err.message)
+})
+
+redis.on('connect', () => {
+  console.log('Redis connected (inventory service)')
+})
+
 const inventoryEvents = new EventEmitter()
 
 // 재고 예약 만료 시간 (분)
@@ -60,25 +78,44 @@ export class RealtimeInventoryService {
    * 재고 상태 조회 (캐시 우선)
    */
   async getStockStatus(productId: string): Promise<StockStatus> {
-    // Redis 캐시 확인
-    const cacheKey = `inventory:${productId}`
-    const cached = await redis.get(cacheKey)
-    
-    if (cached) {
-      return JSON.parse(cached)
+    try {
+      // Redis 캐시 확인
+      const cacheKey = `inventory:${productId}`
+      const cached = await redis.get(cacheKey)
+      
+      if (cached) {
+        return JSON.parse(cached)
+      }
+    } catch (error) {
+      console.warn('Redis cache read failed:', error)
+      // Redis 실패 시 DB로 직접 이동
     }
 
-    // DB에서 조회 (reservations 관계가 없으므로 제거)
-    const inventory = await query({
-      where: { productId }
-    })
+    // DB에서 조회
+    const result = await query(`
+      SELECT * FROM inventory WHERE "productId" = $1 LIMIT 1
+    `, [productId])
+    
+    const inventory = result.rows[0]
 
     if (!inventory) {
       throw new Error(`Inventory not found for product ${productId}`)
     }
 
-    // reservations 관계가 없으므로 예약 수량은 0으로 처리
-    const reserved = 0
+    // 현재 예약된 수량 확인
+    let reserved = 0
+    try {
+      const reservedResult = await query(`
+        SELECT COALESCE(SUM(quantity), 0) as reserved 
+        FROM "inventoryReservation" 
+        WHERE "productId" = $1 AND status = 'ACTIVE'
+      `, [productId])
+      
+      reserved = parseInt(reservedResult.rows[0]?.reserved || '0')
+    } catch (error) {
+      console.warn('Failed to get reserved quantity:', error)
+    }
+
     const available = inventory.quantity - reserved
 
     const status: StockStatus = {
@@ -90,8 +127,13 @@ export class RealtimeInventoryService {
       outOfStock: available <= 0
     }
 
-    // 캐시 저장 (1분)
-    await redis.setex(cacheKey, 60, JSON.stringify(status))
+    // 캐시 저장 (1분) - 실패해도 계속 진행
+    try {
+      const cacheKey = `inventory:${productId}`
+      await redis.setex(cacheKey, 60, JSON.stringify(status))
+    } catch (error) {
+      console.warn('Redis cache write failed:', error)
+    }
 
     return status
   }
@@ -102,19 +144,26 @@ export class RealtimeInventoryService {
   async reserveStock(reservation: InventoryReservation): Promise<string> {
     const { productId, quantity, userId, cartId, orderId } = reservation
 
-    // 트랜잭션으로 처리
-    return await prisma.$transaction(async (tx) => {
+    try {
       // 재고 확인
-      const inventory = await tx.inventory.findFirst({
-        where: { productId }
-      })
+      const inventoryResult = await query(`
+        SELECT * FROM inventory WHERE "productId" = $1 LIMIT 1
+      `, [productId])
+      
+      const inventory = inventoryResult.rows[0]
 
       if (!inventory) {
         throw new Error(`Product ${productId} not found`)
       }
 
-      // reservations 관계가 없으므로 예약 수량은 0으로 처리
-      const reserved = 0
+      // 현재 예약된 수량 확인
+      const reservedResult = await query(`
+        SELECT COALESCE(SUM(quantity), 0) as reserved 
+        FROM "inventoryReservation" 
+        WHERE "productId" = $1 AND status = 'ACTIVE'
+      `, [productId])
+      
+      const reserved = parseInt(reservedResult.rows[0]?.reserved || '0')
       const available = inventory.quantity - reserved
 
       if (available < quantity) {
@@ -125,105 +174,147 @@ export class RealtimeInventoryService {
       const expiresAt = new Date()
       expiresAt.setMinutes(expiresAt.getMinutes() + RESERVATION_EXPIRY_MINUTES)
 
-      const newReservation = await tx.inventoryReservation.create({
-        data: {
-          productId,
-          quantity,
-          userId,
-          cartId,
-          orderId,
-          expiresAt,
-          status: 'ACTIVE'
-        }
-      })
+      const reservationResult = await query(`
+        INSERT INTO "inventoryReservation" 
+        ("productId", quantity, "userId", "cartId", "orderId", "expiresAt", status, "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', NOW(), NOW())
+        RETURNING id
+      `, [productId, quantity, userId, cartId, orderId, expiresAt])
+
+      const newReservationId = reservationResult.rows[0]?.id
 
       // 캐시 무효화
-      await redis.del(`inventory:${productId}`)
+      try {
+        await redis.del(`inventory:${productId}`)
+      } catch (error) {
+        console.warn('Redis cache invalidation failed:', error)
+      }
 
       // 실시간 이벤트 발행
       this.emitInventoryUpdate(productId, 'reservation_created')
 
-      return newReservation.id
-    })
+      return newReservationId
+    } catch (error) {
+      console.error('Error reserving stock:', error)
+      throw error
+    }
   }
 
   /**
    * 예약 확정 (주문 완료 시)
    */
   async confirmReservation(reservationId: string): Promise<void> {
-    const reservation = await query({
-      where: { id: reservationId },
-      data: { status: 'CONFIRMED' },
-      include: { product: true }
-    })
+    try {
+      // 예약 정보 조회 및 확정으로 업데이트
+      const reservationResult = await query(`
+        UPDATE "inventoryReservation" 
+        SET status = 'CONFIRMED', "updatedAt" = NOW()
+        WHERE id = $1 
+        RETURNING "productId", quantity
+      `, [reservationId])
 
-    // 실제 재고 차감 (updateMany 사용)
-    await queryMany({
-      where: { productId: reservation.productId },
-      data: {
-        quantity: { decrement: reservation.quantity }
+      const reservation = reservationResult.rows[0]
+      
+      if (!reservation) {
+        throw new Error(`Reservation ${reservationId} not found`)
       }
-    })
 
-    // 캐시 무효화
-    await redis.del(`inventory:${reservation.productId}`)
+      // 실제 재고 차감
+      await query(`
+        UPDATE inventory 
+        SET quantity = quantity - $1, "updatedAt" = NOW()
+        WHERE "productId" = $2
+      `, [reservation.quantity, reservation.productId])
 
-    // 실시간 이벤트 발행
-    this.emitInventoryUpdate(reservation.productId, 'stock_confirmed')
+      // 캐시 무효화
+      try {
+        await redis.del(`inventory:${reservation.productId}`)
+      } catch (error) {
+        console.warn('Redis cache invalidation failed:', error)
+      }
+
+      // 실시간 이벤트 발행
+      this.emitInventoryUpdate(reservation.productId, 'stock_confirmed')
+    } catch (error) {
+      console.error('Error confirming reservation:', error)
+      throw error
+    }
   }
 
   /**
    * 예약 취소
    */
   async cancelReservation(reservationId: string): Promise<void> {
-    const reservation = await query({
-      where: { id: reservationId },
-      data: { status: 'CANCELLED' }
-    })
+    try {
+      // 예약 취소로 업데이트
+      const reservationResult = await query(`
+        UPDATE "inventoryReservation" 
+        SET status = 'CANCELLED', "updatedAt" = NOW()
+        WHERE id = $1 
+        RETURNING "productId"
+      `, [reservationId])
 
-    // 캐시 무효화
-    await redis.del(`inventory:${reservation.productId}`)
+      const reservation = reservationResult.rows[0]
+      
+      if (!reservation) {
+        throw new Error(`Reservation ${reservationId} not found`)
+      }
 
-    // 실시간 이벤트 발행
-    this.emitInventoryUpdate(reservation.productId, 'reservation_cancelled')
+      // 캐시 무효화
+      try {
+        await redis.del(`inventory:${reservation.productId}`)
+      } catch (error) {
+        console.warn('Redis cache invalidation failed:', error)
+      }
+
+      // 실시간 이벤트 발행
+      this.emitInventoryUpdate(reservation.productId, 'reservation_cancelled')
+    } catch (error) {
+      console.error('Error cancelling reservation:', error)
+      throw error
+    }
   }
 
   /**
    * 벌크 재고 업데이트 (관리자용)
    */
   async bulkUpdateInventory(updates: InventoryUpdate[]): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    try {
       for (const update of updates) {
         const { productId, quantity, type, locationId } = update
 
-        let updateData: unknown = {}
+        let sql = ''
+        let params = []
+        
         if (type === 'increment') {
-          updateData = { quantity: { increment: quantity } }
+          sql = `UPDATE inventory SET quantity = quantity + $1, "updatedAt" = NOW() WHERE "productId" = $2 AND "locationId" = $3`
+          params = [quantity, productId, locationId || 'default']
         } else if (type === 'decrement') {
-          updateData = { quantity: { decrement: quantity } }
+          sql = `UPDATE inventory SET quantity = quantity - $1, "updatedAt" = NOW() WHERE "productId" = $2 AND "locationId" = $3`
+          params = [quantity, productId, locationId || 'default']
         } else {
-          updateData = { quantity }
+          sql = `UPDATE inventory SET quantity = $1, "updatedAt" = NOW() WHERE "productId" = $2 AND "locationId" = $3`
+          params = [quantity, productId, locationId || 'default']
         }
 
-        await tx.inventory.update({
-          where: { 
-            productId_locationId: {
-              productId,
-              locationId: locationId || 'default'
-            }
-          },
-          data: updateData
-        })
+        await query(sql, params)
 
         // 캐시 무효화
-        await redis.del(`inventory:${productId}`)
+        try {
+          await redis.del(`inventory:${productId}`)
+        } catch (error) {
+          console.warn('Redis cache invalidation failed:', error)
+        }
       }
-    })
 
-    // 실시간 이벤트 발행
-    updates.forEach(update => {
-      this.emitInventoryUpdate(update.productId, 'bulk_update')
-    })
+      // 실시간 이벤트 발행
+      updates.forEach(update => {
+        this.emitInventoryUpdate(update.productId, 'bulk_update')
+      })
+    } catch (error) {
+      console.error('Error in bulk update inventory:', error)
+      throw error
+    }
   }
 
   /**
@@ -273,27 +364,30 @@ export class RealtimeInventoryService {
    * 만료된 예약 정리 (주기적 실행)
    */
   private async cleanupExpiredReservations(): Promise<void> {
-    const expired = await queryMany({
-      where: {
-        status: 'ACTIVE',
-        expiresAt: { lte: new Date() }
-      },
-      data: { status: 'EXPIRED' }
-    })
+    try {
+      // 만료된 예약을 EXPIRED로 업데이트
+      const result = await query(`
+        UPDATE "inventoryReservation" 
+        SET status = 'EXPIRED' 
+        WHERE status = 'ACTIVE' AND "expiresAt" <= NOW()
+        RETURNING "productId"
+      `)
 
-    if (expired.count > 0) {
-
-      // 영향받은 상품의 캐시 무효화
-      const expiredReservations = await query({
-        where: { status: 'EXPIRED' },
-        select: { productId: true },
-        distinct: ['productId']
-      })
-
-      for (const reservation of expiredReservations) {
-        await redis.del(`inventory:${reservation.productId}`)
-        this.emitInventoryUpdate(reservation.productId, 'reservation_expired')
+      if (result.rows && result.rows.length > 0) {
+        // 영향받은 상품의 캐시 무효화
+        const uniqueProductIds = [...new Set(result.rows.map(row => row.productId))]
+        
+        for (const productId of uniqueProductIds) {
+          try {
+            await redis.del(`inventory:${productId}`)
+          } catch (error) {
+            console.warn('Redis cache invalidation failed:', error)
+          }
+          this.emitInventoryUpdate(productId, 'reservation_expired')
+        }
       }
+    } catch (error) {
+      console.error('Error cleaning up expired reservations:', error)
     }
   }
 
@@ -311,15 +405,40 @@ export class RealtimeInventoryService {
    * Redis 구독 초기화 (실시간 동기화)
    */
   private initializeRedisSubscriptions(): void {
-    const subscriber = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
-    
-    subscriber.subscribe('inventory:updates')
-    subscriber.on('message', (channel, message) => {
-      if (channel === 'inventory:updates') {
-        const update = JSON.parse(message)
-        inventoryEvents.emit('inventory:changed', update)
-      }
-    })
+    try {
+      const subscriber = new Redis(redisConfig, {
+        retryDelayOnFailover: 100,
+        enableReadyCheck: false,
+        maxRetriesPerRequest: null,
+        lazyConnect: true,
+        connectionName: 'inventory-subscriber'
+      })
+      
+      subscriber.on('error', (err) => {
+        console.warn('Redis subscriber error (inventory service):', err.message)
+      })
+      
+      subscriber.on('connect', () => {
+        console.log('Redis subscriber connected (inventory service)')
+      })
+      
+      subscriber.subscribe('inventory:updates').catch(err => {
+        console.warn('Redis subscription failed:', err.message)
+      })
+      
+      subscriber.on('message', (channel, message) => {
+        if (channel === 'inventory:updates') {
+          try {
+            const update = JSON.parse(message)
+            inventoryEvents.emit('inventory:changed', update)
+          } catch (error) {
+            console.error('Error parsing Redis message:', error)
+          }
+        }
+      })
+    } catch (error) {
+      console.warn('Redis subscription initialization failed:', error)
+    }
   }
 
   /**
@@ -333,8 +452,10 @@ export class RealtimeInventoryService {
       data
     }
 
-    // Redis pub/sub으로 발행
-    redis.publish('inventory:updates', JSON.stringify(update))
+    // Redis pub/sub으로 발행 (실패해도 로컬 이벤트는 계속)
+    redis.publish('inventory:updates', JSON.stringify(update)).catch(err => {
+      console.warn('Redis publish failed:', err.message)
+    })
     
     // 로컬 이벤트 발행
     inventoryEvents.emit('inventory:changed', update)
@@ -351,23 +472,34 @@ export class RealtimeInventoryService {
    * 재고 스냅샷 생성 (감사 및 분석용)
    */
   async createInventorySnapshot(reason?: string): Promise<void> {
-    const inventories = await query()
+    try {
+      const inventoriesResult = await query(`SELECT * FROM inventory`)
+      const inventories = inventoriesResult.rows
 
-    for (const inventory of inventories) {
-      // reservations 관계가 없으므로 예약 수량은 0으로 처리
-      const reserved = 0
-      const available = inventory.quantity - reserved
+      for (const inventory of inventories) {
+        // 현재 예약된 수량 계산
+        const reservedResult = await query(`
+          SELECT COALESCE(SUM(quantity), 0) as reserved 
+          FROM "inventoryReservation" 
+          WHERE "productId" = $1 AND status = 'ACTIVE'
+        `, [inventory.productId])
+        
+        const reserved = parseInt(reservedResult.rows[0]?.reserved || '0')
+        const available = inventory.quantity - reserved
 
-      await query({
-        data: {
-          productId: inventory.productId,
-          locationId: inventory.locationId,
-          quantity: inventory.quantity,
-          reserved,
-          available,
-          reason: reason || 'Scheduled snapshot'
-        }
-      })
+        // 스냅샷 테이블이 있다면 삽입 (없으면 로그만)
+        console.log(`Inventory Snapshot: Product ${inventory.productId}, Quantity: ${inventory.quantity}, Reserved: ${reserved}, Available: ${available}, Reason: ${reason || 'Scheduled snapshot'}`)
+        
+        // TODO: 스냅샷 테이블 구현 필요
+        // await query(`
+        //   INSERT INTO inventory_snapshots 
+        //   ("productId", "locationId", quantity, reserved, available, reason, "createdAt")
+        //   VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        // `, [inventory.productId, inventory.locationId, inventory.quantity, reserved, available, reason || 'Scheduled snapshot'])
+      }
+    } catch (error) {
+      console.error('Error creating inventory snapshot:', error)
+      throw error
     }
   }
 
@@ -379,7 +511,7 @@ export class RealtimeInventoryService {
       clearInterval(this.reservationCleanupInterval)
     }
     await redis.quit()
-    await prisma.$disconnect()
+    // Note: DB connection pool cleanup is handled by the Database singleton
   }
 }
 

@@ -40,53 +40,74 @@ const RankingSection = React.memo(function RankingSection({ data, sectionId = 'r
   const { currentLanguage } = useLanguage();
 
   useEffect(() => {
-
-    if (data) {
-      // JSON 데이터가 있는 경우 직접 사용
-
-      setRankings({
-        popular: data.popular || [],
-        lowStock: data.lowStock || data.urgent || [],
-        search: data.search || []
-      });
-      setTitle(data.title || '실시간 랭킹');
-      setLoading(false);
-      setIsVisible(true);
-    } else {
-
-      // Fallback: API 호출 (하위 호환성)
-      loadRankingData();
-    }
+    // 실제 상품 데이터를 로드
+    loadRankingData();
+  
   }, [data, sectionId, currentLanguage]);
 
   const loadRankingData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/ui-sections/${sectionId}`, {
-        headers: {
-          'Accept-Language': currentLanguage
-        }
+      
+      // 실제 상품 데이터를 가져오기
+      const [popularRes, newRes, saleRes] = await Promise.all([
+        fetch('/api/products?sort=popular&limit=5'),
+        fetch('/api/products?sort=newest&limit=5'),
+        fetch('/api/products?category=sale&limit=5')
+      ]);
+      
+      const popularData = popularRes.ok ? await popularRes.json() : { products: [] };
+      const newData = newRes.ok ? await newRes.json() : { products: [] };
+      const saleData = saleRes.ok ? await saleRes.json() : { products: [] };
+      
+      // 상품 데이터를 랭킹 형식으로 변환
+      const formatProducts = (products: any[], startRank = 1) => {
+        return products.map((p, index) => ({
+          id: p.id,
+          rank: startRank + index,
+          title: p.name,
+          description: p.description || '',
+          price: `${p.price?.toLocaleString()}원`,
+          originalPrice: p.originalPrice ? `${p.originalPrice.toLocaleString()}원` : undefined,
+          image: p.image || '/placeholder.png',
+          link: `/products/${p.slug}`,
+          badge: p.stock < 5 ? '품절임박' : undefined,
+          rating: p.rating,
+          stock: p.stock
+        }));
+      };
+      
+      setRankings({
+        popular: formatProducts(popularData.products || []),
+        lowStock: formatProducts(saleData.products || []),
+        search: formatProducts(newData.products || [])
       });
       
-      if (response.ok) {
-        const apiData = await response.json();
-        if (apiData.section) {
-          const content = apiData.section.content?.rankings || {};
-          setRankings({
-            popular: content.popular || [],
-            lowStock: content.lowStock || content.urgent || [],
-            search: content.search || []
-          });
-          setIsVisible(apiData.section.isActive !== false);
-        }
-      } else {
-        // API 실패 시 기본값 설정
-        setRankings({ popular: [], lowStock: [], search: [] });
+      // data prop에서 제목 가져오기
+      if (data && typeof data === 'object' && 'title' in data) {
+        setTitle(data.title || '실시간 인기 상품');
       }
+      
+      setIsVisible(true);
     } catch (error) {
-
-      // 에러 시에도 기본값 설정하여 렌더링 에러 방지
-      setRankings({ popular: [], lowStock: [], search: [] });
+      console.error('Failed to load ranking data:', error);
+      
+      // 에러 시 샘플 데이터
+      setRankings({
+        popular: [
+          { id: '1', rank: 1, title: '인기 상품 1', price: '29,900원', link: '/products/1', rating: 4.5, stock: 10 },
+          { id: '2', rank: 2, title: '인기 상품 2', price: '39,900원', link: '/products/2', rating: 4.3, stock: 5 },
+          { id: '3', rank: 3, title: '인기 상품 3', price: '19,900원', link: '/products/3', rating: 4.8, stock: 15 }
+        ],
+        lowStock: [
+          { id: '4', rank: 1, title: '품절임박 1', price: '49,900원', link: '/products/4', badge: '품절임박', stock: 2 },
+          { id: '5', rank: 2, title: '품절임박 2', price: '24,900원', link: '/products/5', badge: '품절임박', stock: 3 }
+        ],
+        search: [
+          { id: '6', rank: 1, title: '신상품 1', price: '34,900원', link: '/products/6', badge: 'NEW', rating: 5.0 },
+          { id: '7', rank: 2, title: '신상품 2', price: '44,900원', link: '/products/7', badge: 'NEW', rating: 4.7 }
+        ]
+      });
     } finally {
       setLoading(false);
     }
@@ -96,7 +117,7 @@ const RankingSection = React.memo(function RankingSection({ data, sectionId = 'r
   if (!rankings) {
     return (
       <div className={`w-full py-12 ${className}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-gray-200 rounded w-48" />
@@ -120,9 +141,10 @@ const RankingSection = React.memo(function RankingSection({ data, sectionId = 'r
     );
   }
 
-  if (!isVisible || (rankings.popular?.length === 0 && rankings.lowStock?.length === 0 && rankings.search?.length === 0)) {
-    return null;
-  }
+  // 랜킹 데이터가 없어도 섹션 표시
+  // if (!isVisible || (rankings.popular?.length === 0 && rankings.lowStock?.length === 0 && rankings.search?.length === 0)) {
+  //   return null;
+  // }
 
   const currentRankings = rankings[activeTab] || [];
 

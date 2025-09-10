@@ -137,7 +137,7 @@ const HeroSection = React.memo(function HeroSection({ data, sectionId = 'hero', 
   if (loading) {
     return (
       <div className={`w-full py-4 ${className}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="h-[280px] lg:h-[320px] bg-gray-200 animate-pulse rounded-2xl" />
             <div className="h-[280px] lg:h-[320px] bg-gray-200 animate-pulse rounded-2xl" />
@@ -147,8 +147,26 @@ const HeroSection = React.memo(function HeroSection({ data, sectionId = 'hero', 
     );
   }
 
+  // 슬라이드가 없을 때 기본 슬라이드 표시
   if (!slides || slides.length === 0) {
-    return null;
+    slides = [
+      {
+        id: 'default-1',
+        title: '특별 할인 이벤트',
+        subtitle: '최대 70% 할인',
+        buttonText: '쇼핑하기',
+        link: '/products',
+        bgColor: 'bg-gradient-to-br from-blue-600 to-purple-600'
+      },
+      {
+        id: 'default-2',
+        title: '신상품 출시',
+        subtitle: '새로운 제품을 만나보세요',
+        buttonText: '구경하기',
+        link: '/products',
+        bgColor: 'bg-gradient-to-br from-green-600 to-teal-600'
+      }
+    ];
   }
 
   // 현재 표시할 2개의 슬라이드

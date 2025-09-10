@@ -5,6 +5,7 @@ import ProductCard from '@/components/sections/ProductCard'
 import { Slider } from '@/components/ui/slider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Product {
   id: string
@@ -26,6 +27,7 @@ interface Category {
 }
 
 export default function ProductsPage() {
+  const { t } = useLanguage()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,8 +88,8 @@ export default function ProductsPage() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">전체 상품</h1>
-          <p className="mt-2 text-gray-600">원하시는 상품을 찾아보세요</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('products.title', '전체 상품')}</h1>
+          <p className="mt-2 text-gray-600">{t('products.subtitle', '원하시는 상품을 찾아보세요')}</p>
         </div>
 
         <div className="flex gap-8">
@@ -96,13 +98,13 @@ export default function ProductsPage() {
             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
               {/* 검색 */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">검색</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('products.search', '검색')}</h3>
                 <form onSubmit={handleSearch}>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="상품명 검색..."
+                    placeholder={t('products.search_placeholder', '상품명 검색...')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </form>
@@ -110,7 +112,7 @@ export default function ProductsPage() {
 
               {/* 카테고리 필터 */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">카테고리</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('products.category', '카테고리')}</h3>
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
@@ -124,7 +126,7 @@ export default function ProductsPage() {
                       }}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-700">전체</span>
+                    <span className="text-sm text-gray-700">{t('products.all_categories', '전체')}</span>
                   </label>
                   {categories.map((category) => (
                     <label key={category.id} className="flex items-center">
@@ -149,7 +151,7 @@ export default function ProductsPage() {
 
               {/* 가격 필터 */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">가격</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('products.price_filter', '가격')}</h3>
                 <div className="space-y-4">
                   <Slider
                     value={priceRange}
@@ -167,7 +169,7 @@ export default function ProductsPage() {
 
               {/* 정렬 */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">정렬</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('products.sort', '정렬')}</h3>
                 <select
                   value={`${sortBy}-${sortOrder}`}
                   onChange={(e) => {
@@ -178,10 +180,10 @@ export default function ProductsPage() {
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="createdAt-desc">최신순</option>
-                  <option value="price-asc">가격 낮은순</option>
-                  <option value="price-desc">가격 높은순</option>
-                  <option value="name-asc">이름순</option>
+                  <option value="createdAt-desc">{t('products.sort_newest', '최신순')}</option>
+                  <option value="price-asc">{t('products.sort_price_low', '가격 낮은순')}</option>
+                  <option value="price-desc">{t('products.sort_price_high', '가격 높은순')}</option>
+                  <option value="name-asc">{t('products.sort_name', '이름순')}</option>
                 </select>
               </div>
             </div>
@@ -203,7 +205,7 @@ export default function ProductsPage() {
 
                 {filteredProducts.length === 0 && (
                   <div className="text-center py-12">
-                    <p className="text-gray-500">검색 결과가 없습니다.</p>
+                    <p className="text-gray-500">{t('products.no_results', '검색 결과가 없습니다.')}</p>
                   </div>
                 )}
 
@@ -215,7 +217,7 @@ export default function ProductsPage() {
                       disabled={page === 1}
                       className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                     >
-                      이전
+                      {t('products.prev', '이전')}
                     </button>
                     
                     {[...Array(totalPages)].map((_, i) => (
@@ -237,7 +239,7 @@ export default function ProductsPage() {
                       disabled={page === totalPages}
                       className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                     >
-                      다음
+                      {t('products.next', '다음')}
                     </button>
                   </div>
                 )}

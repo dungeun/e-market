@@ -2,10 +2,28 @@ import { query } from '@/lib/db'
 import { env } from '@/lib/config/env';
 import { Redis } from 'ioredis'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD
+const redisUrl = process.env.REDIS_URL
+const redis = redisUrl
+  ? new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'product-service'
+    })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      connectionName: 'product-service'
+    })
+
+redis.on('error', (err) => {
+  console.warn('Redis connection error (product service):', err.message)
 })
 
 export interface Product {

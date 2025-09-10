@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 
 import ProductCard from './ProductCard'
+import SectionLayout from '../ui/SectionLayout'
 import { Tag, Percent } from 'lucide-react'
 
 interface SpecialOffersProps {
@@ -105,71 +106,57 @@ const SpecialOffers = React.memo(function SpecialOffers({ config: propsConfig, p
       setLoading(false);
     }
   };
+  
   return (
-    <section className="py-12 px-4 bg-black">
-      <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Tag className="w-6 h-6" style={{ color: config?.highlightColor || '#ff0000' }} />
-            {config?.title && (
-              <h2 className="text-3xl font-bold text-white">
-                {config?.title}
-              </h2>
-            )}
-            <Percent className="w-6 h-6" style={{ color: config?.highlightColor || '#ff0000' }} />
-          </div>
-          {config?.subtitle && (
-            <p className="text-gray-300">
-              {config?.subtitle}
-            </p>
-          )}
-          {config?.minDiscount && (
-            <div className="mt-2 inline-block bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-              {config?.minDiscount}% 이상 할인!
-            </div>
-          )}
-        </div>
-
-        {/* 상품 그리드 */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="bg-gray-800 rounded-lg h-64"></div>
-                <div className="mt-2 h-4 bg-gray-800 rounded w-3/4"></div>
-                <div className="mt-1 h-4 bg-gray-800 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {products.slice(0, config?.limit || 6).map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                showBadge={true}
-                badgeText="특가"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-gray-400">
-            특가 상품이 없습니다.
-          </div>
-        )}
-
-        {/* 더보기 */}
-        <div className="text-center mt-8">
-          <a
-            href="/products/special-offers"
-            className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            특가 상품 모두 보기
-          </a>
-        </div>
-      </div>
-    </section>
+    <SectionLayout
+      theme="dark"
+      layout="grid"
+      columns={3}
+      responsive={{
+        mobile: 2,
+        tablet: 3,
+        desktop: 3
+      }}
+      header={{
+        title: config?.title || '특가 상품',
+        subtitle: config?.subtitle,
+        icon: Tag,
+        secondaryIcon: Percent,
+        centerAlign: true,
+        badge: config?.minDiscount ? {
+          text: `${config.minDiscount}% 이상 할인!`,
+          color: config?.highlightColor || '#ef4444'
+        } : undefined
+      }}
+      loading={loading}
+      empty={!loading && products.length === 0}
+      emptyState={{
+        message: '특가 상품이 없습니다.',
+        description: '할인 상품이 곧 업데이트될 예정입니다.'
+      }}
+      skeleton={{
+        count: 3,
+        height: '300px',
+        showHeader: true
+      }}
+      cta={{
+        text: '특가 상품 모두 보기',
+        href: '/products/special-offers',
+        variant: 'primary'
+      }}
+      section={{
+        'aria-label': '특가 상품 목록'
+      }}
+    >
+      {products.slice(0, config?.limit || 6).map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          showBadge={true}
+          badgeText="특가"
+        />
+      ))}
+    </SectionLayout>
     )
 });
 

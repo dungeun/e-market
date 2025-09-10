@@ -4,13 +4,14 @@ export interface Language {
   code: string
   name: string
   native_name?: string
-  google_code: string
-  direction: string
+  google_code?: string
+  direction?: string
   flag_emoji?: string
   enabled: boolean
   is_default: boolean
-  created_at: Date
-  updated_at: Date
+  display_order?: number
+  created_at?: Date
+  updated_at?: Date
 }
 
 export interface Translation {
@@ -29,7 +30,7 @@ export interface Translation {
 
 /**
  * 언어 관리 서비스
- * 동적 언어 설정을 지원하는 유틸리티 함수들
+ * language_settings 테이블 기반 동적 언어 설정 관리
  * 최대 3개 언어만 활성화 가능
  */
 export class LanguageManager {
@@ -46,6 +47,12 @@ export class LanguageManager {
     return LanguageManager._instance
   }
 
+  clearCache(): void {
+    console.log('🧹 Clearing language cache...')
+    this._languages = null
+    this._cacheExpiry = 0
+  }
+
   /**
    * 활성화된 언어 목록 조회 (캐시됨)
    */
@@ -54,36 +61,24 @@ export class LanguageManager {
       return this._languages
     }
 
-    // 현재 활성 언어 설정 조회
-    const settingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-    
-    if (settingsResult.rows.length === 0) {
-      return []
-    }
-
-    const { selected_languages, default_language } = settingsResult.rows[0]
-    const selectedCodes: string[] = Array.isArray(selected_languages) ? selected_languages : JSON.parse(selected_languages)
-
-    // 언어 메타데이터 조회
-    const metadataResult = await query(
-      `SELECT * FROM language_metadata WHERE code = ANY($1) ORDER BY 
-       CASE WHEN code = $2 THEN 0 ELSE 1 END, name ASC`,
-      [selectedCodes, default_language]
+    const result = await query(
+      `SELECT * FROM language_settings 
+       WHERE enabled = true 
+       ORDER BY is_default DESC, display_order ASC, name ASC`
     )
 
-    const languages: Language[] = metadataResult.rows.map(row => ({
+    const languages: Language[] = result.rows.map(row => ({
       code: row.code,
       name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
+      native_name: row.native_name || row.name,
+      google_code: row.google_code || row.code,
+      direction: row.direction || 'ltr',
+      flag_emoji: row.flag_emoji || '🌐',
       enabled: true,
-      is_default: row.code === default_language,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at)
+      is_default: row.is_default || false,
+      display_order: row.display_order,
+      created_at: row.created_at ? new Date(row.created_at) : undefined,
+      updated_at: row.updated_at ? new Date(row.updated_at) : undefined
     }))
 
     this._languages = languages
@@ -93,37 +88,26 @@ export class LanguageManager {
   }
 
   /**
-   * 모든 언어 목록 조회 (사용 가능한 모든 언어 메타데이터)
+   * 모든 언어 목록 조회 (활성/비활성 모두 포함)
    */
   async getAllLanguages(): Promise<Language[]> {
-    // 현재 설정 조회
-    const settingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-    
-    const selectedCodes: string[] = settingsResult.rows.length > 0 
-      ? (Array.isArray(settingsResult.rows[0].selected_languages) 
-          ? settingsResult.rows[0].selected_languages 
-          : JSON.parse(settingsResult.rows[0].selected_languages))
-      : []
-    const defaultLanguage = settingsResult.rows.length > 0 ? settingsResult.rows[0].default_language : 'ko'
-
-    // 모든 언어 메타데이터 조회
     const result = await query(
-      'SELECT * FROM language_metadata ORDER BY name ASC'
+      `SELECT * FROM language_settings 
+       ORDER BY display_order ASC, name ASC`
     )
 
     return result.rows.map(row => ({
       code: row.code,
       name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
-      enabled: selectedCodes.includes(row.code),
-      is_default: row.code === defaultLanguage,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at)
+      native_name: row.native_name || row.name,
+      google_code: row.google_code || row.code,
+      direction: row.direction || 'ltr',
+      flag_emoji: row.flag_emoji || '🌐',
+      enabled: row.enabled || false,
+      is_default: row.is_default || false,
+      display_order: row.display_order,
+      created_at: row.created_at ? new Date(row.created_at) : undefined,
+      updated_at: row.updated_at ? new Date(row.updated_at) : undefined
     }))
   }
 
@@ -131,36 +115,27 @@ export class LanguageManager {
    * 기본 언어 조회
    */
   async getDefaultLanguage(): Promise<Language | null> {
-    const settingsResult = await query(
-      'SELECT default_language FROM language_settings LIMIT 1'
+    const result = await query(
+      'SELECT * FROM language_settings WHERE is_default = true LIMIT 1'
     )
 
-    if (settingsResult.rows.length === 0) {
+    if (result.rows.length === 0) {
       return null
     }
 
-    const defaultCode = settingsResult.rows[0].default_language
-    const metadataResult = await query(
-      'SELECT * FROM language_metadata WHERE code = $1',
-      [defaultCode]
-    )
-
-    if (metadataResult.rows.length === 0) {
-      return null
-    }
-
-    const row = metadataResult.rows[0]
+    const row = result.rows[0]
     return {
       code: row.code,
       name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
+      native_name: row.native_name || row.name,
+      google_code: row.google_code || row.code,
+      direction: row.direction || 'ltr',
+      flag_emoji: row.flag_emoji || '🌐',
       enabled: true,
       is_default: true,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at)
+      display_order: row.display_order,
+      created_at: row.created_at ? new Date(row.created_at) : undefined,
+      updated_at: row.updated_at ? new Date(row.updated_at) : undefined
     }
   }
 
@@ -168,40 +143,28 @@ export class LanguageManager {
    * 언어 코드로 언어 조회
    */
   async getLanguageByCode(code: string): Promise<Language | null> {
-    // 현재 설정에서 해당 언어가 활성화되어 있는지 확인
-    const settingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-    
-    const selectedCodes: string[] = settingsResult.rows.length > 0 
-      ? (Array.isArray(settingsResult.rows[0].selected_languages) 
-          ? settingsResult.rows[0].selected_languages 
-          : JSON.parse(settingsResult.rows[0].selected_languages))
-      : []
-    const defaultLanguage = settingsResult.rows.length > 0 ? settingsResult.rows[0].default_language : 'ko'
-
-    // 언어 메타데이터 조회
-    const metadataResult = await query(
-      'SELECT * FROM language_metadata WHERE code = $1',
+    const result = await query(
+      'SELECT * FROM language_settings WHERE code = $1',
       [code]
     )
 
-    if (metadataResult.rows.length === 0) {
+    if (result.rows.length === 0) {
       return null
     }
 
-    const row = metadataResult.rows[0]
+    const row = result.rows[0]
     return {
       code: row.code,
       name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
-      enabled: selectedCodes.includes(row.code),
-      is_default: row.code === defaultLanguage,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at)
+      native_name: row.native_name || row.name,
+      google_code: row.google_code || row.code,
+      direction: row.direction || 'ltr',
+      flag_emoji: row.flag_emoji || '🌐',
+      enabled: row.enabled || false,
+      is_default: row.is_default || false,
+      display_order: row.display_order,
+      created_at: row.created_at ? new Date(row.created_at) : undefined,
+      updated_at: row.updated_at ? new Date(row.updated_at) : undefined
     }
   }
 
@@ -244,17 +207,22 @@ export class LanguageManager {
     const result = await query(`
       SELECT t.*, l.name as language_name 
       FROM language_pack_translations t
-      LEFT JOIN language_settings l ON t.language_code = l.code
-      WHERE t.key = $1 AND l.enabled = true
-      ORDER BY l.is_default DESC, l.name ASC
+      JOIN language_settings l ON t.language_code = l.code
+      WHERE t.key = $1
     `, [key])
 
     const translations: Record<string, Translation> = {}
     
     result.rows.forEach(row => {
       translations[row.language_code] = {
-        ...row,
+        id: row.id,
+        key: row.key,
+        language_code: row.language_code,
+        value: row.value,
+        status: row.status,
+        translated_by: row.translated_by,
         translated_at: row.translated_at ? new Date(row.translated_at) : undefined,
+        verified_by: row.verified_by,
         verified_at: row.verified_at ? new Date(row.verified_at) : undefined,
         created_at: new Date(row.created_at),
         updated_at: new Date(row.updated_at)
@@ -265,7 +233,7 @@ export class LanguageManager {
   }
 
   /**
-   * 번역 값 조회 (언어 코드와 키로)
+   * 특정 언어와 키에 대한 번역 조회
    */
   async getTranslation(key: string, languageCode: string, fallbackToDefault: boolean = true): Promise<string | null> {
     let result = await query(
@@ -319,181 +287,29 @@ export class LanguageManager {
   }
 
   /**
-   * 언어 추가 (새로운 JSONB 방식)
-   */
-  async addLanguage(code: string): Promise<Language> {
-    if (!code) {
-      throw new Error('언어 코드는 필수입니다.')
-    }
-
-    // 언어 메타데이터 확인
-    const metadataResult = await query(
-      'SELECT * FROM language_metadata WHERE code = $1',
-      [code]
-    )
-
-    if (metadataResult.rows.length === 0) {
-      throw new Error(`지원되지 않는 언어 코드입니다: ${code}`)
-    }
-
-    // 현재 설정 조회
-    const settingsResult = await query(
-      'SELECT selected_languages FROM language_settings LIMIT 1'
-    )
-
-    let selectedLanguages: string[] = []
-    if (settingsResult.rows.length > 0) {
-      selectedLanguages = Array.isArray(settingsResult.rows[0].selected_languages) 
-        ? settingsResult.rows[0].selected_languages 
-        : JSON.parse(settingsResult.rows[0].selected_languages)
-    }
-
-    // 이미 추가된 언어인지 확인
-    if (selectedLanguages.includes(code)) {
-      throw new Error('이미 추가된 언어입니다.')
-    }
-
-    // 3개 제한 체크
-    if (selectedLanguages.length >= this.MAX_ACTIVE_LANGUAGES) {
-      throw new Error(`최대 ${this.MAX_ACTIVE_LANGUAGES}개의 언어만 활성화할 수 있습니다. 먼저 다른 언어를 비활성화하세요.`)
-    }
-
-    // 언어 추가
-    selectedLanguages.push(code)
-    
-    await query(`
-      UPDATE language_settings 
-      SET selected_languages = $1, updated_at = CURRENT_TIMESTAMP
-    `, [JSON.stringify(selectedLanguages)])
-
-    // 캐시 무효화
-    this._languages = null
-    this._cacheExpiry = 0
-
-    const row = metadataResult.rows[0]
-    return {
-      code: row.code,
-      name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
-      enabled: true,
-      is_default: false,
-      created_at: new Date(row.created_at),
-      updated_at: new Date()
-    }
-  }
-
-  /**
-   * 언어 제거
-   */
-  async removeLanguage(code: string): Promise<boolean> {
-    if (!code) {
-      throw new Error('언어 코드는 필수입니다.')
-    }
-
-    // 기본 언어는 제거 불가
-    const settingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-
-    if (settingsResult.rows.length === 0) {
-      throw new Error('언어 설정을 찾을 수 없습니다.')
-    }
-
-    const { default_language } = settingsResult.rows[0]
-    if (code === default_language) {
-      throw new Error('기본 언어는 제거할 수 없습니다.')
-    }
-
-    let selectedLanguages: string[] = Array.isArray(settingsResult.rows[0].selected_languages) 
-      ? settingsResult.rows[0].selected_languages 
-      : JSON.parse(settingsResult.rows[0].selected_languages)
-
-    // 해당 언어 제거
-    const initialLength = selectedLanguages.length
-    selectedLanguages = selectedLanguages.filter(lang => lang !== code)
-
-    if (selectedLanguages.length === initialLength) {
-      throw new Error('선택된 언어에 해당 코드가 없습니다.')
-    }
-
-    // 업데이트
-    await query(`
-      UPDATE language_settings 
-      SET selected_languages = $1, updated_at = CURRENT_TIMESTAMP
-    `, [JSON.stringify(selectedLanguages)])
-
-    // 캐시 무효화
-    this._languages = null
-    this._cacheExpiry = 0
-
-    return true
-  }
-
-  /**
-   * 언어 교체 (3개 제한 유지)
-   * 하나의 언어를 비활성화하고 다른 언어를 활성화
-   */
-  async switchLanguage(removeCode: string, addCode: string): Promise<{ removed: boolean, added: Language }> {
-    await query('BEGIN')
-    
-    try {
-      // 1. 기존 언어 제거
-      await this.removeLanguage(removeCode)
-      
-      // 2. 새 언어 추가
-      const addedLanguage = await this.addLanguage(addCode)
-      
-      await query('COMMIT')
-      
-      return {
-        removed: true,
-        added: addedLanguage
-      }
-    } catch (error) {
-      await query('ROLLBACK')
-      throw error
-    }
-  }
-
-  /**
    * 활성 언어 개수 확인
    */
   async getActiveLanguageCount(): Promise<number> {
-    const result = await query('SELECT selected_languages FROM language_settings LIMIT 1')
-    if (result.rows.length === 0) {
-      return 0
-    }
+    const result = await query(
+      'SELECT COUNT(*) as count FROM language_settings WHERE enabled = true'
+    )
     
-    const selectedLanguages = Array.isArray(result.rows[0].selected_languages) 
-      ? result.rows[0].selected_languages 
-      : JSON.parse(result.rows[0].selected_languages)
-    
-    return selectedLanguages.length
+    return parseInt(result.rows[0].count, 10)
   }
 
   /**
    * 언어 활성화 가능 여부 확인
    */
   async canActivateLanguage(code: string): Promise<boolean> {
-    const result = await query('SELECT selected_languages FROM language_settings LIMIT 1')
-    if (result.rows.length === 0) {
+    // 이미 활성화된 언어인지 확인
+    const language = await this.getLanguageByCode(code)
+    if (language && language.enabled) {
       return true
     }
-    
-    const selectedLanguages = Array.isArray(result.rows[0].selected_languages) 
-      ? result.rows[0].selected_languages 
-      : JSON.parse(result.rows[0].selected_languages)
-    
-    const isAlreadyActive = selectedLanguages.includes(code)
-    
-    if (isAlreadyActive) {
-      return true // 이미 활성화된 언어
-    }
-    
-    return selectedLanguages.length < this.MAX_ACTIVE_LANGUAGES
+
+    // 활성 언어 개수 확인
+    const activeCount = await this.getActiveLanguageCount()
+    return activeCount < this.MAX_ACTIVE_LANGUAGES
   }
 
   /**
@@ -508,220 +324,208 @@ export class LanguageManager {
     flag_emoji?: string
     enabled?: boolean
     is_default?: boolean
+    display_order?: number
   }): Promise<Language> {
-    const { code, enabled = false, ...otherData } = languageData
+    const { code, ...otherData } = languageData
     
     if (!code) {
       throw new Error('언어 코드는 필수입니다.')
     }
 
-    // 언어 메타데이터 확인 또는 생성
-    let metadataResult = await query(
-      'SELECT * FROM language_metadata WHERE code = $1',
-      [code]
-    )
+    // 활성화 제한 체크
+    if (otherData.enabled) {
+      const canActivate = await this.canActivateLanguage(code)
+      if (!canActivate) {
+        throw new Error(`최대 ${this.MAX_ACTIVE_LANGUAGES}개의 언어만 활성화할 수 있습니다.`)
+      }
+    }
 
-    if (metadataResult.rows.length === 0) {
-      // 새 언어 메타데이터 생성
-      await query(`
-        INSERT INTO language_metadata (code, name, native_name, google_code, direction, flag_emoji, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `, [
-        code,
-        otherData.name || code.toUpperCase(),
-        otherData.native_name || otherData.name || code.toUpperCase(),
-        otherData.google_code || code,
-        otherData.direction || 'ltr',
-        otherData.flag_emoji || '🌐'
-      ])
-      
-      metadataResult = await query(
-        'SELECT * FROM language_metadata WHERE code = $1',
-        [code]
+    // 기존 언어 정보 가져오기 (있는 경우)
+    const existingLanguage = await this.getLanguageByCode(code)
+    
+    // 기본값 설정
+    const name = otherData.name || existingLanguage?.name || code.toUpperCase()
+    const native_name = otherData.native_name || existingLanguage?.native_name || name
+    const google_code = otherData.google_code || existingLanguage?.google_code || code
+    const direction = otherData.direction || existingLanguage?.direction || 'ltr'
+    const flag_emoji = otherData.flag_emoji || existingLanguage?.flag_emoji || '🌐'
+    const enabled = otherData.enabled !== undefined ? otherData.enabled : (existingLanguage?.enabled || false)
+    const is_default = otherData.is_default !== undefined ? otherData.is_default : (existingLanguage?.is_default || false)
+    const display_order = otherData.display_order || existingLanguage?.display_order || null
+
+    // Upsert 실행
+    const result = await query(`
+      INSERT INTO language_settings (
+        code, name, native_name, google_code, direction, flag_emoji, 
+        enabled, is_default, display_order, created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       )
-    } else if (Object.keys(otherData).length > 0) {
-      // 기존 메타데이터 업데이트
-      const updateFields = []
-      const updateValues = []
-      let paramCount = 1
-
-      if (otherData.name !== undefined) {
-        updateFields.push(`name = $${paramCount}`)
-        updateValues.push(otherData.name)
-        paramCount++
-      }
-      if (otherData.native_name !== undefined) {
-        updateFields.push(`native_name = $${paramCount}`)
-        updateValues.push(otherData.native_name)
-        paramCount++
-      }
-      if (otherData.google_code !== undefined) {
-        updateFields.push(`google_code = $${paramCount}`)
-        updateValues.push(otherData.google_code)
-        paramCount++
-      }
-      if (otherData.direction !== undefined) {
-        updateFields.push(`direction = $${paramCount}`)
-        updateValues.push(otherData.direction)
-        paramCount++
-      }
-      if (otherData.flag_emoji !== undefined) {
-        updateFields.push(`flag_emoji = $${paramCount}`)
-        updateValues.push(otherData.flag_emoji)
-        paramCount++
-      }
-
-      if (updateFields.length > 0) {
-        updateFields.push(`updated_at = $${paramCount}`)
-        updateValues.push(new Date())
-        paramCount++
-        
-        updateValues.push(code)
-        
-        await query(
-          `UPDATE language_metadata 
-           SET ${updateFields.join(', ')} 
-           WHERE code = $${paramCount}`,
-          updateValues
-        )
-        
-        metadataResult = await query(
-          'SELECT * FROM language_metadata WHERE code = $1',
-          [code]
-        )
-      }
-    }
-
-    // 현재 설정 조회
-    const settingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-
-    if (settingsResult.rows.length === 0) {
-      // 설정이 없으면 생성
-      await query(`
-        INSERT INTO language_settings (selected_languages, default_language, created_at, updated_at)
-        VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `, [
-        JSON.stringify(enabled ? [code] : []),
-        otherData.is_default ? code : 'ko'
-      ])
-    } else {
-      let selectedLanguages: string[] = Array.isArray(settingsResult.rows[0].selected_languages) 
-        ? settingsResult.rows[0].selected_languages 
-        : JSON.parse(settingsResult.rows[0].selected_languages)
-      const defaultLanguage = settingsResult.rows[0].default_language
-
-      // 활성화/비활성화 처리
-      if (enabled && !selectedLanguages.includes(code)) {
-        if (selectedLanguages.length >= this.MAX_ACTIVE_LANGUAGES) {
-          throw new Error(`최대 ${this.MAX_ACTIVE_LANGUAGES}개의 언어만 활성화할 수 있습니다.`)
-        }
-        selectedLanguages.push(code)
-      } else if (!enabled && selectedLanguages.includes(code)) {
-        if (code === defaultLanguage) {
-          throw new Error('기본 언어는 비활성화할 수 없습니다.')
-        }
-        selectedLanguages = selectedLanguages.filter(lang => lang !== code)
-      }
-
-      // 기본 언어 설정
-      const newDefaultLanguage = otherData.is_default ? code : defaultLanguage
-
-      await query(`
-        UPDATE language_settings 
-        SET selected_languages = $1, default_language = $2, updated_at = CURRENT_TIMESTAMP
-        WHERE true
-      `, [JSON.stringify(selectedLanguages), newDefaultLanguage])
-    }
+      ON CONFLICT (code) DO UPDATE SET
+        name = $2,
+        native_name = $3,
+        google_code = $4,
+        direction = $5,
+        flag_emoji = $6,
+        enabled = $7,
+        is_default = $8,
+        display_order = $9,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `, [
+      code,
+      name,
+      native_name,
+      google_code,
+      direction,
+      flag_emoji,
+      enabled,
+      is_default,
+      display_order
+    ])
 
     // 캐시 무효화
-    this._languages = null
-    this._cacheExpiry = 0
+    this.clearCache()
 
-    // 최신 설정으로 Language 객체 반환
-    const finalSettingsResult = await query(
-      'SELECT selected_languages, default_language FROM language_settings LIMIT 1'
-    )
-    const finalSelectedLanguages: string[] = Array.isArray(finalSettingsResult.rows[0].selected_languages) 
-      ? finalSettingsResult.rows[0].selected_languages 
-      : JSON.parse(finalSettingsResult.rows[0].selected_languages)
-    const finalDefaultLanguage = finalSettingsResult.rows[0].default_language
-
-    const row = metadataResult.rows[0]
+    const row = result.rows[0]
     return {
       code: row.code,
       name: row.name,
-      native_name: row.native_name,
-      google_code: row.google_code,
-      direction: row.direction,
-      flag_emoji: row.flag_emoji,
-      enabled: finalSelectedLanguages.includes(code),
-      is_default: code === finalDefaultLanguage,
+      native_name: row.native_name || row.name,
+      google_code: row.google_code || row.code,
+      direction: row.direction || 'ltr',
+      flag_emoji: row.flag_emoji || '🌐',
+      enabled: row.enabled || false,
+      is_default: row.is_default || false,
+      display_order: row.display_order,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at)
     }
   }
 
   /**
-   * 캐시 무효화
+   * 언어 활성화
    */
-  clearCache(): void {
-    this._languages = null
-    this._cacheExpiry = 0
+  async enableLanguage(code: string): Promise<boolean> {
+    if (!await this.canActivateLanguage(code)) {
+      throw new Error(`최대 ${this.MAX_ACTIVE_LANGUAGES}개의 언어만 활성화할 수 있습니다.`)
+    }
+
+    const result = await query(
+      'UPDATE language_settings SET enabled = true, updated_at = CURRENT_TIMESTAMP WHERE code = $1',
+      [code]
+    )
+
+    this.clearCache()
+    return result.rowCount > 0
   }
 
   /**
-   * 언어팩 환경변수 형태로 조회 (하위 호환성)
+   * 언어 비활성화
    */
-  async getLanguageCodesForEnv(): Promise<string> {
-    const languages = await this.getEnabledLanguages()
-    return languages.map(lang => lang.code).join(',')
+  async disableLanguage(code: string): Promise<boolean> {
+    // 기본 언어는 비활성화 불가
+    const language = await this.getLanguageByCode(code)
+    if (language && language.is_default) {
+      throw new Error('기본 언어는 비활성화할 수 없습니다.')
+    }
+
+    const result = await query(
+      'UPDATE language_settings SET enabled = false, updated_at = CURRENT_TIMESTAMP WHERE code = $1',
+      [code]
+    )
+
+    this.clearCache()
+    return result.rowCount > 0
   }
 
   /**
-   * 기본 언어 코드 조회 (하위 호환성)
+   * 기본 언어 설정
    */
-  async getDefaultLanguageCode(): Promise<string> {
-    const defaultLang = await this.getDefaultLanguage()
-    return defaultLang?.code || 'ko'
+  async setDefaultLanguage(code: string): Promise<boolean> {
+    await query('BEGIN')
+    
+    try {
+      // 기존 기본 언어 해제
+      await query('UPDATE language_settings SET is_default = false')
+      
+      // 새 기본 언어 설정 및 활성화
+      await query(
+        'UPDATE language_settings SET is_default = true, enabled = true, updated_at = CURRENT_TIMESTAMP WHERE code = $1',
+        [code]
+      )
+      
+      await query('COMMIT')
+      this.clearCache()
+      return true
+    } catch (error) {
+      await query('ROLLBACK')
+      throw error
+    }
+  }
+
+  /**
+   * 번역 저장 또는 업데이트
+   */
+  async saveTranslation(
+    key: string, 
+    languageCode: string, 
+    value: string,
+    status: 'auto' | 'manual' | 'verified' = 'manual',
+    translatedBy: string = 'system'
+  ): Promise<Translation> {
+    const result = await query(`
+      INSERT INTO language_pack_translations (
+        key, language_code, value, status, translated_by, translated_at, created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
+      ON CONFLICT (key, language_code) DO UPDATE SET
+        value = $3,
+        status = $4,
+        translated_by = $5,
+        translated_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `, [key, languageCode, value, status, translatedBy])
+
+    const row = result.rows[0]
+    return {
+      id: row.id,
+      key: row.key,
+      language_code: row.language_code,
+      value: row.value,
+      status: row.status,
+      translated_by: row.translated_by,
+      translated_at: row.translated_at ? new Date(row.translated_at) : undefined,
+      verified_by: row.verified_by,
+      verified_at: row.verified_at ? new Date(row.verified_at) : undefined,
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at)
+    }
+  }
+
+  /**
+   * 번역 삭제
+   */
+  async deleteTranslation(key: string, languageCode?: string): Promise<boolean> {
+    let result
+    
+    if (languageCode) {
+      result = await query(
+        'DELETE FROM language_pack_translations WHERE key = $1 AND language_code = $2',
+        [key, languageCode]
+      )
+    } else {
+      result = await query(
+        'DELETE FROM language_pack_translations WHERE key = $1',
+        [key]
+      )
+    }
+
+    return result.rowCount > 0
   }
 }
 
-// 싱글톤 인스턴스 export
+// 싱글톤 인스턴스 생성 및 export
 export const languageManager = LanguageManager.getInstance()
-
-// 편의 함수들
-export async function getEnabledLanguages(): Promise<Language[]> {
-  return languageManager.getEnabledLanguages()
-}
-
-export async function getLanguageCodes(): Promise<string[]> {
-  return languageManager.getLanguageCodes()
-}
-
-export async function getDefaultLanguage(): Promise<Language | null> {
-  return languageManager.getDefaultLanguage()
-}
-
-export async function getTranslation(key: string, languageCode: string): Promise<string | null> {
-  return languageManager.getTranslation(key, languageCode)
-}
-
-export async function getTranslations(keys: string[], languageCode: string): Promise<Record<string, string>> {
-  return languageManager.getTranslations(keys, languageCode)
-}
-
-// 환경변수 방식과의 호환성을 위한 함수
-export async function getSupportedLanguages(): Promise<string[]> {
-  const envLanguages = process.env.DEFAULT_LANGUAGES?.split(',') || ['ko', 'en', 'jp']
-  const dbLanguages = await getLanguageCodes()
-  
-  // DB에 설정된 언어가 있으면 그것을 사용, 없으면 환경변수 사용
-  return dbLanguages.length > 0 ? dbLanguages : envLanguages
-}
-
-export async function getDefaultLanguageCode(): Promise<string> {
-  const defaultLang = await getDefaultLanguage()
-  return defaultLang?.code || process.env.DEFAULT_LANGUAGE || 'ko'
-}

@@ -5,6 +5,14 @@
 
 // import { prisma } from '@/lib/db';
 import { ProductWithImage, ProductImage } from '@/types/database';
+import { 
+  unifiedQueryService, 
+  findById, 
+  findByField,
+  findByIds,
+  countByField,
+  CACHE_TTL 
+} from '../unified-query-service';
 
 export interface ProductFilter {
   filter?: 'all' | 'featured' | 'new' | 'sale' | 'best';
@@ -82,8 +90,8 @@ class ProductService {
 
       const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-      // 상품 조회 (Prisma 스키마에 맞게 수정)
-      const products = await prisma.$queryRaw<Product[]>(`
+      // 통합 쿼리 서비스로 상품 조회 (자동 캐싱)
+      const products = await unifiedQueryService.executeRaw<Product>(`
         SELECT 
           p.*,
           c.name as category_name,
@@ -91,8 +99,8 @@ class ProductService {
           COALESCE(pi.images, '[]'::json) as images,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT json_agg(
             json_build_object(
@@ -101,29 +109,29 @@ class ProductService {
               'position', position
             ) ORDER BY position, id
           ) as images
-          FROM "ProductImage"
-          WHERE "productId" = p.id
+          FROM product_images
+          WHERE product_id = p.id
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         ${whereClause}
         ORDER BY 
           CASE WHEN p.status = 'ACTIVE' THEN 1 ELSE 0 END DESC,
           p."createdAt" DESC
         LIMIT $${paramIndex}
-      `, ...params, limit);
+      `, [...params, limit], { useCache: true, cacheTTL: CACHE_TTL.MEDIUM });
 
-      // 전체 개수 조회
-      const countResult = await prisma.$queryRaw<Array<{ count: string }>>(`
+      // 통합 쿼리로 전체 개수 조회 (캐싱)
+      const countResult = await unifiedQueryService.executeRaw<{ count: string }>(`
         SELECT COUNT(*) as count
-        FROM "Product" p
+        FROM products p
         ${whereClause}
-      `, ...params);
+      `, params, { useCache: true, cacheTTL: CACHE_TTL.MEDIUM });
 
       const total = parseInt(countResult[0].count, 10);
 
@@ -148,7 +156,8 @@ class ProductService {
    */
   async getProductDetail(id: string): Promise<Product | null> {
     try {
-      const products = await prisma.$queryRaw<Product[]>(`
+      // 통합 쿼리로 상품 상세 조회 (캐싱)
+      const products = await unifiedQueryService.executeRaw<Product>(`
         SELECT 
           p.*,
           c.name as category_name,
@@ -156,8 +165,8 @@ class ProductService {
           COALESCE(pi.images, '[]'::json) as images,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT json_agg(
             json_build_object(
@@ -166,22 +175,22 @@ class ProductService {
               'position', position
             ) ORDER BY position, id
           ) as images
-          FROM "ProductImage"
-          WHERE "productId" = p.id
+          FROM product_images
+          WHERE product_id = p.id
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         WHERE p.id = $1 AND p.status = 'ACTIVE'
-      `, id);
+      `, [id], { useCache: true, cacheTTL: CACHE_TTL.LONG });
 
       return products[0] || null;
     } catch (error) {
-
+      console.error('Product detail query failed:', error);
       return null;
     }
   }
@@ -198,20 +207,20 @@ class ProductService {
           COALESCE(pi.url, '/placeholder-product.jpg') as image_url,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT url 
-          FROM "ProductImage" 
-          WHERE "productId" = p.id AND position = 0
+          FROM product_images 
+          WHERE product_id = p.id AND position = 0
           LIMIT 1
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         WHERE p.stock > 0 AND p.status = 'ACTIVE'
         ORDER BY COALESCE(r.avg_rating, 0) DESC NULLS LAST
@@ -237,20 +246,20 @@ class ProductService {
           COALESCE(pi.url, '/placeholder-product.jpg') as image_url,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT url 
-          FROM "ProductImage" 
-          WHERE "productId" = p.id AND position = 0
+          FROM product_images 
+          WHERE product_id = p.id AND position = 0
           LIMIT 1
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         WHERE p."publishedAt" > NOW() - INTERVAL '7 days' AND p.stock > 0 AND p.status = 'ACTIVE'
         ORDER BY p."createdAt" DESC
@@ -276,20 +285,20 @@ class ProductService {
           COALESCE(pi.url, '/placeholder-product.jpg') as image_url,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT url 
-          FROM "ProductImage" 
-          WHERE "productId" = p.id AND position = 0
+          FROM product_images 
+          WHERE product_id = p.id AND position = 0
           LIMIT 1
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         WHERE p.status = 'ACTIVE' AND p.stock > 0
         ORDER BY p."createdAt" DESC
@@ -315,20 +324,20 @@ class ProductService {
           COALESCE(pi.url, '/placeholder-product.jpg') as image_url,
           COALESCE(r.avg_rating, 0) as rating,
           COALESCE(r.review_count, 0) as review_count
-        FROM "Product" p
-        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN LATERAL (
           SELECT url 
-          FROM "ProductImage" 
-          WHERE "productId" = p.id AND position = 0
+          FROM product_images 
+          WHERE product_id = p.id AND position = 0
           LIMIT 1
         ) pi ON true
         LEFT JOIN LATERAL (
           SELECT 
             AVG(rating) as avg_rating,
             COUNT(*) as review_count
-          FROM "Review"
-          WHERE "productId" = p.id
+          FROM reviews
+          WHERE product_id = p.id
         ) r ON true
         WHERE p."categoryId" = $1 AND p.stock > 0 AND p.status = 'ACTIVE'
         ORDER BY p.status DESC, p."createdAt" DESC

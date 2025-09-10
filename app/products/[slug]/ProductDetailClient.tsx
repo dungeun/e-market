@@ -28,6 +28,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { formatPrice } from '@/lib/utils';
 import RelatedProducts from '@/components/RelatedProducts';
+import { useCartStore } from '@/stores/cart-store';
+import { useRouter } from 'next/navigation';
 
 interface RelatedProduct {
   id: string;
@@ -92,6 +94,8 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('detail');
+  const router = useRouter();
+  const addItem = useCartStore((state) => state.addItem);
 
   const finalPrice = product.price;
   const originalPrice = product.original_price;
@@ -146,7 +150,7 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
   console.log('Product condition:', product.condition);
   console.log('Condition info:', conditionInfo);
 
-  const addToCart = async () => {
+  const addToCart = () => {
     if (product.stock <= 0) {
       alert('재고가 부족합니다.');
       return;
@@ -157,31 +161,24 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
       return;
     }
     
-    setLoading(true);
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: quantity
-        }),
-      });
-
-      if (response.ok) {
-        alert('장바구니에 추가되었습니다!');
-      } else {
-        const data = await response.json();
-        alert(data.error || '장바구니 추가에 실패했습니다.');
+    // Zustand store에 아이템 추가
+    const firstImage = product.images && product.images.length > 0 
+      ? (product.images[0].url || product.images[0].imageUrl || '/placeholder.jpg')
+      : '/placeholder.jpg';
+    
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      image: firstImage,
+      variant: {
+        condition: product.condition,
+        seller: product.seller_name
       }
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('장바구니 추가 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
+    });
+    
+    alert('장바구니에 추가되었습니다!');
   };
 
   const buyNow = async () => {
@@ -233,11 +230,23 @@ const ProductDetailClient = React.memo(function ProductDetailClient({
               <div className="p-6 lg:p-8 bg-gray-50">
                 <div className="space-y-4">
                   <div className="aspect-square bg-white rounded-lg overflow-hidden relative border border-gray-200">
-                    {hasDiscount && (
-                      <div className="absolute top-4 left-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        -{discountPercentage}%
-                      </div>
-                    )}
+                    <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                      {hasDiscount && (
+                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          -{discountPercentage}%
+                        </div>
+                      )}
+                      {product.featured && (
+                        <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          추천
+                        </div>
+                      )}
+                      {product.new && (
+                        <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          NEW
+                        </div>
+                      )}
+                    </div>
                     {product.images.length > 0 ? (
                       (() => {
                         const imageUrl = product.images[selectedImageIndex]?.url || 

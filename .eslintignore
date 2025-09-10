@@ -2,3 +2,6 @@ backup/
 backups/
 node_modules/
 .next/
+*.backup
+*.old.ts
+*.old.tsx

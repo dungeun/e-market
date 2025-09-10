@@ -3,21 +3,6 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarFooter,
-  SidebarInset,
-} from '@/components/ui/sidebar'
 import { 
   Home, 
   Package, 
@@ -34,10 +19,10 @@ import {
   Tag,
   User,
   Globe,
-  Languages
+  Languages,
+  Truck
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +35,19 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 
-const sidebarItems = [
+interface SidebarItem {
+  title: string;
+  href: string;
+  icon: any;
+  exact?: boolean;
+}
+
+interface SidebarGroup {
+  title: string;
+  items: SidebarItem[];
+}
+
+const sidebarItems: SidebarGroup[] = [
   {
     title: '메인',
     items: [
@@ -58,6 +55,7 @@ const sidebarItems = [
         title: '대시보드',
         href: '/admin',
         icon: Home,
+        exact: true,
       },
       {
         title: '판매 분석',
@@ -99,10 +97,15 @@ const sidebarItems = [
         href: '/admin/categories',
         icon: Tag,
       },
+    ],
+  },
+  {
+    title: 'B2B 관리',
+    items: [
       {
-        title: '재고 관리',
-        href: '/admin/inventory',
-        icon: Package,
+        title: '입점업체 및 창고',
+        href: '/admin/b2b',
+        icon: Truck,
       },
     ],
   },
@@ -115,9 +118,9 @@ const sidebarItems = [
         icon: ShoppingCart,
       },
       {
-        title: '결제 내역',
-        href: '/admin/payments',
-        icon: CreditCard,
+        title: '배송 관리',
+        href: '/admin/delivery',
+        icon: Truck,
       },
     ],
   },
@@ -182,117 +185,121 @@ export default function AdminLayout({
 
   return (
     <>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex h-screen w-full">
-          <Sidebar className="border-r">
-            <SidebarHeader className="border-b px-6 py-4">
-              <Link href="/admin" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Package className="h-4 w-4" />
-                </div>
-                <span className="font-semibold">Commerce Admin</span>
-              </Link>
-            </SidebarHeader>
+      {/* Main Container using Flexbox for better separation */}
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        {/* Header - Full width at top */}
+        <header className="h-[60px] bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Package className="h-6 w-6 text-blue-600" />
+              <h1 className="text-lg font-semibold text-gray-900">Commerce Admin</h1>
+            </div>
+            <div className="text-sm text-gray-500">
+              {pathname === '/admin' && '대시보드'}
+              {pathname === '/admin/ui-config' && 'UI 섹션 설정'}
+              {pathname === '/admin/popup-alerts' && '팝업 알림 관리'}
+              {pathname === '/admin/language-packs' && '언어팩 관리'}
+              {pathname === '/admin/site-settings' && '사이트 설정'}
+              {pathname === '/admin/products' && '상품 관리'}
+              {pathname === '/admin/products/create' && '중고상품 등록'}
+              {pathname === '/admin/orders' && '주문 관리'}
+              {pathname === '/admin/delivery' && '배송 관리'}
+              {pathname === '/admin/customers' && '고객 관리'}
+              {pathname === '/admin/campaigns' && '캠페인 관리'}
+              {pathname === '/admin/analytics' && '판매 분석'}
+              {pathname === '/admin/categories' && '카테고리 관리'}
+              {pathname === '/admin/b2b' && 'B2B 관리'}
+              {pathname === '/admin/reviews' && '리뷰 관리'}
+              {pathname === '/admin/coupons' && '쿠폰 관리'}
+              {pathname === '/admin/settings' && '일반 설정'}
+              {pathname === '/admin/notifications' && '알림 설정'}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => toast.info('알림이 없습니다.')}>
+              <Bell className="h-4 w-4" />
+            </Button>
             
-            <SidebarContent>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2 px-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src="/placeholder.svg" />
+                    <AvatarFallback>AD</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">Admin User</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>내 계정</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  프로필
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  설정
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  로그아웃
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Body Container - Sidebar and Main Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Sidebar - Fixed width */}
+          <aside className="w-[250px] bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0">
+            <nav className="p-4">
               {sidebarItems.map((group) => (
-                <SidebarGroup key={group.title}>
-                  <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {group.items.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton 
-                            asChild
-                            isActive={pathname === item.href}
+                <div key={group.title} className="mb-6">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    {group.title}
+                  </h3>
+                  <ul className="space-y-1">
+                    {group.items.map((item) => {
+                      const isActive = item.exact 
+                        ? pathname === item.href 
+                        : pathname.startsWith(item.href)
+                      
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                              isActive
+                                ? "bg-blue-100 text-blue-900 border-l-2 border-blue-600"
+                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                            )}
                           >
-                            <Link href={item.href}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
-            </SidebarContent>
-
-            <SidebarFooter className="border-t p-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-1 flex-col items-start text-xs">
-                      <span className="font-medium">Admin User</span>
-                      <span className="text-muted-foreground">admin@example.com</span>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>내 계정</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    프로필
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    설정
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    로그아웃
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarFooter>
-          </Sidebar>
-
-          <SidebarInset className="flex flex-1 flex-col">
-            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-6">
-              <SidebarTrigger />
-              <div className="flex flex-1 items-center justify-between">
-                <h1 className="text-lg font-semibold">
-                  {pathname === '/admin' && '대시보드'}
-                  {pathname === '/admin/ui-config' && 'UI 섹션 설정'}
-                  {pathname === '/admin/popup-alerts' && '팝업 알림 관리'}
-                  {pathname === '/admin/language-packs' && '언어팩 관리'}
-                  {pathname === '/admin/site-settings' && '사이트 설정'}
-                  {pathname === '/admin/products' && '상품 관리'}
-                  {pathname === '/admin/products/create' && '중고상품 등록'}
-                  {pathname === '/admin/orders' && '주문 관리'}
-                  {pathname === '/admin/customers' && '고객 관리'}
-                  {pathname === '/admin/campaigns' && '캠페인 관리'}
-                  {pathname === '/admin/analytics' && '판매 분석'}
-                  {pathname === '/admin/categories' && '카테고리 관리'}
-                  {pathname === '/admin/inventory' && '재고 관리'}
-                  {pathname === '/admin/payments' && '결제 내역'}
-                  {pathname === '/admin/reviews' && '리뷰 관리'}
-                  {pathname === '/admin/coupons' && '쿠폰 관리'}
-                  {pathname === '/admin/settings' && '일반 설정'}
-                  {pathname === '/admin/notifications' && '알림 설정'}
-                </h1>
-                
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => toast.info('알림이 없습니다.')}>
-                    <Bell className="h-4 w-4" />
-                  </Button>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </div>
-              </div>
-            </header>
+              ))}
+            </nav>
+          </aside>
 
-            <main className="flex-1 overflow-y-auto bg-muted/10 p-6">
+          {/* Main Content - Takes remaining space */}
+          <main className="flex-1 bg-white overflow-y-auto">
+            <div className="p-6">
               {children}
-            </main>
-          </SidebarInset>
+            </div>
+          </main>
         </div>
-      </SidebarProvider>
+      </div>
+      
       <Toaster position="top-right" richColors closeButton />
     </>
   )

@@ -139,7 +139,7 @@ const CategorySection = React.memo(function CategorySection({ data, sectionId = 
   if (loading) {
     return (
       <section className={`w-full py-8 bg-white ${className}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="overflow-x-auto pb-2">
             <div className="flex gap-6 justify-start md:justify-center min-w-max px-4">
               {[...Array(8)].map((_, i) => (
@@ -163,7 +163,7 @@ const CategorySection = React.memo(function CategorySection({ data, sectionId = 
 
   return (
     <section className={`w-full py-8 bg-white ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 카테고리 가로 스크롤 */}
         <div className="overflow-x-auto pb-2">
           <div className="flex gap-6 justify-start md:justify-center min-w-max px-4">

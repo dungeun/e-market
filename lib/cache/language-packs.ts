@@ -33,17 +33,18 @@ export async function getCachedLanguagePacks(): Promise<
       setTimeout(() => reject(new Error("Language pack timeout")), 3000);
     });
 
-    // language_packs 테이블에서 데이터 조회 - 점(.) 구분자 사용
+    // 새로운 동적 언어팩 시스템에서 데이터 조회 (language_settings 제외)
     const sql = `
       SELECT 
-        key,
-        key as full_key,
-        ko,
-        en,
-        ja,
-        'general' as category,
-        '' as description
-      FROM language_packs
+        lpk.key_name as key,
+        lpk.key_name as full_key,
+        lpt.language_code,
+        lpt.translation as value,
+        lpk.component_type as category,
+        lpk.description
+      FROM language_pack_keys lpk
+      JOIN language_pack_translations lpt ON lpk.id = lpt.key_id
+      WHERE lpk.is_active = true
     `;
     
     const packsPromise = query(sql);
@@ -51,20 +52,30 @@ export async function getCachedLanguagePacks(): Promise<
     const result = (await Promise.race([packsPromise, timeoutPromise])) as any;
     const packs = result.rows || result;
 
-    // 키-값 형태로 변환 - 점(.) 구분자로 통일
+    // 키-값 형태로 변환 - 언어별로 그룹화
     const languagePacks = packs.reduce(
       (acc, pack) => {
-        // key를 직접 사용 (이미 점(.) 구분자 포함)
         const fullKey = pack.key || pack.full_key;
-        acc[fullKey] = {
-          id: fullKey,
-          key: fullKey,
-          ko: pack.ko || '',
-          en: pack.en || '',
-          ja: pack.ja || '',
-          category: pack.category || 'general',
-          description: pack.description || undefined,
-        };
+        const langCode = pack.language_code;
+        
+        // 키가 없으면 초기화
+        if (!acc[fullKey]) {
+          acc[fullKey] = {
+            id: fullKey,
+            key: fullKey,
+            ko: '',
+            en: '',
+            ja: '',
+            category: pack.category || 'general',
+            description: pack.description || undefined,
+          };
+        }
+        
+        // 언어별 값 설정
+        if (langCode === 'ko') acc[fullKey].ko = pack.value || '';
+        else if (langCode === 'en') acc[fullKey].en = pack.value || '';
+        else if (langCode === 'ja') acc[fullKey].ja = pack.value || '';
+        
         return acc;
       },
       {} as Record<string, LanguagePack>,

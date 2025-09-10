@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { 
   Settings, 
   Store, 
@@ -41,16 +50,28 @@ import {
   Instagram,
   Youtube,
   Search,
-  Code
+  Code,
+  Layout,
+  Plus,
+  Edit3,
+  Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { Upload } from 'lucide-react'
 
 export default function SettingsPage() {
+  const [loading, setLoading] = useState(true)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [footerLinkModal, setFooterLinkModal] = useState(false)
+  const [editingFooterLink, setEditingFooterLink] = useState<any>(null)
+  const [currentFooterLink, setCurrentFooterLink] = useState({ title: '', url: '', newWindow: false })
   const [settings, setSettings] = useState({
     general: {
       siteName: 'Commerce Store',
       siteUrl: 'https://commerce.example.com',
       logo: '/logo.png',
+      useImageLogo: false,
       favicon: '/favicon.ico',
       description: '최고의 온라인 쇼핑 경험을 제공합니다.',
       keywords: '온라인쇼핑, 이커머스, 전자상거래',
@@ -135,15 +156,208 @@ export default function SettingsPage() {
       googleAnalytics: 'G-XXXXXXXXXX',
       naverWebmaster: '',
       googleSearchConsole: ''
+    },
+    footer: {
+      enabled: true,
+      companyName: 'Commerce Store',
+      businessNumber: '123-45-67890',
+      ceoName: '홍길동',
+      address: '서울특별시 강남구 테헤란로 123, 456호',
+      phone: '1588-1234',
+      supportEmail: 'support@example.com',
+      supportHours: '평일 09:00~18:00 (주말/공휴일 휴무)',
+      footerText: '© 2024 Commerce Store. All rights reserved.',
+      socialLinks: {
+        facebook: '',
+        instagram: '',
+        twitter: '',
+        youtube: '',
+        linkedin: ''
+      },
+      footerLinks: [
+        { title: '인플루언서 찾기', url: '/influencers', newWindow: false },
+        { title: '캠페인 만들기', url: '/campaigns/create', newWindow: false },
+        { title: '회사소개', url: '/about', newWindow: false },
+        { title: '문의하기', url: '/contact', newWindow: false },
+        { title: '이용약관', url: '/terms', newWindow: false },
+        { title: '개인정보처리방침', url: '/privacy', newWindow: false }
+      ]
     }
   })
 
-  const handleSave = (section: string) => {
-    toast.success(`${section} 설정이 저장되었습니다.`)
+  // 설정 데이터 로드
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/admin/settings')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.settings) {
+            setSettings(prevSettings => ({
+              ...prevSettings,
+              ...data.settings
+            }))
+            // 로고 프리뷰 및 사용 설정
+            if (data.settings.general?.logo) {
+              setLogoPreview(data.settings.general.logo)
+            }
+            // useImageLogo 설정 로드 (기본값 false)
+            if (data.settings.general?.useImageLogo !== undefined) {
+              setSettings(prev => ({
+                ...prev,
+                general: {
+                  ...prev.general,
+                  useImageLogo: data.settings.general.useImageLogo
+                }
+              }))
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error)
+        toast.error('설정을 불러오는데 실패했습니다.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSettings()
+  }, [])
+
+  const handleSave = async (section: string) => {
+    try {
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings)
+      })
+
+      if (response.ok) {
+        toast.success(`${section} 설정이 저장되었습니다.`)
+      } else {
+        toast.error('설정 저장에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+      toast.error('설정 저장 중 오류가 발생했습니다.')
+    }
   }
 
   const handleReset = (section: string) => {
     toast.info(`${section} 설정이 초기화되었습니다.`)
+  }
+
+  // 푸터 링크 관련 함수들
+  const handleAddFooterLink = () => {
+    setCurrentFooterLink({ title: '', url: '', newWindow: false })
+    setEditingFooterLink(null)
+    setFooterLinkModal(true)
+  }
+
+  const handleEditFooterLink = (index: number) => {
+    const link = settings.footer.footerLinks[index]
+    setCurrentFooterLink(link)
+    setEditingFooterLink(index)
+    setFooterLinkModal(true)
+  }
+
+  const handleSaveFooterLink = () => {
+    if (!currentFooterLink.title.trim() || !currentFooterLink.url.trim()) {
+      toast.error('제목과 URL을 모두 입력해주세요.')
+      return
+    }
+
+    const updatedLinks = [...settings.footer.footerLinks]
+    if (editingFooterLink !== null) {
+      updatedLinks[editingFooterLink] = currentFooterLink
+    } else {
+      updatedLinks.push(currentFooterLink)
+    }
+
+    setSettings({
+      ...settings,
+      footer: {
+        ...settings.footer,
+        footerLinks: updatedLinks
+      }
+    })
+
+    setFooterLinkModal(false)
+    setCurrentFooterLink({ title: '', url: '', newWindow: false })
+    setEditingFooterLink(null)
+    toast.success(editingFooterLink !== null ? '링크가 수정되었습니다.' : '링크가 추가되었습니다.')
+  }
+
+  const handleDeleteFooterLink = (index: number) => {
+    const updatedLinks = settings.footer.footerLinks.filter((_, i) => i !== index)
+    setSettings({
+      ...settings,
+      footer: {
+        ...settings.footer,
+        footerLinks: updatedLinks
+      }
+    })
+    toast.success('링크가 삭제되었습니다.')
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 파일 타입 검증
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+    if (!validTypes.includes(file.type)) {
+      toast.error('이미지 파일만 업로드 가능합니다.')
+      return
+    }
+
+    // 파일 크기 검증 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB 이하여야 합니다.')
+      return
+    }
+
+    setUploadingLogo(true)
+    const formData = new FormData()
+    formData.append('logo', file)
+
+    try {
+      const response = await fetch('/api/admin/upload/logo', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setLogoPreview(data.url)
+        setSettings({
+          ...settings,
+          general: {
+            ...settings.general,
+            logo: data.url
+          }
+        })
+        toast.success('로고가 업로드되었습니다.')
+      } else {
+        const error = await response.json()
+        toast.error(error.error || '로고 업로드에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Logo upload error:', error)
+      toast.error('로고 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    )
   }
 
   return (
@@ -156,13 +370,14 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid grid-cols-9 w-full">
+        <TabsList className="grid grid-cols-10 w-full">
           <TabsTrigger value="general">일반</TabsTrigger>
           <TabsTrigger value="store">스토어</TabsTrigger>
           <TabsTrigger value="shipping">배송</TabsTrigger>
           <TabsTrigger value="payment">결제</TabsTrigger>
           <TabsTrigger value="inventory">재고</TabsTrigger>
           <TabsTrigger value="email">이메일</TabsTrigger>
+          <TabsTrigger value="footer">푸터</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="security">보안</TabsTrigger>
           <TabsTrigger value="backup">백업</TabsTrigger>
@@ -178,6 +393,102 @@ export default function SettingsPage() {
               <CardDescription>사이트의 기본 정보를 설정합니다.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 로고 업로드 섹션 */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>사이트 로고</Label>
+                  
+                  {/* 로고 사용 체크박스 */}
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Switch
+                      id="useImageLogo"
+                      checked={settings.general.useImageLogo}
+                      onCheckedChange={(checked) => setSettings({
+                        ...settings, 
+                        general: {
+                          ...settings.general, 
+                          useImageLogo: checked
+                        }
+                      })}
+                    />
+                    <Label htmlFor="useImageLogo" className="cursor-pointer">
+                      이미지 로고 사용 (체크 해제 시 텍스트 로고 표시)
+                    </Label>
+                  </div>
+
+                  {/* 이미지 로고 업로드 섹션 - useImageLogo가 true일 때만 표시 */}
+                  {settings.general.useImageLogo && (
+                    <div className="flex items-center gap-4">
+                      {/* 로고 프리뷰 */}
+                      <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                        {logoPreview ? (
+                          <img 
+                            src={logoPreview} 
+                            alt="로고 프리뷰" 
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-center text-gray-400">
+                            <Upload className="mx-auto h-8 w-8 mb-2" />
+                            <p className="text-xs">로고 없음</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* 업로드 버튼 */}
+                      <div className="space-y-2">
+                        <Label htmlFor="logo-upload" className="cursor-pointer">
+                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <Upload className="h-4 w-4" />
+                            {uploadingLogo ? '업로드 중...' : '로고 업로드'}
+                          </div>
+                          <Input
+                            id="logo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleLogoUpload}
+                            disabled={uploadingLogo}
+                          />
+                        </Label>
+                        <p className="text-xs text-gray-500">
+                          권장: 300x100px, 최대 5MB<br/>
+                          지원 형식: JPG, PNG, GIF, WebP, SVG
+                        </p>
+                        {logoPreview && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setLogoPreview(null)
+                              setSettings({
+                                ...settings,
+                                general: {
+                                  ...settings.general,
+                                  logo: ''
+                                }
+                              })
+                            }}
+                          >
+                            로고 제거
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 텍스트 로고 미리보기 - useImageLogo가 false일 때만 표시 */}
+                  {!settings.general.useImageLogo && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-2">텍스트 로고 미리보기:</p>
+                      <h2 className="text-2xl font-black tracking-wider text-black uppercase">
+                        {settings.general.siteName || 'Commerce Store'}
+                      </h2>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="siteName">사이트 이름</Label>
@@ -842,6 +1153,200 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="footer">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layout className="h-5 w-5" />
+                푸터 설정
+              </CardTitle>
+              <CardDescription>사이트 푸터 정보와 링크를 관리합니다.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* 푸터 활성화 */}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="footerEnabled"
+                  checked={settings.footer.enabled}
+                  onCheckedChange={(checked) => setSettings({...settings, footer: {...settings.footer, enabled: checked}})}
+                />
+                <Label htmlFor="footerEnabled">푸터 표시</Label>
+              </div>
+
+              {/* 회사 정보 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">회사 정보</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">회사명</Label>
+                    <Input 
+                      id="companyName" 
+                      value={settings.footer.companyName}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, companyName: e.target.value}})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ceoName">대표자명</Label>
+                    <Input 
+                      id="ceoName" 
+                      value={settings.footer.ceoName}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, ceoName: e.target.value}})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessNumber">사업자등록번호</Label>
+                    <Input 
+                      id="businessNumber" 
+                      value={settings.footer.businessNumber}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, businessNumber: e.target.value}})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">전화번호</Label>
+                    <Input 
+                      id="phone" 
+                      value={settings.footer.phone}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, phone: e.target.value}})}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="supportEmail">고객지원 이메일</Label>
+                    <Input 
+                      id="supportEmail" 
+                      type="email"
+                      value={settings.footer.supportEmail}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, supportEmail: e.target.value}})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="supportHours">고객지원 운영시간</Label>
+                    <Input 
+                      id="supportHours" 
+                      value={settings.footer.supportHours}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, supportHours: e.target.value}})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">주소</Label>
+                  <Textarea 
+                    id="address" 
+                    value={settings.footer.address}
+                    onChange={(e) => setSettings({...settings, footer: {...settings.footer, address: e.target.value}})}
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="footerText">푸터 텍스트</Label>
+                  <Input 
+                    id="footerText" 
+                    value={settings.footer.footerText}
+                    onChange={(e) => setSettings({...settings, footer: {...settings.footer, footerText: e.target.value}})}
+                    placeholder="© 2024 Company Name. All rights reserved."
+                  />
+                </div>
+              </div>
+
+              {/* 소셜 링크 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">소셜 미디어 링크</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Facebook className="h-4 w-4" />
+                      Facebook
+                    </Label>
+                    <Input 
+                      value={settings.footer.socialLinks.facebook}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, socialLinks: {...settings.footer.socialLinks, facebook: e.target.value}}})}
+                      placeholder="https://facebook.com/yourpage"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4" />
+                      Instagram
+                    </Label>
+                    <Input 
+                      value={settings.footer.socialLinks.instagram}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, socialLinks: {...settings.footer.socialLinks, instagram: e.target.value}}})}
+                      placeholder="https://instagram.com/yourpage"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Twitter className="h-4 w-4" />
+                      Twitter
+                    </Label>
+                    <Input 
+                      value={settings.footer.socialLinks.twitter}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, socialLinks: {...settings.footer.socialLinks, twitter: e.target.value}}})}
+                      placeholder="https://twitter.com/yourpage"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Youtube className="h-4 w-4" />
+                      YouTube
+                    </Label>
+                    <Input 
+                      value={settings.footer.socialLinks.youtube}
+                      onChange={(e) => setSettings({...settings, footer: {...settings.footer, socialLinks: {...settings.footer.socialLinks, youtube: e.target.value}}})}
+                      placeholder="https://youtube.com/yourchannel"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 푸터 링크 관리 */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">푸터 링크</h3>
+                  <Button onClick={handleAddFooterLink} size="sm">
+                    <Plus className="h-4 w-4 mr-1" />
+                    링크 추가
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  {settings.footer.footerLinks.map((link, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium">{link.title}</p>
+                        <p className="text-sm text-gray-500">{link.url}</p>
+                        {link.newWindow && (
+                          <span className="text-xs text-blue-500">새 창에서 열기</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditFooterLink(index)}>
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteFooterLink(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => handleReset('푸터')}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  초기화
+                </Button>
+                <Button onClick={() => handleSave('푸터')}>
+                  <Save className="mr-2 h-4 w-4" />
+                  저장
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="seo">
           <Card>
             <CardHeader>
@@ -919,6 +1424,56 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* 푸터 링크 편집 모달 */}
+      <Dialog open={footerLinkModal} onOpenChange={setFooterLinkModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingFooterLink !== null ? '링크 수정' : '링크 추가'}
+            </DialogTitle>
+            <DialogDescription>
+              푸터에 표시될 링크 정보를 입력하세요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="linkTitle">제목</Label>
+              <Input
+                id="linkTitle"
+                value={currentFooterLink.title}
+                onChange={(e) => setCurrentFooterLink({...currentFooterLink, title: e.target.value})}
+                placeholder="링크 제목을 입력하세요"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="linkUrl">URL</Label>
+              <Input
+                id="linkUrl"
+                value={currentFooterLink.url}
+                onChange={(e) => setCurrentFooterLink({...currentFooterLink, url: e.target.value})}
+                placeholder="https://example.com"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="newWindow"
+                checked={currentFooterLink.newWindow}
+                onCheckedChange={(checked) => setCurrentFooterLink({...currentFooterLink, newWindow: checked})}
+              />
+              <Label htmlFor="newWindow">새 창에서 열기</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFooterLinkModal(false)}>
+              취소
+            </Button>
+            <Button onClick={handleSaveFooterLink}>
+              {editingFooterLink !== null ? '수정' : '추가'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

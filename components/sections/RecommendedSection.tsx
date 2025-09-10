@@ -35,33 +35,70 @@ const RecommendedSection = React.memo(function RecommendedSection({ data, sectio
   const [subtitle, setSubtitle] = useState('선별된 인기 상품을 만나보세요');
 
   useEffect(() => {
-    if (data) {
-      // JSON 데이터가 있는 경우 직접 사용
-      setRecommendations(data.items || []);
-      setTitle(data.title || '추천 상품');
-      setSubtitle(data.subtitle || '선별된 인기 상품을 만나보세요');
-      setLoading(false);
-      setIsVisible(true);
-    } else {
-      // Fallback: API 호출 (하위 호환성)
-      loadRecommendedData();
-    }
+    // 실제 추천 상품 데이터를 로드
+    loadRecommendedData();
   }, [data, sectionId]);
 
   const loadRecommendedData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/ui-sections/${sectionId}`);
+      
+      // 추천 상품 가져오기 (예: 평점 높은 상품)
+      const response = await fetch('/api/products?sort=rating&limit=8');
       
       if (response.ok) {
-        const apiData = await response.json();
-        if (apiData.section) {
-          setRecommendations(apiData.section.content?.items || []);
-          setIsVisible(apiData.section.isActive !== false);
-        }
+        const result = await response.json();
+        const products = (result.products || []).map((p: any) => ({
+          id: p.id,
+          title: p.name,
+          description: p.description || '',
+          price: p.price,
+          originalPrice: p.originalPrice,
+          image: p.image || '/placeholder.png',
+          link: `/products/${p.slug}`,
+          badge: p.stock < 5 ? '품절임박' : p.new ? 'NEW' : undefined,
+          rating: p.rating,
+          reviewCount: p.review_count
+        }));
+        
+        setRecommendations(products);
       }
+      
+      // data prop에서 제목과 부제목 가져오기
+      if (data && typeof data === 'object') {
+        setTitle(data.title || '추천 상품');
+        setSubtitle(data.subtitle || '고객님을 위한 맞춤 추천');
+      }
+      
+      setIsVisible(true);
     } catch (error) {
-
+      console.error('Failed to load recommended products:', error);
+      
+      // 에러 시 샘플 데이터
+      setRecommendations([
+        {
+          id: 'rec-1',
+          title: '추천 상품 1',
+          description: '인기 상품입니다',
+          price: 29900,
+          image: '/placeholder.png',
+          link: '/products/1',
+          rating: 4.8,
+          reviewCount: 124
+        },
+        {
+          id: 'rec-2',
+          title: '추천 상품 2',
+          description: '베스트셀러',
+          price: 39900,
+          originalPrice: 49900,
+          image: '/placeholder.png',
+          link: '/products/2',
+          badge: 'SALE',
+          rating: 4.6,
+          reviewCount: 89
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -70,7 +107,7 @@ const RecommendedSection = React.memo(function RecommendedSection({ data, sectio
   if (loading) {
     return (
       <div className={`w-full py-12 ${className}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -88,13 +125,14 @@ const RecommendedSection = React.memo(function RecommendedSection({ data, sectio
     );
   }
 
-  if (!isVisible || recommendations.length === 0) {
-    return null;
-  }
+  // 추천 데이터가 없어도 섹션 표시
+  // if (!isVisible || recommendations.length === 0) {
+  //   return null;
+  // }
 
   return (
     <section className={`w-full py-12 bg-gray-50 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{title}</h2>
           <p className="text-gray-600 mb-4">{subtitle}</p>
